@@ -1,6 +1,6 @@
 # Agent work plan
 
-Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. The immediate sequence is P01–P04 in the [local editor POC plan](poc-plan.md), using a bounded early T06 editor and SVG portion of T11. The user has deferred accounts/auth and 100% feature compatibility until after GP. G1 remains held for the broader product, but its remaining research and T04/T05 do not block this local POC.
+Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. The completed P01–P04 sequence in the [local editor POC plan](poc-plan.md) passed GP (see [acceptance evidence](poc-acceptance.md)), using a bounded early T06 editor and SVG portion of T11. The user has deferred accounts/auth and 100% feature compatibility until after GP. G1 remains held for the broader product, but its remaining research and T04/T05 do not block this local POC.
 
 ## Coordination rules
 
@@ -46,7 +46,7 @@ flowchart TD
     T12 --> T13
 ```
 
-Current execution is sequential P01 → P02 → P03 → P04 → GP. Only fix T01/T02 behavior that directly blocks an advertised POC operation. Do not begin T03 closure, T04/T05, full T06/T11 or T07–T13 before the POC review unless separately requested. The following waves are the post-POC product schedule, not a requirement to organize agents or complete all feasibility first.
+P01 → P02 → P03 → P04 → GP is complete for the bounded supported inputs. Stop for user demo review before deferred implementation. Only fix T01/T02 behavior that directly blocks an advertised POC operation. Do not begin T03 closure, T04/T05, full T06/T11 or T07–T13 before the POC review unless separately requested. The following waves are the post-POC product schedule, not a requirement to organize agents or complete all feasibility first.
 
 When parallel agent work is explicitly authorized, keep one coordinator and at most three implementation/research agents:
 

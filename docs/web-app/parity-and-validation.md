@@ -4,7 +4,7 @@ This is the acceptance framework for the [web application plan](README.md), not 
 
 ## GP: immediate local editor acceptance
 
-Run only the finite [POC acceptance workflow](poc-plan.md#gp--poc-acceptance-gate): actual Chromium import/tree/selection, validated name/radius edits and SVG feedback, rejected-edit preservation, download/reimport and pinned desktop state/serialization checks. Keep relevant codec/source/digest regressions. GP does not require accounts, hosted services, simulations, arbitrary components, broad cross-browser coverage or complete G1 closure. Correctness and opaque-data preservation for supported edits remain mandatory. Record unsupported inputs as explicit limitations rather than silently accepting or rewriting them. GP is currently unrun.
+Run only the finite [POC acceptance workflow](poc-plan.md#gp--poc-acceptance-gate): actual Chromium import/tree/selection, validated name/radius edits and SVG feedback, rejected-edit preservation, download/reimport and pinned desktop state/serialization checks. Keep relevant codec/source/digest regressions. GP does not require accounts, hosted services, simulations, arbitrary components, broad cross-browser coverage or complete G1 closure. Correctness and opaque-data preservation for supported edits remain mandatory. Record unsupported inputs as explicit limitations rather than silently accepting or rewriting them. GP passed in a clean isolated checkout for the [recorded local editor inputs](poc-acceptance.md); broader product gates remain held.
 
 ## Desktop baseline and evidence
 

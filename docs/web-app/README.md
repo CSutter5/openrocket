@@ -1,6 +1,6 @@
 # OpenRocket web application plan
 
-Status: local editor POC is the next milestone, November 18, 2026. The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block this explicitly authorized POC slice.
+Status: bounded local editor POC and GP passed, November 18, 2026; user demo review is next. See [acceptance evidence](poc-acceptance.md) and the [local run guide](../../web/app/README.md). The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block this explicitly authorized POC slice.
 
 ## Scope and constraints
 
@@ -42,7 +42,7 @@ Avoid choosing exact package versions from this document. At G1, pin tested comp
 | Phase | Result | Exit gate |
 | --- | --- | --- |
 | 0: Evidence and scope | Desktop capability inventory, duplicate-work evaluation, baseline fixtures, maintainer discussion record for upstream work | G0: inventory and scope traceable to the checkout; no unsupported claim of full parity. |
-| POC: current priority | Local sample/file → tree/selection → name/radius edits → SVG schematic → desktop-compatible export for supported inputs | GP: execute P01–P04 and the finite [POC acceptance checks](poc-plan.md#gp--poc-acceptance-gate); no accounts/auth or full G1 prerequisite. |
+| POC: GP passed | Local sample/file → tree/selection → name/radius edits → SVG schematic → desktop-compatible export for supported inputs | GP: execute P01–P04 and the finite [POC acceptance checks](poc-plan.md#gp--poc-acceptance-gate); no accounts/auth or full G1 prerequisite. |
 | 1: Remaining feasibility, after POC | Broader engine/graph/catalog/isolation/file and hosted-budget evidence using the existing proofs | G1: close the recorded gaps before the broader hosted/shared product. GP does not pass G1. |
 | 2: Foundation | Local and staging deployment, accounts, admin management, private projects and access checks | G2: two users and an administrator exercise allowed and denied actions. |
 | 3: Shared design | Component tree/editor, import/export, persisted concurrent commands, reconnect and undo | G3: two browsers edit one design, reconnect without losing acknowledged changes, and open the export in desktop. |
@@ -51,7 +51,7 @@ Avoid choosing exact package versions from this document. At G1, pin tested comp
 | 6: Complete parity | Advanced analysis, optimization, dispersion, printing/export, expressions, scripting and extension strategy | G6: every baseline capability has evidence; unresolved plugin/runtime gaps remain release blockers. |
 | 7: Release readiness | Load and recovery evidence, restore exercise, migrations/rollback, deployment instructions | G7: a fresh deployment and recovery rehearsal pass; parity evidence reviewed. |
 
-The POC route is a user-approved sequencing exception to the original G1-before-editor plan. Start P01 now, defer unrelated feasibility work, and stop at GP for a demo review. T04/T05 are not POC prerequisites. The later phases retain their full product gates; estimates for the bounded editor must not wait for extension or complete-parity research.
+The POC route is a user-approved sequencing exception to the original G1-before-editor plan. P01–P04 and GP are complete for the recorded inputs; stop here for a user demo review and deferred-work prioritization. T04/T05 are not POC prerequisites. The later phases retain their full product gates; estimates for the bounded editor must not wait for extension or complete-parity research.
 
 ## Main feasibility risk
 

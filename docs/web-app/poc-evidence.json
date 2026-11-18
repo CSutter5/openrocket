@@ -1,0 +1,574 @@
+{
+  "gate": "GP",
+  "outcome": "passed",
+  "browser": "149.0.7827.55",
+  "sourceRevision": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "reducer": {
+    "sha256": "796b52a23b73073e063dab7de4546c683a4fe1f8bb6d230184da82eaa82e9ecb",
+    "bytes": 1894542
+  },
+  "checks": [
+    "production build served on loopback without auth/backend",
+    "real sample and local archive import, tree and keyboard selection",
+    "rename, radius, Java intrinsic dimensions/mass/local CG and SVG update",
+    "no-op name/radius and unchanged download",
+    "invalid numbers, unsupported graph/component and preservation-only input",
+    "failed edit/replacement retain accepted archive bytes",
+    "explicit-hole underfit rejection and retained failing desktop-reload control",
+    "UI download, app reimport and pinned desktop serialization/save/reload",
+    "opaque XML, script XML, attachments, IDs/references and stored series exact; affected results outdated"
+  ],
+  "roundtrip": {
+    "outcome": "passed",
+    "browser": "149.0.7827.55",
+    "cases": [
+      {
+        "name": "bundled-explicit",
+        "id": "10000002-0000-4000-8000-000000000000",
+        "nameOracle": "passed",
+        "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+        "targetId": "10000002-0000-4000-8000-000000000000",
+        "requestedRadius": 0.03,
+        "inputSha256": "90103fb03d767448114d1f6e8b374d692878df29b79de6a6a663964c8ae9fff3",
+        "editedSha256": "2b268ec8c83d254bde014e7de54b0c8b9fba5225d22b5dcab54edf73fbdf0332",
+        "originalWarnings": "Messages[]",
+        "editedWarnings": "Messages[]",
+        "input": {
+          "schema": 1,
+          "componentId": "10000002-0000-4000-8000-000000000000",
+          "length": 0.7619999999999998,
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "filled": false,
+          "density": 1850
+        },
+        "before": {
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.2824792661923881,
+          "cg": 0.3809999999999999
+        },
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.29793458815144097,
+          "cg": 0.3809999999999999
+        },
+        "editedProjection": {
+          "radius": 0.03,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.29793458815144097,
+          "cg": 0.3809999999999999
+        },
+        "setterSemanticXmlEqual": true,
+        "semanticSha256": "414b10dec0d8dec1e076624cad96585f9c2dce581f33bd03552d52974fbdeb80",
+        "motorCurvesEqual": true,
+        "counts": {
+          "decals": 0,
+          "resultPoints": 0,
+          "motorAssignments": 0,
+          "simulations": 0,
+          "components": 3
+        },
+        "desktopReloadSemanticXmlEqual": true,
+        "desktopReloadMotorCurvesEqual": true,
+        "desktopExportSha256": "fbb6342cc7d331925b07e778b514143a04958d19d9fccb00e0a33fb937c05d62",
+        "outcome": "passed"
+      },
+      {
+        "name": "explicit",
+        "targetId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "nameOracle": "passed",
+        "inputSha256": "597abe745475a11d02000aa939ffbbce96b35579b7eb617465b7fe2451a453e9",
+        "editedSha256": "0f9039e3ce72d218cb735d931306f738614e77b3453d54d0d3f253ac227d1e7b",
+        "originalWarnings": "Messages[Unknown element opaque, ignoring.,Unknown attributes in element 'openrocket', ignoring.,[SimulationExtension.scripting.warning.disabled]]",
+        "editedWarnings": "Messages[Unknown element opaque, ignoring.,Unknown attributes in element 'openrocket', ignoring.,[SimulationExtension.scripting.warning.disabled]]",
+        "statusesBefore": [
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded"
+        ],
+        "state": {
+          "before": {
+            "radius": 0.03,
+            "thickness": 0.0009999999999999974,
+            "automatic": false,
+            "preset": true,
+            "mass": 0.03781220917860666,
+            "cg": 0.15,
+            "presetDigest": "726e26d7f3618af491f94460622c5110",
+            "length": 0.3,
+            "density": 680,
+            "filled": false,
+            "innerRadius": 0.029,
+            "volume": 5.56061899685392e-05,
+            "listeners": 0
+          },
+          "after": {
+            "radius": 0.035,
+            "thickness": 0.0009999999999999974,
+            "automatic": false,
+            "preset": false,
+            "mass": 0.044221058191929945,
+            "cg": 0.15,
+            "presetDigest": null,
+            "length": 0.3,
+            "density": 680,
+            "filled": false,
+            "innerRadius": 0.034,
+            "volume": 6.503096792930874e-05,
+            "listeners": 0
+          }
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "editedStatuses": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "semanticSha256": "6a1b16299c72bf688b47f7a2bb09a9f9a656463160e76e5b450eca03a8e72d5c",
+        "counts": {
+          "motorAssignments": 5,
+          "resultPoints": 3014,
+          "decals": 2,
+          "components": 13,
+          "simulations": 6
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true,
+        "idsAndReferencesExact": true,
+        "storedSeriesExact": true,
+        "attachmentHashes": [
+          {
+            "path": "decals/BodyStripe.png",
+            "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+          },
+          {
+            "path": "decals/TailStripe.png",
+            "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+          },
+          {
+            "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+            "sha256": "e70f8394675566eaf28c08fa512598499131ca4306e81be66454754d6294b6e0"
+          },
+          {
+            "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+            "sha256": "f761f7636854374e5c7278f6fa6ab8eda5cc8a6e5baec36fc489d8559c1ecc58"
+          },
+          {
+            "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+            "sha256": "23a10513892552a1b19184e0f018152c10b92f04995b16e8c2636b962cb17efd"
+          },
+          {
+            "path": "opaque/poc.bin",
+            "sha256": "6d8078aab704bcde0a8729864248feceb230eb79774f06179547ded9af7c96b2"
+          }
+        ],
+        "browserReimport": true,
+        "desktopResaveBrowserReimport": true
+      },
+      {
+        "name": "ring",
+        "targetId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "nameOracle": "passed",
+        "inputSha256": "6db25d26826021c3b369ba1b2b1b35e9fd94c61c9f83bf68b56e9d5cbb894e02",
+        "editedSha256": "d9f3ea1198c28f3dac5431db33d7a8585bca477d4ea03340006aaa42ba484a3f",
+        "originalWarnings": "Messages[Unknown element opaque, ignoring.,Unknown attributes in element 'openrocket', ignoring.,[SimulationExtension.scripting.warning.disabled]]",
+        "editedWarnings": "Messages[Unknown element opaque, ignoring.,Unknown attributes in element 'openrocket', ignoring.,[SimulationExtension.scripting.warning.disabled]]",
+        "statusesBefore": [
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded"
+        ],
+        "state": {
+          "before": {
+            "radius": 0.03,
+            "thickness": 0.0009999999999999974,
+            "automatic": false,
+            "preset": true,
+            "mass": 0.03781220917860666,
+            "cg": 0.15,
+            "presetDigest": "726e26d7f3618af491f94460622c5110",
+            "length": 0.3,
+            "density": 680,
+            "filled": false,
+            "innerRadius": 0.029,
+            "volume": 5.56061899685392e-05,
+            "listeners": 0,
+            "ring": {
+              "outerRadius": 0.029,
+              "innerRadius": 0.006,
+              "outerAutomatic": true,
+              "innerAutomatic": false,
+              "thickness": 0.023,
+              "length": 0.004,
+              "density": 500,
+              "mass": 0.005057964172279567,
+              "cg": 0.002,
+              "cgMass": 0.005057964172279567,
+              "longitudinalUnitInertia": 0.00022058333333333335,
+              "rotationalUnitInertia": 0.00043850000000000003,
+              "axialMethod": "TOP",
+              "axialOffset": 0.02,
+              "positionX": 0.02,
+              "radialPosition": 0,
+              "radialDirection": 0,
+              "instanceCount": 1,
+              "instanceSeparation": 0,
+              "bounds": [
+                0,
+                0.004,
+                -0.029,
+                0.029,
+                -0.029,
+                0.029
+              ],
+              "preset": false,
+              "listeners": 0
+            }
+          },
+          "configurationChanged": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "rocketChanged": {
+            "document": true,
+            "mass": true,
+            "aerodynamic": true,
+            "tree": false,
+            "functional": true
+          },
+          "after": {
+            "radius": 0.035,
+            "thickness": 0.0009999999999999974,
+            "automatic": false,
+            "preset": false,
+            "mass": 0.044221058191929945,
+            "cg": 0.15,
+            "presetDigest": null,
+            "length": 0.3,
+            "density": 680,
+            "filled": false,
+            "innerRadius": 0.034,
+            "volume": 6.503096792930874e-05,
+            "listeners": 0,
+            "ring": {
+              "outerRadius": 0.034,
+              "innerRadius": 0.006,
+              "outerAutomatic": true,
+              "innerAutomatic": false,
+              "thickness": 0.028000000000000004,
+              "length": 0.004,
+              "density": 500,
+              "mass": 0.007037167544041137,
+              "cg": 0.002,
+              "cgMass": 0.007037167544041137,
+              "longitudinalUnitInertia": 0.00029933333333333336,
+              "rotationalUnitInertia": 0.0005960000000000001,
+              "axialMethod": "TOP",
+              "axialOffset": 0.02,
+              "positionX": 0.02,
+              "radialPosition": 0,
+              "radialDirection": 0,
+              "instanceCount": 1,
+              "instanceSeparation": 0,
+              "bounds": [
+                0,
+                0.004,
+                -0.034,
+                0.034,
+                -0.034,
+                0.034
+              ],
+              "preset": false,
+              "listeners": 0
+            }
+          }
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "editedStatuses": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "semanticSha256": "b0556282dbccef589bfa5fe4af90bc1b05541e07bbe020507bd6b1e40c3811a2",
+        "counts": {
+          "decals": 2,
+          "components": 13,
+          "simulations": 6,
+          "motorAssignments": 5,
+          "resultPoints": 3014
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true,
+        "idsAndReferencesExact": true,
+        "storedSeriesExact": true,
+        "attachmentHashes": [
+          {
+            "path": "decals/BodyStripe.png",
+            "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+          },
+          {
+            "path": "decals/TailStripe.png",
+            "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+          },
+          {
+            "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+            "sha256": "e70f8394675566eaf28c08fa512598499131ca4306e81be66454754d6294b6e0"
+          },
+          {
+            "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+            "sha256": "f761f7636854374e5c7278f6fa6ab8eda5cc8a6e5baec36fc489d8559c1ecc58"
+          },
+          {
+            "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+            "sha256": "23a10513892552a1b19184e0f018152c10b92f04995b16e8c2636b962cb17efd"
+          },
+          {
+            "path": "opaque/poc.bin",
+            "sha256": "6d8078aab704bcde0a8729864248feceb230eb79774f06179547ded9af7c96b2"
+          }
+        ],
+        "browserReimport": true,
+        "desktopResaveBrowserReimport": true
+      }
+    ],
+    "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+    "underfit": {
+      "before": {
+        "radius": 0.03,
+        "thickness": 0.0009999999999999974,
+        "automatic": false,
+        "preset": true,
+        "mass": 0.03781220917860666,
+        "cg": 0.15,
+        "presetDigest": "726e26d7f3618af491f94460622c5110",
+        "length": 0.3,
+        "density": 680,
+        "filled": false,
+        "innerRadius": 0.029,
+        "volume": 5.56061899685392e-05,
+        "listeners": 0,
+        "ring": {
+          "outerRadius": 0.029,
+          "innerRadius": 0.006,
+          "outerAutomatic": true,
+          "innerAutomatic": false,
+          "thickness": 0.023,
+          "length": 0.004,
+          "density": 500,
+          "mass": 0.005057964172279567,
+          "cg": 0.002,
+          "cgMass": 0.005057964172279567,
+          "longitudinalUnitInertia": 0.00022058333333333335,
+          "rotationalUnitInertia": 0.00043850000000000003,
+          "axialMethod": "TOP",
+          "axialOffset": 0.02,
+          "positionX": 0.02,
+          "radialPosition": 0,
+          "radialDirection": 0,
+          "instanceCount": 1,
+          "instanceSeparation": 0,
+          "bounds": [
+            0,
+            0.004,
+            -0.029,
+            0.029,
+            -0.029,
+            0.029
+          ],
+          "preset": false,
+          "listeners": 0
+        }
+      },
+      "live": {
+        "radius": 0.0005,
+        "thickness": 0.0005,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.00016022122533307945,
+        "cg": 0.15,
+        "presetDigest": null,
+        "length": 0.3,
+        "density": 680,
+        "filled": false,
+        "innerRadius": 0,
+        "volume": 2.3561944901923448e-07,
+        "listeners": 0,
+        "ring": {
+          "outerRadius": 0,
+          "innerRadius": 0.006,
+          "outerAutomatic": true,
+          "innerAutomatic": false,
+          "thickness": 0,
+          "length": 0.004,
+          "density": 500,
+          "mass": 0,
+          "cg": 0.002,
+          "cgMass": 0,
+          "longitudinalUnitInertia": 1.0333333333333333e-05,
+          "rotationalUnitInertia": 1.8e-05,
+          "axialMethod": "TOP",
+          "axialOffset": 0.02,
+          "positionX": 0.02,
+          "radialPosition": 0,
+          "radialDirection": 0,
+          "instanceCount": 1,
+          "instanceSeparation": 0,
+          "bounds": [
+            0,
+            0.004,
+            0,
+            0,
+            0,
+            0
+          ],
+          "preset": false,
+          "listeners": 0
+        }
+      },
+      "reloaded": {
+        "outerRadius": 0.006,
+        "innerRadius": 0.006,
+        "outerAutomatic": false,
+        "mass": 0
+      },
+      "outcome": "classified-rejection-required",
+      "reason": "Desktop reload disables automatic outer radius when the explicit ring hole exceeds the parent inner radius"
+    }
+  },
+  "interactions": {
+    "outcome": "passed",
+    "browser": "149.0.7827.55",
+    "dedicatedWorker": true,
+    "checks": [
+      "selection and keyboard activation",
+      "escaped rename",
+      "radius growth",
+      "thickness clamp",
+      "intrinsic mass/local CG and SVG update",
+      "no-op name/radius",
+      "empty/NaN/zero/negative/oversized number rejection",
+      "unsupported stage and automatic-radius graph",
+      "preservation-only version",
+      "malformed replacement retention",
+      "byte-identical downloads after invalid edits and failed replacement"
+    ],
+    "pageErrors": []
+  },
+  "g1": "held",
+  "limits": "Bounded local POC; no simulations, accounts, collaboration, hosted services or full desktop compatibility",
+  "testedRevision": "b83daa29efbd1474a8c64173ca81720b593126f6",
+  "validationWorktree": "/tmp/openrocket-poc-gp",
+  "trackedStateBeforeAndAfter": "clean",
+  "node": "v26.13.1",
+  "commits": {
+    "P01": "a1a6e4492",
+    "P02": "3985bfc5c",
+    "P03": "dc741aa5b",
+    "P04": "b83daa29e"
+  },
+  "sourceHashes": {
+    "web/app/index.html": "5117f906096f45881e649560434dbf112e32e02218bb2e8109d5ade19c231c9b",
+    "web/app/package.json": "7531b6060ffe993a57764c7f4f75e7483728328e967268918c06a3b9b8039cb0",
+    "web/app/public/explicit-tube.ork": "03947e7160047c64de87421692b54dc37daf46754f607d86bd06a2cb7711f35a",
+    "web/app/scripts/check-engine.mjs": "6fb5931865a03729f6e93ec0442a7564400aea60d7c20210a63cc65a015de2df",
+    "web/app/src/Schematic.tsx": "c62dbd7920afdcdcc07c346ef33c8d9c4d989aa6c0c798b17a9a895f97e69518",
+    "web/app/src/bridge.ts": "c6e645a18ed9c5251f21ccd3507fd4ba80df5988244cd4cf3aa2685ff0152368",
+    "web/app/src/document.worker.ts": "dad9eaefd7324d27e9c5bc3d1afbe2e3b4a971c370061185b0f8bcd07f407802",
+    "web/app/src/main.tsx": "5361d7613affacfef4a74697541f447f329cfb6303bc51297071154395b025c6",
+    "web/app/src/model.ts": "d73c3a4aa96362497bf96e9d69cd24f328ba9ea238c4754163998fcb50d3ae98",
+    "web/app/src/reducer.d.ts": "03f5cc35c69900d955ec416cf1d83dcc29e0d260e2fde1f6d43dd3ad0b0ee4b3",
+    "web/app/src/style.css": "7c9894b5c6e12b4f44f40a4d03b4e95f2481444c6e5b583838ff6ad0f69de305",
+    "web/app/test/acceptance.mjs": "2fa4cbe6ff934013f34e6ddd3701ce3e9e14d9b9ce707bf840046c3f56b0e98c",
+    "web/app/test/fixtures.mjs": "47918cb94f55cca705e07730ee7c1ea91c371a08ed27b9b7938bcf181fc1a20d",
+    "web/app/test/p01.mjs": "3a277fa04cda6c2c8217e8a639b1dc3db4c227395b7c9fc047ffa307f2e83c3d",
+    "web/app/test/p02.mjs": "1bc895be227d699d320fcaee8c49293afde0484bc3ac14af76d70489e867c626",
+    "web/app/test/roundtrip.mjs": "5ff9f7adbcabe225bffb797923207d3d259fcfc42e79c758db460e15977a8405",
+    "web/app/tsconfig.json": "2ce70b14fee47602c7969cd08e0fba2f9cff6ca56c6e073b5a097faad178fcaf",
+    "web/package-lock.json": "16159bff42f98d70c446e67c95d8150f2c67ffb3e2ffe093bdf3446eff13425c",
+    "web/package.json": "7a616b92820ab9c9e8cb6fa0536b024d8071c0167fcc398caa59d5c17bfebdd0"
+  },
+  "downloads": {
+    "explicit-edited.ork": "0f9039e3ce72d218cb735d931306f738614e77b3453d54d0d3f253ac227d1e7b",
+    "explicit-named.ork": "597abe745475a11d02000aa939ffbbce96b35579b7eb617465b7fe2451a453e9",
+    "explicit-noop.ork": "8588ab167c08f299f1a4b0d6c1816f2cb4c82c97074152211aa1719c6a335056",
+    "explicit-reimported.ork": "0f9039e3ce72d218cb735d931306f738614e77b3453d54d0d3f253ac227d1e7b",
+    "ring-after-rejection.ork": "46065c66876d1b744ec1e35bc0033fa6552950d9f1976e79d38d1c44b7df3617",
+    "ring-edited.ork": "d9f3ea1198c28f3dac5431db33d7a8585bca477d4ea03340006aaa42ba484a3f",
+    "ring-named.ork": "6db25d26826021c3b369ba1b2b1b35e9fd94c61c9f83bf68b56e9d5cbb894e02",
+    "ring-noop.ork": "46065c66876d1b744ec1e35bc0033fa6552950d9f1976e79d38d1c44b7df3617",
+    "ring-reimported.ork": "d9f3ea1198c28f3dac5431db33d7a8585bca477d4ea03340006aaa42ba484a3f",
+    "sample-edited.ork": "2b268ec8c83d254bde014e7de54b0c8b9fba5225d22b5dcab54edf73fbdf0332",
+    "sample-named.ork": "90103fb03d767448114d1f6e8b374d692878df29b79de6a6a663964c8ae9fff3",
+    "sample-original.ork": "03947e7160047c64de87421692b54dc37daf46754f607d86bd06a2cb7711f35a"
+  },
+  "checksOutsideGp": {
+    "webWorkspace": "2 contract tests, 7 fixture manifests, 46 codec tests and 12 platform tests passed in clean checkout",
+    "coreIoAndMotor": "47 existing tests passed in first isolated worktree; same pinned core sources",
+    "engine": "fresh build; source/digest checks and original/adapted JVM reference equality passed",
+    "start": "documented dev command passed, HTTP 200 at 127.0.0.1:5174 (5173 in use); documented preview command HTTP 200 at 127.0.0.1:4173"
+  },
+  "rawEvidence": "/tmp/openrocket-poc-gp/web/app/build/gp",
+  "limitations": [
+    "Headless pinned desktop loader/setter/saver, not Swing GUI",
+    "Chromium 149 on Linux only; Playwright used its Ubuntu fallback build",
+    "No full G1 corpus, hosted budgets, deployments or deferred features were run"
+  ],
+  "userArchive": {
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "unchanged": true,
+    "requiredByPoc": false
+  }
+}
