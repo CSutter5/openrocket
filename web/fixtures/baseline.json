@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "desktopRevision": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "fixtures": [
+    {
+      "path": "core/src/main/resources/datafiles/examples/A simple model rocket.ork",
+      "sha256": "47973b6db4c5b7ed64c8aaed6cbf2442403d5303581218903da1b44d8e2b3615",
+      "size": 546448,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "ec44d175604a1661d976517a0d9ff07617e5b27fd2ef7032f3df7c73a7770627",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 1667373,
+          "sha256": "ec44d175604a1661d976517a0d9ff07617e5b27fd2ef7032f3df7c73a7770627"
+        },
+        {
+          "path": "preview.png",
+          "size": 31340,
+          "sha256": "e83fef024d52a96677db7087e297a984a31862a4afd45530592920a5ea7230d8"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 19735,
+          "sha256": "014eb57d610067a1be3ec2bef4e4773ef8f5d5609a0df34462c90a47cc6537df"
+        },
+        {
+          "path": "decals/BodyStripe.png",
+          "size": 257,
+          "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+        },
+        {
+          "path": "decals/TailStripe.png",
+          "size": 267,
+          "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+        },
+        {
+          "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+          "size": 1549,
+          "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+        },
+        {
+          "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+          "size": 1661,
+          "sha256": "b5bf46b0331b19e8f95cc09a9580112bf1a215ec3bd6c6ed9f7348a6b9de7ca4"
+        },
+        {
+          "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+          "size": 1612,
+          "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "centeringring",
+        "engineblock",
+        "innertube",
+        "launchlug",
+        "masscomponent",
+        "nosecone",
+        "parachute",
+        "shockcord",
+        "stage",
+        "trapezoidfinset"
+      ],
+      "componentIdCount": 14,
+      "simulationCount": 5,
+      "flightDataCount": 5
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Three stage low power rocket.ork",
+      "sha256": "cbbfd708f5cd5e4626f129871e3def7556a878dfc92fba3c8603061f5c71c20e",
+      "size": 766272,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "66280edf41066c064a2c6a2cd08c0404b6effc104aa40959dbe895625b6b4acf",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 2395409,
+          "sha256": "66280edf41066c064a2c6a2cd08c0404b6effc104aa40959dbe895625b6b4acf"
+        },
+        {
+          "path": "preview.png",
+          "size": 37035,
+          "sha256": "0070d293b2ad2756321b43a7e98db02778568939eb9028feb1852b728a269743"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 23458,
+          "sha256": "04a22e0dc1f22837a0c8e135cabecac51a1760973339c90d3cefa8457cb9510b"
+        },
+        {
+          "path": "decals/gStripe.png",
+          "size": 225,
+          "sha256": "c2f546e8f82474cb2c619b54d24177206177b4962ada8b61d6f1ca1e1730d903"
+        },
+        {
+          "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+          "size": 1549,
+          "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+        },
+        {
+          "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+          "size": 1612,
+          "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+        },
+        {
+          "path": "thrustcurves/786268e561730df1afa3eec2178716c2.rse",
+          "size": 1611,
+          "sha256": "215905aa26989268a7fb7369a04b065cd554adbaf23af17a71b76c17d8dd2b87"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "centeringring",
+        "engineblock",
+        "freeformfinset",
+        "innertube",
+        "launchlug",
+        "masscomponent",
+        "nosecone",
+        "parachute",
+        "shockcord",
+        "stage",
+        "trapezoidfinset",
+        "tubecoupler"
+      ],
+      "componentIdCount": 28,
+      "simulationCount": 3,
+      "flightDataCount": 3
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Clustered motors.ork",
+      "sha256": "c839f32301332a8864b99fc2b798d8e24db0a929e6d586852f85328910b7aa1c",
+      "size": 377993,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "c31434bceb4eeef876efe9ba19faa973f9e655a018e9b2f12daf821d9970d749",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 968285,
+          "sha256": "c31434bceb4eeef876efe9ba19faa973f9e655a018e9b2f12daf821d9970d749"
+        },
+        {
+          "path": "preview.png",
+          "size": 49905,
+          "sha256": "bcb21f63622562cda8b64fb15f11b47d115bf7485a13b40dafb567313035100a"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 37100,
+          "sha256": "8989ee3f99fca803f953720fc626c2d1a89449246be20ad35cab459a7ce1360c"
+        },
+        {
+          "path": "decals/grad.png",
+          "size": 317,
+          "sha256": "2b8ef7c980d1673491bb141d81ace60596f116acb09439e814c39f9d5bd0badc"
+        },
+        {
+          "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+          "size": 1549,
+          "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+        },
+        {
+          "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+          "size": 1661,
+          "sha256": "b5bf46b0331b19e8f95cc09a9580112bf1a215ec3bd6c6ed9f7348a6b9de7ca4"
+        },
+        {
+          "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+          "size": 1612,
+          "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "centeringring",
+        "ellipticalfinset",
+        "engineblock",
+        "innertube",
+        "launchlug",
+        "masscomponent",
+        "nosecone",
+        "parachute",
+        "shockcord",
+        "stage"
+      ],
+      "componentIdCount": 18,
+      "simulationCount": 5,
+      "flightDataCount": 5
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Dual parachute deployment.ork",
+      "sha256": "73cfe47104631d908d5d7ce62acda602ff1e2c3f8dee2467f55b2fd784dd3164",
+      "size": 696718,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "6d61cce7248edc495d8d1ba68c62c4d76812ad8e7945bded0304b23053d50eda",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 2057184,
+          "sha256": "6d61cce7248edc495d8d1ba68c62c4d76812ad8e7945bded0304b23053d50eda"
+        },
+        {
+          "path": "preview.png",
+          "size": 41851,
+          "sha256": "79dad444dec312a7787f2e65bebebde83cf472c473e095bf0f1a7a91826e6fb6"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 42654,
+          "sha256": "56a7d4ba3113bd65ea49f2d4e24dcda803d5828586c0da738679674b661477d1"
+        },
+        {
+          "path": "thrustcurves/26a5e7834018943090396d419ca64662.rse",
+          "size": 2336,
+          "sha256": "308bf90d5531f9a9d9473e426274a2948d03921b49331793ae40c21ac834a35c"
+        },
+        {
+          "path": "thrustcurves/cff44a78b2c4bc9e2ef19f6a2ded4da0.rse",
+          "size": 1941,
+          "sha256": "16018684ca1a2dad1ec0053f9be929fec7aa1fe3903a8defcc6a9f19e97f1bd3"
+        },
+        {
+          "path": "thrustcurves/6eb7fe0c078fe0365e2052d8c877f6a4.rse",
+          "size": 2038,
+          "sha256": "d54c9ede4f0f2c8858870cdfd3ca9f0126ebe6cce8464dbab9b541960ca2b2b1"
+        },
+        {
+          "path": "thrustcurves/871f7fe309f61ec7e45e4b29833349d9.rse",
+          "size": 2478,
+          "sha256": "6f9e82e5b9644ad6ae65bc7f46f5f2fe97551c870bf1658973729e0047b1a4bc"
+        },
+        {
+          "path": "thrustcurves/e26c7159754a0c58db92d8c5b3568902.rse",
+          "size": 1469,
+          "sha256": "db595c8e1b80be9a58d9a23221b659c11338c82cdfb47c7e8159705963ef44c2"
+        },
+        {
+          "path": "thrustcurves/0fa1ede88d6407eadc5bbc413810100d.rse",
+          "size": 2032,
+          "sha256": "bb59f4f07df23829b3b0ccbddb5805de28fcf0492b63d29706c8fc3bbd5fc084"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "bulkhead",
+        "centeringring",
+        "innertube",
+        "nosecone",
+        "parachute",
+        "railbutton",
+        "stage",
+        "trapezoidfinset",
+        "tubecoupler"
+      ],
+      "componentIdCount": 21,
+      "simulationCount": 6,
+      "flightDataCount": 6
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Simulation extensions.ork",
+      "sha256": "87f43e25bae4e50ac50b70d5cb25688a5aaf758be890efbba8dd07d5065b66bc",
+      "size": 690157,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "01e094b23512c37ab30f447be5f38a9d90df9172a99b9e99760b4b78ff90351d",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 1787465,
+          "sha256": "01e094b23512c37ab30f447be5f38a9d90df9172a99b9e99760b4b78ff90351d"
+        },
+        {
+          "path": "preview.png",
+          "size": 45022,
+          "sha256": "063693b0e1eda68f3a735d2248f72199e12156ae7988e59cd2dccc5de76c2ab6"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 45060,
+          "sha256": "40b268f9ee7a439c3ea641dae731ea1c6c1c46a26d4e66e11a39a05bf5efc11e"
+        },
+        {
+          "path": "decals/skunk.jpg",
+          "size": 15601,
+          "sha256": "8c674434aa78b423d2badfbbc8a99ea20c050320a04e62ed5062b79bbfe42b70"
+        },
+        {
+          "path": "decals/sticker.gif",
+          "size": 1109,
+          "sha256": "548c45a82299dfdbb10a1d02bf319d25138b5d8187be752eb27bb3291b521e7f"
+        },
+        {
+          "path": "thrustcurves/5498ead583ab6cd6900a533b1cb69df8.rse",
+          "size": 2018,
+          "sha256": "3d2ae0dba8886208619accec22b7a374c27b2895ea4f7f7c57d386e90538b457"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "bulkhead",
+        "centeringring",
+        "innertube",
+        "masscomponent",
+        "nosecone",
+        "parachute",
+        "shockcord",
+        "stage",
+        "trapezoidfinset",
+        "tubecoupler"
+      ],
+      "componentIdCount": 25,
+      "simulationCount": 3,
+      "flightDataCount": 3
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Simulation scripting.ork",
+      "sha256": "ba0d7a9444d62054918e2f54ae7e2aca789a09556021c66eed93a8f92b484bdb",
+      "size": 732931,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "9998b377b5bb29852fcd1a3dbbcbd8139585674df4707968510a1c81f1c30791",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 1875555,
+          "sha256": "9998b377b5bb29852fcd1a3dbbcbd8139585674df4707968510a1c81f1c30791"
+        },
+        {
+          "path": "preview.png",
+          "size": 44997,
+          "sha256": "858dfae9c13f89b021d57443b83998660f355eeddb078e35b56fcf688c12a186"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 44988,
+          "sha256": "013ef24c2508b5de7ce4b33200a7ecbd80922de9a1226b7e11c1901a33c20b7f"
+        },
+        {
+          "path": "decals/skunk.jpg",
+          "size": 15601,
+          "sha256": "8c674434aa78b423d2badfbbc8a99ea20c050320a04e62ed5062b79bbfe42b70"
+        },
+        {
+          "path": "decals/sticker.gif",
+          "size": 1109,
+          "sha256": "548c45a82299dfdbb10a1d02bf319d25138b5d8187be752eb27bb3291b521e7f"
+        },
+        {
+          "path": "thrustcurves/5498ead583ab6cd6900a533b1cb69df8.rse",
+          "size": 2018,
+          "sha256": "3d2ae0dba8886208619accec22b7a374c27b2895ea4f7f7c57d386e90538b457"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "bulkhead",
+        "centeringring",
+        "innertube",
+        "masscomponent",
+        "nosecone",
+        "parachute",
+        "shockcord",
+        "stage",
+        "trapezoidfinset",
+        "tubecoupler"
+      ],
+      "componentIdCount": 24,
+      "simulationCount": 3,
+      "flightDataCount": 3
+    },
+    {
+      "path": "core/src/main/resources/datafiles/examples/Pods--powered with recovery deployment.ork",
+      "sha256": "7339ef0435bfe5c1d2db597618dc79199c06433647f6ae9e44ee1493f7f48a37",
+      "size": 157739,
+      "transport": "zip",
+      "format": "1.11",
+      "xmlSha256": "09ec45beb6cbc215d282fc9c0af0eee8346c78ab9b5f125ff526c56e96cc4a02",
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "size": 253509,
+          "sha256": "09ec45beb6cbc215d282fc9c0af0eee8346c78ab9b5f125ff526c56e96cc4a02"
+        },
+        {
+          "path": "preview.png",
+          "size": 45064,
+          "sha256": "a53d8842e78ca4c1b9bcc343eeb24aab6528e598af3b3b3b957fe6e398808a0c"
+        },
+        {
+          "path": "thumbnail.png",
+          "size": 34906,
+          "sha256": "e86be62d896e72ae09c5d70511081aeaa7cff149433d9b701fedeffc27af26bf"
+        },
+        {
+          "path": "thrustcurves/e5b53def203dd437ebf0d67846f6cd3b.rse",
+          "size": 1906,
+          "sha256": "f1352df4834302d985358f777e42ce77b39c34641d2b13ea121cf4589a7cdb9a"
+        },
+        {
+          "path": "thrustcurves/bd060845629e4cfceec7e9b19297ab9f.rse",
+          "size": 1654,
+          "sha256": "f8b263592dedc89a6958e10b981cc525a6b028c26f3f38b56a15acd88bd55710"
+        }
+      ],
+      "componentTypes": [
+        "bodytube",
+        "centeringring",
+        "innertube",
+        "launchlug",
+        "nosecone",
+        "podset",
+        "stage",
+        "streamer",
+        "trapezoidfinset"
+      ],
+      "componentIdCount": 15,
+      "simulationCount": 1,
+      "flightDataCount": 1
+    }
+  ]
+}

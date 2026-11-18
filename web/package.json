@@ -1,0 +1,15 @@
+{
+  "name": "openrocket-web-feasibility",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*", "engine-adapter", "platform-proof"],
+  "engines": {"node": ">=22.12"},
+  "scripts": {
+    "test:contracts": "npm test --workspace @openrocket/contracts",
+    "check:fixtures": "python3 scripts/fixture-inventory.py --check"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
+}
