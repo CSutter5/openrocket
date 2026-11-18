@@ -11,6 +11,14 @@ if (!classpath) throw Error('Set ORK_PROOF_CLASSPATH to core test runtimeClasspa
 await mkdir(output, { recursive: true });
 const source = process.env.ORK_PROOF_INPUT || fileURLToPath(new URL('core/src/main/resources/datafiles/examples/A simple model rocket.ork', repo));
 const generatedFixture = process.env.ORK_PROOF_GENERATED_FORMAT111 === '1';
+const motorCatalog = process.env.ORK_PROOF_MOTOR_CATALOG;
+const javaProperties = ['-Djava.awt.headless=true', '-Djava.util.prefs.userRoot='+resolve(output,'preferences'),
+  ...(motorCatalog ? ['-Dork.proof.motorCatalog='+resolve(motorCatalog)] : [])];
+const coreSourceHashes = {};
+for (const path of ['core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java',
+  'core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java']) {
+  coreSourceHashes[path] = await sha256(new Uint8Array(await readFile(new URL(path,repo))));
+}
 const original = await importArchive(new Uint8Array(await readFile(source)));
 const target = componentNames(original).find(c => c.type === 'bodytube');
 if (!target) throw Error('Fixture has no body tube to edit');
@@ -19,12 +27,12 @@ const exported = await exportArchive(await renameComponent(original, target.id, 
 const editedPath = resolve(output, 'web-edited.ork'), desktopPath = resolve(output, 'desktop-resaved.ork');
 await writeFile(editedPath, exported.bytes);
 execFileSync('javac', ['-cp', classpath, '-d', output, fileURLToPath(new URL('../jvm/ArchiveDesktopProof.java', import.meta.url))], { stdio: 'inherit' });
-const java = spawnSync('java', ['-Djava.awt.headless=true', '-Djava.util.prefs.userRoot='+resolve(output,'preferences'), '-cp', output+':'+classpath,
+const java = spawnSync('java', [...javaProperties, '-cp', output+':'+classpath,
   'ArchiveDesktopProof', source, editedPath, desktopPath, target.id, name], { encoding: 'utf8', maxBuffer: 8*1024*1024 });
 const fixture = generatedFixture ? 'generated-format111-from-A-simple-model-rocket' : process.env.ORK_PROOF_INPUT ? basename(source) : relative(fileURLToPath(repo), resolve(source));
 await writeFile(resolve(output,'desktop.log'), (java.stdout ?? '') + (java.stderr ?? ''));
 if (java.status !== 0) {
-  const failure = { baseline:'33bdb6d3062a6d9ef44a00d1ff865f962136e9e9',fixture,inputSha256:await sha256(original.original),outcome:'failed',
+  const failure = { baseline:'33bdb6d3062a6d9ef44a00d1ff865f962136e9e9',coreSourceHashes,fixture,inputSha256:await sha256(original.original),outcome:'failed',
     model:java.stdout?.split('\n').find(line=>line.startsWith('MODEL')),error:java.stderr?.trim() || java.error?.message || `Java exited ${java.status}`,
     loadWarnings:java.stdout?.split('\n').find(line=>line.startsWith('LOAD_WARNINGS')),
     diagnostics:['desktop.log','expected.xml','actual.xml'] };
@@ -37,12 +45,22 @@ const desktopBytes = new Uint8Array(await readFile(desktopPath));
 const desktop = await importArchive(desktopBytes, exported.identity);
 if (!desktop.diagnostics.includes('SIDECAR_RECONCILIATION_REQUIRED')) throw Error('Desktop sidecar loss was not explicit');
 if (componentNames(desktop).find(c => c.id === target.id)?.name !== name) throw Error('Desktop lost edited name/ID');
+const reserializedMotors = [];
 for (const entry of original.entries.filter(e => e.path.startsWith('decals/') || e.path.startsWith('thrustcurves/'))) {
-  if (desktop.entries.find(e => e.path === entry.path)?.sha256 !== entry.sha256) throw Error('Desktop asset changed: '+entry.path);
+  const after = desktop.entries.find(e => e.path === entry.path);
+  if (!after) throw Error('Desktop asset missing: '+entry.path);
+  if (after.sha256 !== entry.sha256) {
+    if (!entry.path.startsWith('thrustcurves/')) throw Error('Desktop asset changed: '+entry.path);
+    // The JVM bridge has compared motor digests and every time/thrust/mass/CG sample.
+    reserializedMotors.push({path:entry.path,beforeSha256:entry.sha256,afterSha256:after.sha256});
+  }
 }
-const report = { baseline: '33bdb6d3062a6d9ef44a00d1ff865f962136e9e9', fixture,
+const report = { baseline: '33bdb6d3062a6d9ef44a00d1ff865f962136e9e9', coreSourceHashes, fixture,
   inputSha256: await sha256(original.original), webExportSha256: await sha256(exported.bytes), desktopExportSha256: await sha256(desktopBytes),
   targetId: target.id, name, desktopResult: stdout.split('\n').find(l => l.startsWith('PROOF')),
+  motorCatalog: motorCatalog ? {file:basename(motorCatalog),sha256:await sha256(new Uint8Array(await readFile(motorCatalog)))} : 'test catalog',
+  motorCurveComparison:'JVM compares reference/data digests, exact time/thrust arrays, mass/CG samples within 1e-15 SI',
+  reserializedMotors,
   assets: desktop.entries.filter(e => e.path.startsWith('decals/') || e.path.startsWith('thrustcurves/')).map(e => ({path:e.path,sha256:e.sha256})),
   sidecarDiagnostics: desktop.diagnostics };
 await writeFile(resolve(output, 'report.json'), JSON.stringify(report,null,2)+'\n');
@@ -52,7 +70,7 @@ if (generatedFixture) {
       !desktop.xml.includes('<randomseed>8447</randomseed>')) throw Error('Format 1.11 RK6/fixed seed lost');
 } else if (!process.env.ORK_PROOF_INPUT) {
   const generated = resolve(output, 'format111.ork');
-  execFileSync('java', ['-Djava.awt.headless=true', '-Djava.util.prefs.userRoot='+resolve(output,'preferences'), '-cp', output+':'+classpath,
+  execFileSync('java', [...javaProperties, '-cp', output+':'+classpath,
     'ArchiveDesktopProof', 'generate-format111', source, generated], { stdio: 'ignore' });
   execFileSync(process.execPath, [fileURLToPath(import.meta.url), resolve(output, 'format111')], {
     env: { ...process.env, ORK_PROOF_INPUT: generated, ORK_PROOF_GENERATED_FORMAT111: '1' }, stdio: 'inherit',

@@ -1,0 +1,42 @@
+{
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "coreSourceHashes": {
+    "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+    "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57"
+  },
+  "fixture": "desktop-resaved.ork",
+  "inputSha256": "2249cb94962fb2c6155b8c3eea8e6b894577f5435f210d768c579d583c9c155a",
+  "webExportSha256": "e2d699c18f0167596d418520caeabbb81768985bf25011d68dac7f1950cd7154",
+  "desktopExportSha256": "c1e948afdb29f780d2373c6d1454155a25180ecd685e7cf161a8bae8b02d5d87",
+  "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+  "name": "Web & desktop <proof>",
+  "desktopResult": "PROOF components=17 decals=0 motorAssignments=5 motorDigests=[77ae2d2ca1c91023a59c2c09cf4746a3, 812abf1e0e2e60f6ec54538ffbf2b8e4, 90f749d42119cb8a081a354353524f92, a6489608710e3e47e4795efc421e8571, acee08976425e0ddc8b9bfc014a91770] simulations=6 resultPoints=5540 semanticSha256=2f3146e837787192259c2b6279914e30502c64ce5dfb6cbe8b0b684f9d9d5fc0 originalWarnings=Messages[] editedWarnings=Messages[]",
+  "motorCatalog": "test catalog",
+  "motorCurveComparison": "JVM compares reference/data digests, exact time/thrust arrays, mass/CG samples within 1e-15 SI",
+  "reserializedMotors": [],
+  "assets": [
+    {
+      "path": "thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse",
+      "sha256": "07a3484d2d3394d252cdee71c34eb1dabee4d2d96ab5b5dbca1cc7a0637e39c3"
+    },
+    {
+      "path": "thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse",
+      "sha256": "2d595f034bb220b2242f96dc1e40aae7d89f9dd26093aee5681803be7cd25372"
+    },
+    {
+      "path": "thrustcurves/77ae2d2ca1c91023a59c2c09cf4746a3.rse",
+      "sha256": "785ea6adde2e900481dd76c5c13ddf4db8dc232019a7c6932b98cf3829af8aea"
+    },
+    {
+      "path": "thrustcurves/a6489608710e3e47e4795efc421e8571.rse",
+      "sha256": "ab3c99a74d396a8fca3f353fc2caba97864b486447b14764c07da17b8ccd7251"
+    },
+    {
+      "path": "thrustcurves/90f749d42119cb8a081a354353524f92.rse",
+      "sha256": "fe84c25a4f99965cc5a93c7e562e729066be370a53fb73372c9a3cfb420ee8f7"
+    }
+  ],
+  "sidecarDiagnostics": [
+    "SIDECAR_RECONCILIATION_REQUIRED"
+  ]
+}

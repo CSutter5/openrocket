@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-17",
+  "sourceRevision": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "buildScript": {
+    "sha256": "552c6ce37021969f908d2a9063aee45f6e53037cdc6cbac32cee85d72418249e",
+    "bytes": 3807
+  },
+  "artifactsUnchangedFromOriginalProof": true,
+  "artifacts": {
+    "build/generated/teavm/js/openrocket-g1-engine.js": {
+      "sha256": "64aebc15f1c7178e563bd037856054a36709a4fd140b8a80d89cc92778340421",
+      "bytes": 2580479
+    },
+    "build/generated/teavm/js/reducer.js": {
+      "sha256": "a4eb7e241189bb619c363892e539c3001685588b6459f82f22f51c658ae07b20",
+      "bytes": 1433105
+    }
+  },
+  "originalJvmTranscriptUnchanged": true,
+  "adaptedJvmExact": true,
+  "browser": {
+    "runtime": "149.0.7827.55",
+    "maxAbsoluteErrors": {
+      "atmosphere": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "wind": [
+        0,
+        0,
+        0
+      ]
+    },
+    "durationMs": 1024.2000000476837,
+    "pageTicks": 102,
+    "cancellation": {
+      "completed": false,
+      "observationMs": 100.10000002384186
+    },
+    "flightComparisonsUnchangedFromOriginalProof": true,
+    "flightRows": {
+      "RK4": 716,
+      "RK6": 733
+    }
+  },
+  "workerd": {
+    "startupWallMs": 198.579881,
+    "firstCommandWallMs": 4.96966800000007,
+    "invalidInputs": 9,
+    "projects": 2,
+    "acceptedCommands": 3,
+    "duplicateRetries": 1
+  },
+  "sourcePinNegativeChecks": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/util/MathUtil.java",
+      "unexpectedChangeRejected": true
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "unexpectedChangeRejected": true
+    }
+  ]
+}

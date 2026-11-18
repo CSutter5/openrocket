@@ -1,0 +1,44 @@
+{
+  "commits": {
+    "warning": "40dd387ce",
+    "rsePrecision": "3648d87bd"
+  },
+  "regressions": {
+    "beforeFix": {
+      "warningCases": 2,
+      "warningFailures": 2,
+      "motorCases": 4,
+      "motorFailures": 4
+    },
+    "afterFix": {
+      "tests": 47,
+      "failures": 0
+    }
+  },
+  "diagnosis": [
+    {
+      "motor": "J135W",
+      "savedDigest": "acee08976425e0ddc8b9bfc014a91770",
+      "roundedEmbeddedDigest": "5e8ddc5325196345aa5bd5e6401e44a8",
+      "originalMassKg": 0.6065496493042201,
+      "roundedMassKg": 0.6065499999999999,
+      "originalQuantizedMass": 6065,
+      "roundedQuantizedMass": 6066
+    },
+    {
+      "motor": "J800T",
+      "savedDigest": "812abf1e0e2e60f6ec54538ffbf2b8e4",
+      "roundedEmbeddedDigest": "b2e7f74fc3cd05ec5274a58ab6dd5761",
+      "originalMassKg": 0.5434497855703907,
+      "roundedMassKg": 0.5434500000000001,
+      "originalQuantizedMass": 5434,
+      "roundedQuantizedMass": 5435
+    }
+  ],
+  "verification": {
+    "bothBundledCatalogCurvesMatchSavedDigest": true,
+    "fullPrecisionRseRoundTripsPreserveBothDigests": true,
+    "mismatchedCurvesStillRejected": true
+  },
+  "limitation": "Previously rounded archives need original curves from a matching catalog/source; no digest bypass or fuzzy identity matching was added."
+}

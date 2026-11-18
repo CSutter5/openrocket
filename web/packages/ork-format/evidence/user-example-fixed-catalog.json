@@ -1,0 +1,71 @@
+{
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "coreSourceHashes": {
+    "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+    "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57"
+  },
+  "fixture": "example rocket.ork",
+  "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+  "webExportSha256": "ed603c075931d0196bd55c8df077e0bdce7394292b45dae55af5dee4a5447c47",
+  "desktopExportSha256": "2249cb94962fb2c6155b8c3eea8e6b894577f5435f210d768c579d583c9c155a",
+  "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+  "name": "Web & desktop <proof>",
+  "desktopResult": "PROOF components=17 decals=0 motorAssignments=5 motorDigests=[77ae2d2ca1c91023a59c2c09cf4746a3, 812abf1e0e2e60f6ec54538ffbf2b8e4, 90f749d42119cb8a081a354353524f92, a6489608710e3e47e4795efc421e8571, acee08976425e0ddc8b9bfc014a91770] simulations=6 resultPoints=5540 semanticSha256=2f3146e837787192259c2b6279914e30502c64ce5dfb6cbe8b0b684f9d9d5fc0 originalWarnings=Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36] editedWarnings=Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+  "motorCatalog": {
+    "file": "initial_motors.db",
+    "sha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f"
+  },
+  "motorCurveComparison": "JVM compares reference/data digests, exact time/thrust arrays, mass/CG samples within 1e-15 SI",
+  "reserializedMotors": [
+    {
+      "path": "thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse",
+      "beforeSha256": "19ebc489b3d4a41a516dba88715d80c79cda6100f71ee1661ec3815bd95f6f15",
+      "afterSha256": "07a3484d2d3394d252cdee71c34eb1dabee4d2d96ab5b5dbca1cc7a0637e39c3"
+    },
+    {
+      "path": "thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse",
+      "beforeSha256": "f9e4ddb73ec53c0998899afa7d1ba31db28b08c9d18887a9deb59ae21dcb18ed",
+      "afterSha256": "2d595f034bb220b2242f96dc1e40aae7d89f9dd26093aee5681803be7cd25372"
+    },
+    {
+      "path": "thrustcurves/77ae2d2ca1c91023a59c2c09cf4746a3.rse",
+      "beforeSha256": "473f84aa837770624a4a71225a7fdfa71cd745415a319dd24f9d9f252137b8ba",
+      "afterSha256": "785ea6adde2e900481dd76c5c13ddf4db8dc232019a7c6932b98cf3829af8aea"
+    },
+    {
+      "path": "thrustcurves/a6489608710e3e47e4795efc421e8571.rse",
+      "beforeSha256": "ab4c16799e8f509797db761357e4175899b9ee846561afd8200c8e266509f38b",
+      "afterSha256": "ab3c99a74d396a8fca3f353fc2caba97864b486447b14764c07da17b8ccd7251"
+    },
+    {
+      "path": "thrustcurves/90f749d42119cb8a081a354353524f92.rse",
+      "beforeSha256": "fbe01c564e589db9e5c1ec4c35b337b5c988bfaaac69bf4d999b23dafe642120",
+      "afterSha256": "fe84c25a4f99965cc5a93c7e562e729066be370a53fb73372c9a3cfb420ee8f7"
+    }
+  ],
+  "assets": [
+    {
+      "path": "thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse",
+      "sha256": "07a3484d2d3394d252cdee71c34eb1dabee4d2d96ab5b5dbca1cc7a0637e39c3"
+    },
+    {
+      "path": "thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse",
+      "sha256": "2d595f034bb220b2242f96dc1e40aae7d89f9dd26093aee5681803be7cd25372"
+    },
+    {
+      "path": "thrustcurves/77ae2d2ca1c91023a59c2c09cf4746a3.rse",
+      "sha256": "785ea6adde2e900481dd76c5c13ddf4db8dc232019a7c6932b98cf3829af8aea"
+    },
+    {
+      "path": "thrustcurves/a6489608710e3e47e4795efc421e8571.rse",
+      "sha256": "ab3c99a74d396a8fca3f353fc2caba97864b486447b14764c07da17b8ccd7251"
+    },
+    {
+      "path": "thrustcurves/90f749d42119cb8a081a354353524f92.rse",
+      "sha256": "fe84c25a4f99965cc5a93c7e562e729066be370a53fb73372c9a3cfb420ee8f7"
+    }
+  ],
+  "sidecarDiagnostics": [
+    "SIDECAR_RECONCILIATION_REQUIRED"
+  ]
+}

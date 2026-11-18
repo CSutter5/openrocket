@@ -4,12 +4,16 @@ import java.nio.file.*;
 import java.security.MessageDigest;
 import java.util.*;
 import info.openrocket.core.document.*;
+import info.openrocket.core.database.motor.ThrustCurveMotorSetDatabase;
+import info.openrocket.core.database.motor.ThrustCurveMotorSQLiteDatabase;
+import info.openrocket.core.database.motor.MotorDatabase;
 import info.openrocket.core.file.*;
 import info.openrocket.core.file.openrocket.*;
 import info.openrocket.core.logging.*;
 import info.openrocket.core.motor.*;
 import info.openrocket.core.rocketcomponent.*;
 import info.openrocket.core.simulation.*;
+import info.openrocket.core.startup.Application;
 
 /** Development-only bridge: execute the pinned desktop loader and saver headlessly. */
 public class ArchiveDesktopProof {
@@ -31,8 +35,35 @@ public class ArchiveDesktopProof {
         Files.write(output.resolve("actual.xml"), actual);
         throw new AssertionError(message + "; see expected.xml and actual.xml");
     }
+    static void requireSameMotorCurves(OpenRocketDocument expected, OpenRocketDocument actual) {
+        for (RocketComponent component : expected.getRocket()) {
+            if (!(component instanceof MotorMount mount) || !mount.isMotorMount()) continue;
+            MotorMount reloaded = (MotorMount) actual.getRocket().findComponent(component.getID());
+            for (var id : expected.getRocket().getIds()) {
+                Motor before = mount.getMotorConfig(id).getMotor();
+                Motor after = reloaded.getMotorConfig(id).getMotor();
+                if (before == null) { require(after == null, "Unexpected motor assignment"); continue; }
+                require(after instanceof ThrustCurveMotor && before instanceof ThrustCurveMotor, "Missing thrust curve");
+                ThrustCurveMotor a = (ThrustCurveMotor) before, b = (ThrustCurveMotor) after;
+                require(a.getDigest().equals(b.getDigest()), "Motor reference digest drift");
+                require(MotorDigest.digestMotor(a).equals(MotorDigest.digestMotor(b)), "Motor curve digest drift");
+                require(Arrays.equals(a.getTimePoints(), b.getTimePoints()), "Motor time sample drift");
+                require(Arrays.equals(a.getThrustPoints(), b.getThrustPoints()), "Motor thrust sample drift");
+                require(a.getCGPoints().length == b.getCGPoints().length, "Motor CG sample count drift");
+                for (int i = 0; i < a.getCGPoints().length; i++) {
+                    require(Math.abs(a.getCGPoints()[i].getX() - b.getCGPoints()[i].getX()) <= 1e-15, "Motor CG drift");
+                    require(Math.abs(a.getCGPoints()[i].getWeight() - b.getCGPoints()[i].getWeight()) <= 1e-15, "Motor mass drift");
+                }
+            }
+        }
+    }
     public static void main(String[] args) throws Exception {
         OpenRocketSaverTest.setup();
+        String catalog = System.getProperty("ork.proof.motorCatalog");
+        if (catalog != null) {
+            ThrustCurveMotorSetDatabase database = (ThrustCurveMotorSetDatabase) Application.getInjector().getInstance(MotorDatabase.class);
+            for (ThrustCurveMotor motor : ThrustCurveMotorSQLiteDatabase.readDatabase(new File(catalog))) database.addMotor(motor);
+        }
         if (args.length == 3 && args[0].equals("generate-format111")) {
             var generated = new GeneralRocketLoader(new File(args[1])).load();
             var settings = generated.getSimulations().get(0).getOptions();
@@ -87,6 +118,7 @@ public class ArchiveDesktopProof {
         new GeneralRocketSaver().save(new File(args[2]), edited, options());
         var desktopExport = new GeneralRocketLoader(new File(args[2])).load();
         requireSameXml(semanticXml(edited), semanticXml(desktopExport), "Desktop re-export semantic drift", output);
+        requireSameMotorCurves(edited, desktopExport);
         System.out.printf(Locale.ROOT,
             "PROOF components=%d decals=%d motorAssignments=%d motorDigests=%s simulations=%d resultPoints=%d semanticSha256=%s originalWarnings=%s editedWarnings=%s%n",
             componentCount, decals, motors, motorDigests, edited.getSimulations().size(), resultPoints,
