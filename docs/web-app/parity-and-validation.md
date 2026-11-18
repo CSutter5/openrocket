@@ -1,6 +1,10 @@
 # Parity and validation
 
-This is the acceptance framework for the [web application plan](README.md), not a completed parity report. The [G1 feasibility record](g1-feasibility.md) contains executed proof results and limitations; the capability rows below still require their delivery-phase acceptance. Expand them into testable individual capabilities during T00, then keep evidence and remaining gaps beside each capability.
+This is the acceptance framework for the [web application plan](README.md), not a completed parity report. The user has explicitly deferred 100% compatibility, accounts and auth until after the local editor POC. The [POC plan and GP gate](poc-plan.md#gp--poc-acceptance-gate) control that milestone; the full capability matrix and G1/G2–G7 below remain post-POC product requirements. Existing G1 evidence is preserved, and G1 remains held without blocking the bounded POC.
+
+## GP: immediate local editor acceptance
+
+Run only the finite [POC acceptance workflow](poc-plan.md#gp--poc-acceptance-gate): actual Chromium import/tree/selection, validated name/radius edits and SVG feedback, rejected-edit preservation, download/reimport and pinned desktop state/serialization checks. Keep relevant codec/source/digest regressions. GP does not require accounts, hosted services, simulations, arbitrary components, broad cross-browser coverage or complete G1 closure. Correctness and opaque-data preservation for supported edits remain mandatory. Record unsupported inputs as explicit limitations rather than silently accepting or rewriting them. GP is currently unrun.
 
 ## Desktop baseline and evidence
 
@@ -33,11 +37,11 @@ The paths below are relative to the repository root. Package names abbreviate `c
 | Git-style version management (new) | Web-specific requirement | Commits, branch graph, semantic diffs, three-way merge, conflict resolution, revert/restore and revision download | T08/T09, G4 |
 | Workers deployment (new) | User clarified no Containers/external compute | Fresh Worker/assets and storage deployment; production has no JVM/native service dependency; migration and recovery evidence | T03/T04/T13, G1/G7 |
 
-Desktop-specific mechanisms may need browser equivalents. Record the proposed behavior, how it meets the user outcome, and any unavoidable difference before marking the capability complete. Literal compatibility with arbitrary native plugins cannot currently be promised; no requirement exception was granted in this task.
+Desktop-specific mechanisms may need browser equivalents. Record the proposed behavior, how it meets the user outcome, and any unavoidable difference before marking the capability complete. Literal compatibility with arbitrary native plugins cannot currently be promised. The user-approved exception defers these capabilities for GP only; it does not mark them implemented or remove the later parity goal.
 
-## Gate G1: feasibility must be demonstrated before broad implementation
+## Gate G1: broader product feasibility after the POC
 
-Run four independent proofs, then review them together:
+G1 is held for the recorded gaps. ADR-15 authorizes only the bounded local editor before closure; hosted/shared and broader product work still need the appropriate gates. Do not continue general G1 investigations before P01 unless they directly unblock its supported path. After the POC review, close the missing evidence in these four proofs and review them together:
 
 1. **Engine:** Build the pinned Java algorithms into a browser artifact, run representative calculations/seeded flights, and compare against JVM output. Include current RK6 and format-1.11-era behavior instead of relying on a 24.12 port. Inventory all runtime adaptation and extension gaps. Benchmark browser responsiveness and cancellation.
 2. **Trusted editing:** Run the bounded reducer in Workers. Demonstrate setter side effects, auto dimensions, tree moves, flight configuration listeners and invalid graph rejection. Compare complete relevant resulting state with the JVM. Interleave different projects/users to expose shared singleton/preference leakage. Accepting a client-generated snapshot is not a proof.
@@ -78,4 +82,4 @@ Test fresh local setup and fresh staging provision with documented commands. Run
 
 For every capability record the implementing revision, fixture/input, expected result and its basis, exact commands or manual steps, runtime/browser, observed outcome, and reviewer. Record skipped checks and environment limitations separately. Relevant tools include existing Gradle/JUnit tests, [Vitest's Workers integration](https://developers.cloudflare.com/workers/testing/vitest-integration/), and multi-context browser tests; proposed tool use is not a claim those checks ran.
 
-G6 requires all baseline capability rows to be implemented and verified or an explicit user-approved requirement change. G7 additionally requires deployment, recovery, isolation and measured workload evidence. The isolated G1 proofs establish neither gate, a production application, nor general numerical/desktop parity.
+GP requires only the explicitly scoped local editor workflow; its completion must not be reported as G1/G6/G7 completion. G6 requires all baseline capability rows to be implemented and verified or a further explicit user-approved requirement change. G7 additionally requires deployment, recovery, isolation and measured workload evidence. The isolated G1 proofs establish neither gate, a production application, nor general numerical/desktop parity.

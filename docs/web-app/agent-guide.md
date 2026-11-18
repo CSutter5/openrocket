@@ -9,9 +9,11 @@ This file is the starting handoff for OpenRocket web application work. It collec
 3. Inspect the current branch, working tree, recent local commits, and relevant implementation. Preserve existing changes and identify which work belongs to you. The checkout's current state takes precedence over an old handoff's progress claims.
 4. Choose the next authorized work packet whose prerequisites are satisfied. Identify its owned paths, expected behavior, checks, and handoff before editing. Do not start every packet at once.
 
-The [G1 evidence record](g1-feasibility.md) supersedes the original planning-only status. Bounded browser, file and local/hosted Workers proofs now exist; G1 remains held for its recorded gaps. Update progress using actual commits and evidence rather than assuming a proof package is production infrastructure.
+Immediate priority, November 18, 2026: implement P01 in the [local editor POC plan](poc-plan.md), then P02–P04 through GP. The user explicitly deferred accounts, authentication and 100% feature compatibility until after this POC. This temporary scope decision supersedes old blanket T04–T13 holds for the specified early T06/SVG slice only. Do not continue general G1 geometry proofs before delivering the visible editor unless a concrete POC blocker requires one. G1 remains held for the broader product; GP is a separate, currently unrun gate. The [G1 evidence record](g1-feasibility.md) remains historical evidence, not production infrastructure.
 
 ## Product context to retain
+
+The local POC uses one browser, one in-memory document and local import/download. No account, backend, remote storage or deployment is needed; keep existing authenticated proofs intact rather than disabling their checks. The bullets below describe the retained post-POC product goals. File preservation, source/digest checks, immutable preferences, no imported script execution and the existing unsafe-edit refusals still apply to the POC.
 
 - Production uses Cloudflare Workers and storage services. The user explicitly excluded Containers and external compute. Java/Node are allowed for development and build-time tooling; production must not require a JVM service.
 - Build a custom browser UI around adapted OpenRocket design and physics logic. The proposed UI stack is React/TypeScript/Vite with SVG and Three.js. TeaVM JavaScript is the first engine adaptation to investigate, not an already verified solution.

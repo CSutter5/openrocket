@@ -1,5 +1,7 @@
 # G1 contracts and selected inputs
 
+For immediate work, the [local editor POC plan](poc-plan.md) authorizes reuse of these proven methods/codec in a single-browser local-file workflow before G1 closure. Accounts/auth, hosted APIs and general parity are deferred until after GP. Keep the existing server command/provenance contracts and authenticated proofs intact for later use; the local POC does not need to implement project/branch/session machinery. Existing input bounds, source/digest checks, data preservation and unsafe-edit refusal still apply.
+
 These are version 1 feasibility boundaries for T01–T03, not an application schema or a claim of complete T00 discovery. The pinned desktop source is `33bdb6d3062a6d9ef44a00d1ff865f962136e9e9` (26.11.beta.01). Java source changes after that revision must be reviewed separately. No production resources or external compute are needed by these proofs.
 
 ## Shared boundaries

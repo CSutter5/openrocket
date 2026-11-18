@@ -2,9 +2,21 @@
 
 Read [the scope](README.md) first. These decisions are proposed for implementation, with feasibility conditions stated explicitly. Supersede a decision with its evidence and consequences rather than silently changing it. All production compute must remain in Workers or the user's browser.
 
-The first [G1 executable evidence](g1-feasibility.md) now qualifies these decisions. It establishes bounded local/hosted proofs, not production readiness or full numerical/desktop parity.
+Current priority: [ADR-15](#adr-15-deliver-a-local-editor-poc-before-full-g1-closure) and the [POC plan](poc-plan.md) authorize a local browser editor before complete G1 closure, with accounts/auth, backend integration and full parity deferred. Earlier blanket delivery holds apply to the post-POC product, not this bounded early editor. G1 evidence remains valid and the gate remains held.
 
-## Runtime and data flow
+## POC runtime and data flow
+
+```mermaid
+flowchart LR
+    Local[Sample or local ORK file] --> UI[Browser editor]
+    UI <-->|validated local edits| Java[Web Worker / pinned Java reducer]
+    UI <-->|preserved archive and effects| Codec[Existing ORK codec]
+    Codec --> Download[Local ORK download]
+```
+
+One browser owns one in-memory document. There is no shared server authority, account or cloud persistence in this POC; the existing authenticated Workers endpoints are unchanged. UI success means a local edit or export was prepared, not that a shared revision was saved.
+
+## Post-POC runtime and data flow
 
 ```mermaid
 flowchart LR
@@ -177,3 +189,11 @@ No arbitrary script/plugin may run with session/network/storage capabilities. A 
 **Reasoning and alternatives:** The getter includes exact endpoint contact and caps the sibling radius at the parent-derived outer radius. `toRelative` subtracts absolute component locations; omitting a common prefix can change floating-point boundary classification. Body components force AFTER positioning through `SymmetricComponent.isAfter`/`setAfter`, so forcing the tube to TOP is not a desktop-valid way to remove that prefix. Reconstructing the explicit preceding nose cone preserves the actual arithmetic. Copying the overlap algorithm to TypeScript or accepting arbitrary ancestor graphs without their read set would leave this behavior unproved.
 
 **Consequences:** The existing explicit-hole underfit failure/refusal remains. Both-automatic cap inputs are tested independently through authenticated publication and desktop serialization/save/reload, with annular-cylinder expectations and repeated core reads. Preferences stay immutable; arbitrary defaults, graphs, catalogs/extensions and hosted CPU/heap limits remain open. Source pinning, the two exact I/O exceptions and catalog/motor digest checks are unchanged. G1 remains held; the executable evidence and reproduction commands live in the package READMEs and feasibility record.
+
+## ADR-15: Deliver a local editor POC before full G1 closure
+
+**Context and decision:** On November 18, 2026, the user explicitly prioritized a basic editor and deferred accounts, authentication and 100% feature compatibility until after it. Reuse the proven Java/codec subset to deliver P01–P04 and the independent GP acceptance gate in the [POC plan](poc-plan.md). Start with a visible sample/file tree, then name/radius edits, an SVG schematic and export/reopen. This temporarily supersedes ADR-02/ADR-10 and earlier scheduling statements wherever they block this bounded editor until all G1 work is finished. G1 remains held for the broader product.
+
+**Scope and alternatives:** Choose browser memory and local files, with Java-derived edits in a browser Web Worker. Keep the existing React/TypeScript/Vite direction and SVG for the minimal preview. Defer Workers app integration, D1/R2/DO persistence, auth/admin, sharing, history, simulations, 3D, catalog editors, structural editing and advanced parity. Completing all geometry/extension/budget research first would delay the requested demo; removing checks from authenticated endpoints would unnecessarily create a different access model. Neither is required for the local POC.
+
+**Consequences and validation:** The future hosted product still needs server authority, accounts and its recorded gates. No backend proof is deleted or converted to anonymous access. No production compute exception is granted. Supported POC edits must retain pinned methods, digest/source checks, opaque data and unsafe-edit refusal, with actual browser and desktop round trips. GP proves only the named local workflow; it does not prove hosted budgets, general compatibility, simulation correctness or production readiness. Deferred capabilities retain their owners and later gates. This planning decision does not claim that the UI or GP checks already exist or pass.

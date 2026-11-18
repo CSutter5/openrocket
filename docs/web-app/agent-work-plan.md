@@ -1,6 +1,6 @@
 # Agent work plan
 
-Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. The [G1 evidence record](g1-feasibility.md) supersedes the original planning-only progress status; later packets remain gated by that assessment.
+Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. The immediate sequence is P01–P04 in the [local editor POC plan](poc-plan.md), using a bounded early T06 editor and SVG portion of T11. The user has deferred accounts/auth and 100% feature compatibility until after GP. G1 remains held for the broader product, but its remaining research and T04/T05 do not block this local POC.
 
 ## Coordination rules
 
@@ -10,12 +10,21 @@ Make focused local commits as coherent changes pass their appropriate checks and
 
 Every assignment starts by reading repository `AGENTS.md` and `CONTRIBUTING.md`, the relevant decision records, upstream symbols, and any closer directory instructions. Check open issues/PRs for duplicate work and link findings; the initial search was incomplete. Broad upstream changes need a maintainer discussion record before implementation, as required by repository guidance. This plan does not authorize agents to message maintainers or other people automatically.
 
-The user authorized the first G1 implementation milestone after the original planning task. This is not an unrestricted rewrite. Keep failed experiments isolated and report their evidence. Do not replace a failed feasibility gate with reduced parity, new compute services, or an unreviewed physics rewrite.
+The user has now authorized a local editor POC before full G1 closure and deferred accounts, auth and complete compatibility for that milestone. This is an explicit temporary scope exception, not an unrestricted rewrite or a passing G1. Retain existing proofs, failed evidence, pinned algorithms and later product goals. Add no compute service or unreviewed physics rewrite. The [POC plan](poc-plan.md) controls immediate acceptance; the full packets below describe post-POC work.
 
 ## Dependency graph and scheduling
 
 ```mermaid
 flowchart TD
+    Proven[Existing bounded T01/T02 evidence] --> P01[P01 local import and visible tree]
+    P01 --> P02[P02 supported edits and SVG]
+    P02 --> P03[P03 export and desktop round trip]
+    P03 --> P04[P04 browser acceptance and run guide]
+    P04 --> GP{GP local POC demo}
+    GP --> Review[User demo review and post-POC prioritization]
+    Review --> T01
+    Review --> T02
+    Review --> T03
     T00[T00 baseline and contracts] --> T01[T01 engine / validator proof]
     T00 --> T02[T02 archive / identity proof]
     T00 --> T03[T03 Workers / auth proof]
@@ -37,7 +46,9 @@ flowchart TD
     T12 --> T13
 ```
 
-With four active-agent slots, keep one coordinator and at most three implementation/research agents. Rotate roles rather than starting every packet simultaneously:
+Current execution is sequential P01 → P02 → P03 → P04 → GP. Only fix T01/T02 behavior that directly blocks an advertised POC operation. Do not begin T03 closure, T04/T05, full T06/T11 or T07–T13 before the POC review unless separately requested. The following waves are the post-POC product schedule, not a requirement to organize agents or complete all feasibility first.
+
+When parallel agent work is explicitly authorized, keep one coordinator and at most three implementation/research agents:
 
 | Wave | Coordinator | Up to three concurrent assignments | Integration checkpoint |
 | --- | --- | --- | --- |
@@ -50,6 +61,8 @@ With four active-agent slots, keep one coordinator and at most three implementat
 Dependencies still govern starts within each wave. A reviewer must inspect behavior and evidence, not merely agree with another agent's recommendation. Security and compatibility tests begin with their feature packets; wave E is final integration, not their first test pass.
 
 ## Work packets
+
+For immediate implementation, the [P01–P04 packet table](poc-plan.md#ordered-work-and-stop-conditions) is authoritative. T00–T13 below retain the broader product responsibilities. Remaining T01–T03 investigations are deferred unless needed for the POC path; a complete T01–T03 exit is not a GP prerequisite.
 
 ### T00 — Integration agent: baseline, capability ledger, and contracts
 
@@ -95,7 +108,7 @@ Exit: G2 proves two ordinary users and an admin, plus denied unauthenticated, vi
 
 ### T06 — Editor agent: single-user design and compatible files
 
-Depends on G1 model/codec/engine contracts. Own future `web/app/editor/`, component panels, units/material controls, and import/export UI. Implement the command-driven tree and property editor with selection, supported component add/remove/move, flight configurations, atomic gestures, validation messages, and local undo. Use server-ready commands from the start. Integrate T02 preservation and codec behavior; users must see unsupported or rejected edits and dirty/saved state.
+The full packet depends on G1 model/codec/engine contracts. Its bounded POC slice is explicitly authorized earlier by [P01–P04](poc-plan.md), with no T04/T05, accounts/auth, structural editing or full-parity prerequisite. Own future `web/app/editor/`, component panels, units/material controls, and import/export UI. Implement the command-driven tree and property editor with selection, supported component add/remove/move, flight configurations, atomic gestures, validation messages, and local undo. Use server-ready commands from the start. Integrate T02 preservation and codec behavior; users must see unsupported or rejected edits and dirty/saved state.
 
 Exit: representative designs can be created/edited/imported/exported and opened in the pinned desktop application. Cover component types in explicit batches; incomplete component coverage remains in the parity ledger. Exercise keyboard navigation, units/locales, validation, and recovery after a rejected edit. This packet establishes the editor increment; it does not establish all desktop UI parity.
 
@@ -125,7 +138,7 @@ Exit: G5 covers representative single/multistage/cluster/recovery flights on JVM
 
 ### T11 — Visualization/output agent: 2D, 3D, and files users produce
 
-Depends on T06 geometry contracts. Own future `web/app/views/`, printing/Photo Studio, and export UI. Implement 2D views, CG/CP indicators, 3D geometry, picking, appearances/decals, camera controls, and Photo Studio. Add the desktop's supported PDF/template/part-list and CSV/SVG/OBJ/RockSim/RASAero workflows in individually reviewed increments, reusing core exporters where feasible. Preserve output scale, units, and format semantics.
+The full packet depends on T06 geometry contracts. Only the small labeled SVG schematic in P02 is pulled forward for the POC; 3D and other outputs remain deferred. Own future `web/app/views/`, printing/Photo Studio, and export UI. Implement 2D views, CG/CP indicators, 3D geometry, picking, appearances/decals, camera controls, and Photo Studio. Add the desktop's supported PDF/template/part-list and CSV/SVG/OBJ/RockSim/RASAero workflows in individually reviewed increments, reusing core exporters where feasible. Preserve output scale, units, and format semantics.
 
 Exit: G5/G6 evidence includes representative geometry and rendering comparisons, image export, measured print/template scale, and format round trips. Exercise keyboard/accessibility and supported browsers/GPU limits. Tag any Java tests requiring live OpenGL `requires-live-opengl`; browser tests still need actual browser rendering evidence. Do not put editable design originals into runtime Java resource directories.
 

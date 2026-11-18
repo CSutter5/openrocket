@@ -1,10 +1,12 @@
 # OpenRocket web application plan
 
-Status: G1 feasibility implementation, 2026-11-17. Executable browser, desktop-file and Workers proofs now live under `web/`; they are isolated experiments, not a production application. See the [feasibility contracts](g1-contracts.md) and [observed G1 evidence](g1-feasibility.md) before starting dependent delivery work.
+Status: local editor POC is the next milestone, November 18, 2026. The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block this explicitly authorized POC slice.
 
 ## Scope and constraints
 
-Build a multiuser browser application with user accounts, administrator management, simultaneous editing of the same design, Git-style history, desktop-compatible `.ork` import/export, and desktop feature parity. The user clarified that deployment may use **Cloudflare Workers and storage, but no Containers or external compute**. Java and Node may run during development and CI; production must not depend on a JVM service. Browser computation is part of the proposed solution.
+The immediate deliverable is a single-user local browser editor: sample/file import, component tree/selection, name and supported BodyTube radius edits, an SVG schematic, and `.ork` download/reopen. Use browser memory and local files; skip backend integration, accounts/auth, collaboration/history, simulations, 3D, broad catalogs/component editing and advanced features. The [POC plan](poc-plan.md) defines the finite finish line and deferred owners. Correctness and preservation remain required for the supported edits.
+
+After the POC, build a multiuser browser application with user accounts, administrator management, simultaneous editing of the same design, Git-style history, desktop-compatible `.ork` import/export, and desktop feature parity. The user clarified that deployment may use **Cloudflare Workers and storage, but no Containers or external compute**. Java and Node may run during development and CI; production must not depend on a JVM service. Browser computation is part of the proposed solution.
 
 The desktop reference is this checkout at `33bdb6d3062a6d9ef44a00d1ff865f962136e9e9`, reporting `26.11.beta.01` in `core/src/main/resources/build.properties`. Pin this baseline for initial comparisons. Updating it requires a capability and format delta review; an older browser port cannot establish parity with this version.
 
@@ -17,7 +19,7 @@ Start future work here, then read:
 
 ## Selected stack
 
-These are planning selections. Gate G1 must establish runtime compatibility before dependencies and versions are committed.
+The POC uses React/TypeScript/Vite, SVG, the existing browser-compatible Java reducer exports and archive codec. Retain the tested pins. The backend, accounts, collaboration, simulation and 3D selections below describe the post-POC product; their remaining feasibility work is not a prerequisite to the local editor.
 
 | Area | Selection | Reason |
 | --- | --- | --- |
@@ -40,7 +42,8 @@ Avoid choosing exact package versions from this document. At G1, pin tested comp
 | Phase | Result | Exit gate |
 | --- | --- | --- |
 | 0: Evidence and scope | Desktop capability inventory, duplicate-work evaluation, baseline fixtures, maintainer discussion record for upstream work | G0: inventory and scope traceable to the checkout; no unsupported claim of full parity. |
-| 1: Feasibility | Reproducible browser engine, trusted Worker edits, compatible expanded archive round trip, Workers auth smoke test | G1: all four proofs pass with recorded evidence. Stop dependent implementation if strict hosting cannot support them. |
+| POC: current priority | Local sample/file → tree/selection → name/radius edits → SVG schematic → desktop-compatible export for supported inputs | GP: execute P01–P04 and the finite [POC acceptance checks](poc-plan.md#gp--poc-acceptance-gate); no accounts/auth or full G1 prerequisite. |
+| 1: Remaining feasibility, after POC | Broader engine/graph/catalog/isolation/file and hosted-budget evidence using the existing proofs | G1: close the recorded gaps before the broader hosted/shared product. GP does not pass G1. |
 | 2: Foundation | Local and staging deployment, accounts, admin management, private projects and access checks | G2: two users and an administrator exercise allowed and denied actions. |
 | 3: Shared design | Component tree/editor, import/export, persisted concurrent commands, reconnect and undo | G3: two browsers edit one design, reconnect without losing acknowledged changes, and open the export in desktop. |
 | 4: Version management | Named commits, branches, semantic diffs, three-way merge, revert and restore | G4: divergent edits merge or report conflicts; refs survive retries and crashes. |
@@ -48,7 +51,7 @@ Avoid choosing exact package versions from this document. At G1, pin tested comp
 | 6: Complete parity | Advanced analysis, optimization, dispersion, printing/export, expressions, scripting and extension strategy | G6: every baseline capability has evidence; unresolved plugin/runtime gaps remain release blockers. |
 | 7: Release readiness | Load and recovery evidence, restore exercise, migrations/rollback, deployment instructions | G7: a fresh deployment and recovery rehearsal pass; parity evidence reviewed. |
 
-Phases are delivery increments. A collaborative design demo at phase 3 is useful, but it does not satisfy the feature-parity requirement. No calendar estimate is defensible until the engine and extension feasibility work is complete.
+The POC route is a user-approved sequencing exception to the original G1-before-editor plan. Start P01 now, defer unrelated feasibility work, and stop at GP for a demo review. T04/T05 are not POC prerequisites. The later phases retain their full product gates; estimates for the bounded editor must not wait for extension or complete-parity research.
 
 ## Main feasibility risk
 
@@ -71,3 +74,5 @@ The independent [MMRocket Sim repository](https://github.com/mtnmanak/mmrocket-s
 The original planning task inspected repository architecture, build/module dependencies, loader/saver behavior, format documentation, and desktop feature entry points. Primary Cloudflare, TeaVM, Hono, Better Auth, and Drizzle documentation informed the choices; supporting links are in the companion documents. Three research agents examined engine feasibility, file/collaboration behavior, and parity/reuse independently. That planning task ran no application/runtime tests; the subsequent [G1 record](g1-feasibility.md) contains the actual implementation checks and remaining gaps.
 
 AI assistance: Codex using GPT-6 (runtime-supplied family; exact variant unavailable) prepared and reviewed these planning documents with three agents inheriting that runtime model. Human contributors remain responsible for reviewing decisions and verifying implementation. Any future PR must use the repository template and report its actual checks and model identities.
+
+POC-first revision, November 18, 2026: Codex using GPT-6 (runtime-supplied family; exact variant unavailable), without subagents, revised scope and scheduling at the user's request. Documentation links, consistency and the complete diff are checked; no application implementation or runtime verification is claimed for this documentation change.
