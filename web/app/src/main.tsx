@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { LIMITS } from '@openrocket/ork-format';
 import { request } from './bridge';
 import type { Action, ComponentView, DocumentView } from './model';
+import { TubeProperties } from './TubeProperties';
 import { RocketDrawing } from './RocketDrawing';
 import { Schematic } from './Schematic';
 import './style.css';
@@ -33,13 +34,14 @@ function Properties({ component, editable, busy, edit }: {
       <p id="radius-help" className="muted">{tube ? 'SI metres, (0, 1]. The Java setter may clamp wall thickness, clear a known preset and invalidate stored results.' : `Read-only: ${component.radiusReason}`}</p>
       {numberError && <p role="alert" className="error">{numberError}</p>}
     </form>
+    {tube && <TubeProperties component={component} editable={editable} busy={busy} edit={edit}/>}
     {tube && <section aria-label="Java intrinsic measurements"><h3>Java intrinsic measurements</h3>
       <p className="muted">Per component; excludes mass/CG overrides and motors. These are not whole-rocket values.</p>
       <dl><dt>Outer radius (m)</dt><dd data-testid="radius">{tube.state.radius}</dd>
         <dt>Wall thickness (m)</dt><dd data-testid="thickness">{tube.state.thickness}</dd>
         <dt>Intrinsic mass (kg)</dt><dd data-testid="mass">{tube.state.mass}</dd>
         <dt>Local CG (m)</dt><dd data-testid="cg">{tube.state.cg}</dd>
-        <dt>Length input (m)</dt><dd>{tube.input.length}</dd>
+        <dt>Length (m)</dt><dd data-testid="length">{tube.input.length}</dd><dt>Density (kg/m³)</dt><dd data-testid="density">{tube.input.density}</dd>
         <dt>Preset attached</dt><dd>{tube.state.preset ? 'Yes; digest checked' : 'No'}</dd>
       </dl>
       {'ring' in tube.state && <p>Automatic ring: outer radius {tube.state.ring.outerRadius} m; inner radius {tube.state.ring.innerRadius} m; intrinsic mass {tube.state.ring.mass} kg; local CG {tube.state.ring.cg} m.</p>}
@@ -131,7 +133,7 @@ function App() {
       {document && <>
         <div className="document-status"><strong>{document.filename}</strong><span>{components.length} components</span>
           <strong data-testid="dirty">{document.dirty ? 'Changed since import / export' : 'No changes since import / export'}</strong>
-          <span>{document.mode === 'editable' ? 'Names editable; geometry limited below' : 'Preservation only: all properties read-only'}</span>
+          <span>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}</span>
         </div>
         {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
         <RocketDrawing drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }}/>

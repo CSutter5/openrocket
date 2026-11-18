@@ -5,6 +5,7 @@ export interface ComponentView {
   properties: { name: string; value: string }[];
   tube?: { input: TubeRadiusInput; state: Intrinsic };
   radiusReason?: string;
+  extraProperties?: boolean; extraPropertiesReason?: string;
 }
 export interface DocumentView {
   drawing: import('./drawing').Drawing;
@@ -16,5 +17,6 @@ export type Action =
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }
   | { type: 'radius'; id: string; expected: number; value: number }
+  | { type: 'tubeProperty'; id: string; property: import('../../packages/ork-format/src/tube-properties.js').TubeProperty; expected: number; value: number }
   | { type: 'export' };
 export interface Reply { view: DocumentView; notice: string; bytes?: Uint8Array }

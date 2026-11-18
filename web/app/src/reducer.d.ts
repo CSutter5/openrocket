@@ -1,4 +1,5 @@
 declare module '*build/generated/teavm/js/reducer.js' {
+  export function tubePropertyEdit(key: string, digest: string, length: number, radius: number, thickness: number, filled: boolean, density: number, property: string, value: number): string;
   export function drawRocket(input: string): string;
   export function radiusEdit(length: number, radius: number, thickness: number, filled: boolean, density: number, value: number): string;
   export function presetRadiusEdit(key: string, digest: string, length: number, radius: number, thickness: number, filled: boolean, density: number, value: number): string;

@@ -1,6 +1,7 @@
 import { componentNames, renameComponent, importArchive, exportArchive, type ExpandedArchive } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
-import { radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { tubePropertyInput, applyTubeProperty } from '../../packages/ork-format/src/tube-properties.js';
+import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
@@ -34,6 +35,10 @@ function describe(current: ExpandedArchive, name: string, lastExport: string): D
         radiusSimulationEffects(current, input, state);
         view.tube = { input, state };
       } catch (error) { view.radiusReason = component.type === 'bodytube' ? failure(error) : 'Only supported BodyTube outer radius can be edited. Other types are read-only.'; }
+      if (view.tube) {
+        try { tubePropertyInput(current, component.id!); view.extraProperties = true; }
+        catch (error) { view.extraPropertiesReason = failure(error); }
+      }
       return view;
     }),
     simulations: current.parsed.simulations.map(n => ({ name: n.children.find(c => c.name === 'name')?.text ?? '(unnamed)',
@@ -69,6 +74,12 @@ async function execute(action: Action): Promise<Reply> {
       candidate = { ...candidate, identity: exported.identity };
       notice = 'Name updated. Other XML and attachments preserved.';
     }
+  } else if (action.type === 'tubeProperty') {
+    const input = tubePropertyInput(archive, action.id);
+    if (input[action.property] !== action.expected) throw new Error('Property changed; select the component again');
+    const effects = JSON.parse(tubePropertyEdit(input.preset?.key ?? '', input.preset?.digest ?? '', input.length, input.radius, input.thickness, input.filled, input.density, action.property, action.value));
+    candidate = await applyTubeProperty(archive, input, action.property, action.value, effects.after, effects.functionalChange);
+    if (candidate !== archive) notice = `Java ${action.property} edit accepted. Affected stored results are outdated; series retained.`;
   } else if (action.type === 'radius') {
     if (!Number.isFinite(action.value) || action.value <= 0 || action.value > 1) throw new Error('Outer radius must be a finite number greater than 0 and at most 1 m');
     const input = tubeRadiusInput(archive, action.id);

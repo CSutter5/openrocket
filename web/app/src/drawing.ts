@@ -44,7 +44,7 @@ export function drawingInput(archive: ExpandedArchive) {
   for (const n of nodes.filter(n => !['rocket', 'stage', 'bodytube', 'nosecone', 'transition'].includes(n.name))) {
     if (n.name !== 'trapezoidfinset' || n.parent?.parent?.name !== 'bodytube') { omitted.push(`${n.label ?? n.name}: ${n.name} (interior or unsupported shape)`); continue; }
     try {
-      if (Number(optional(n, 'cant', '0')) !== 0) throw new Error('canted fins are not yet drawn');
+      if (numeric(optional(n, 'cant', '0'), 'fin cant') !== 0) throw new Error('canted fins are not yet drawn');
       const parent = componentIndices.indexOf(nodes.indexOf(n.parent.parent));
       const positions = n.children.filter(c => c.name === 'axialoffset'), legacy = n.children.filter(c => c.name === 'position');
       if (positions.length !== 1 || legacy.length !== 1 || positions[0].attributes.method?.value !== legacy[0].attributes.type?.value || positions[0].text.trim() !== legacy[0].text.trim()) throw new Error('ambiguous fin position');

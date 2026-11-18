@@ -34,3 +34,6 @@ summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
 .drawing-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
 .drawing-title span { color: #485e6c; } .rocket-drawing polygon { cursor: pointer; }
 .drawing-selection { margin: .5rem 0; }
+
+.property-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+.property-grid form { margin: .5rem 0; }

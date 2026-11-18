@@ -9,7 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "predev": "node scripts/check-engine.mjs",
     "prebuild": "node scripts/check-engine.mjs",
-    "test": "npm run build && node test/acceptance.mjs"
+    "test": "npm run build && node --experimental-strip-types test/acceptance.mjs"
   },
   "dependencies": {
     "@openrocket/ork-format": "0.0.0",
