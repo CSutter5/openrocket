@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openrocket version="1.11" creator="OpenRocket local POC">
+<rocket><name>Explicit tube sample</name><id>10000000-0000-4000-8000-000000000000</id>
+<subcomponents><stage><name>Stage</name><id>10000001-0000-4000-8000-000000000000</id><subcomponents>
+<bodytube><name>Tube</name><id>10000002-0000-4000-8000-000000000000</id><length>0.7619999999999998</length><radius>0.0284734</radius><thickness>0.0011429999999999982</thickness><material type="bulk" density="1850.0">Fiberglass</material></bodytube>
+</subcomponents></stage></subcomponents></rocket>
+</openrocket>
