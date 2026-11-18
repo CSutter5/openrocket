@@ -3,7 +3,6 @@ package info.openrocket.core.file.motor;
 import info.openrocket.core.motor.Motor;
 import info.openrocket.core.motor.ThrustCurveMotor;
 import info.openrocket.core.util.CoordinateIF;
-import info.openrocket.core.util.TextUtil;
 
 /**
  * Writes a {@link ThrustCurveMotor} as a RockSim engine file (.rse) XML string.
@@ -39,10 +38,10 @@ public class RockSimMotorWriter {
 		sb.append(" mfg=\"").append(escapeXmlAttr(motor.getManufacturer().getSimpleName())).append("\"");
 		sb.append(" code=\"").append(escapeXmlAttr(motor.getDesignation())).append("\"");
 		sb.append(" Type=\"").append(motorTypeString(motor.getMotorType())).append("\"");
-		sb.append(" dia=\"").append(TextUtil.doubleToString(diameterMM)).append("\"");
-		sb.append(" len=\"").append(TextUtil.doubleToString(lengthMM)).append("\"");
-		sb.append(" initWt=\"").append(TextUtil.doubleToString(initWtGrams)).append("\"");
-		sb.append(" propWt=\"").append(TextUtil.doubleToString(propWtGrams)).append("\"");
+		sb.append(" dia=\"").append(Double.toString(diameterMM)).append("\"");
+		sb.append(" len=\"").append(Double.toString(lengthMM)).append("\"");
+		sb.append(" initWt=\"").append(Double.toString(initWtGrams)).append("\"");
+		sb.append(" propWt=\"").append(Double.toString(propWtGrams)).append("\"");
 
 		// Delays
 		double[] delays = motor.getStandardDelays();
@@ -62,7 +61,7 @@ public class RockSimMotorWriter {
 			sb.append("   <comments>").append(escapeXmlContent(desc)).append("</comments>\n");
 		}
 
-		// Thrust curve data
+		// Keep numeric samples at round-trip precision so serialization does not change motor digests.
 		writeData(sb, motor);
 
 		sb.append("  </engine>\n");
@@ -81,10 +80,10 @@ public class RockSimMotorWriter {
 			double cgMM = cg.getX() * 1000.0;
 
 			sb.append("    <eng-data");
-			sb.append(" t=\"").append(TextUtil.doubleToString(time[i])).append("\"");
-			sb.append(" f=\"").append(TextUtil.doubleToString(thrust[i])).append("\"");
-			sb.append(" m=\"").append(TextUtil.doubleToString(massGrams)).append("\"");
-			sb.append(" cg=\"").append(TextUtil.doubleToString(cgMM)).append("\"");
+			sb.append(" t=\"").append(Double.toString(time[i])).append("\"");
+			sb.append(" f=\"").append(Double.toString(thrust[i])).append("\"");
+			sb.append(" m=\"").append(Double.toString(massGrams)).append("\"");
+			sb.append(" cg=\"").append(Double.toString(cgMM)).append("\"");
 			sb.append("/>\n");
 		}
 		sb.append("   </data>\n");

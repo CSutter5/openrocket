@@ -25,6 +25,8 @@ import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.util.DecalNotFoundException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -48,6 +50,34 @@ public class MotorHandlerTest {
 		assertNotNull(loaded);
 		assertEquals(requestedDigest, loaded.getDigest());
 		assertEquals(Motor.Type.UNKNOWN, loaded.getMotorType());
+		assertTrue(warnings.isEmpty());
+	}
+
+	@ParameterizedTest
+	@ValueSource(doubles = { 0.6065496493042201, 0.5434497855703907 })
+	public void testHighPrecisionEmbeddedMassPreservesRequestedDigest(double middleMass) throws Exception {
+		ThrustCurveMotor.Builder builder = new ThrustCurveMotor.Builder()
+				.setManufacturer(Manufacturer.getManufacturer("AeroTech"))
+				.setDesignation("Precision test")
+				.setMotorType(Motor.Type.RELOAD)
+				.setDiameter(0.054)
+				.setLength(0.314)
+				.setTimePoints(new double[] { 0, 0.5, 1.0 })
+				.setThrustPoints(new double[] { 0, 12, 0 })
+				.setCGPoints(new CoordinateIF[] {
+						new Coordinate(0.157, 0, 0, 1.0),
+						new Coordinate(0.157, 0, 0, middleMass),
+						new Coordinate(0.157, 0, 0, 0.5)
+				});
+		String requestedDigest = MotorDigest.digestMotor(builder.build());
+		ThrustCurveMotor original = builder.setDigest(requestedDigest).build();
+		WarningSet warnings = new WarningSet();
+
+		Motor loaded = createHandler(requestedDigest, createRseAttachment(original)).getMotor(warnings);
+
+		assertNotNull(loaded);
+		assertEquals(requestedDigest, loaded.getDigest());
+		assertEquals(middleMass, ((ThrustCurveMotor) loaded).getCGPoints()[1].getWeight(), 1e-15);
 		assertTrue(warnings.isEmpty());
 	}
 

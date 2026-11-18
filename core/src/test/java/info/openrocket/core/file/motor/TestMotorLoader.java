@@ -14,6 +14,7 @@ import java.util.List;
 
 import info.openrocket.core.motor.Manufacturer;
 import info.openrocket.core.motor.Motor;
+import info.openrocket.core.motor.MotorDigest;
 import info.openrocket.core.motor.ThrustCurveMotor;
 import info.openrocket.core.util.Coordinate;
 import info.openrocket.core.util.CoordinateIF;
@@ -21,6 +22,7 @@ import info.openrocket.core.util.CoordinateIF;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class TestMotorLoader {
 
@@ -112,6 +114,37 @@ public class TestMotorLoader {
 					"Time mismatch at point " + i);
 			assertEquals(original.getThrustPoints()[i], loaded.getThrustPoints()[i], 1e-3,
 					"Thrust mismatch at point " + i);
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(doubles = { 0.6065496493042201, 0.5434497855703907 })
+	public void testRockSimMotorWriterPreservesDigestPrecision(double middleMass) throws IOException {
+		// Mass samples from the J135W/J800T curves cross a digest boundary at three decimal grams.
+		ThrustCurveMotor.Builder builder = new ThrustCurveMotor.Builder()
+				.setManufacturer(Manufacturer.getManufacturer("AeroTech"))
+				.setDesignation("Precision test")
+				.setMotorType(Motor.Type.RELOAD)
+				.setDiameter(0.054)
+				.setLength(0.314)
+				.setTimePoints(new double[] { 0, 0.500499999999, 1.000499999999 })
+				.setThrustPoints(new double[] { 0, 12.345499999999, 0 })
+				.setCGPoints(new CoordinateIF[] {
+						new Coordinate(0.157000499999, 0, 0, 1.0),
+						new Coordinate(0.156000499999, 0, 0, middleMass),
+						new Coordinate(0.155000499999, 0, 0, 0.5)
+				});
+		ThrustCurveMotor original = builder.setDigest(MotorDigest.digestMotor(builder.build())).build();
+		byte[] rse = new RockSimMotorWriter().write(original).getBytes(StandardCharsets.UTF_8);
+		ThrustCurveMotor loaded = new RockSimMotorLoader().load(new ByteArrayInputStream(rse), "precision.rse")
+				.get(0).build();
+
+		assertEquals(original.getDigest(), loaded.getDigest());
+		assertArrayEquals(original.getTimePoints(), loaded.getTimePoints());
+		assertArrayEquals(original.getThrustPoints(), loaded.getThrustPoints());
+		for (int i = 0; i < original.getCGPoints().length; i++) {
+			assertEquals(original.getCGPoints()[i].getWeight(), loaded.getCGPoints()[i].getWeight(), 1e-15);
+			assertEquals(original.getCGPoints()[i].getX(), loaded.getCGPoints()[i].getX(), 1e-15);
 		}
 	}
 
