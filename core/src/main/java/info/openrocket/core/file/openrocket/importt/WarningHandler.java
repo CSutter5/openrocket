@@ -74,7 +74,7 @@ class WarningHandler extends AbstractElementHandler {
 		
 		if (type.equals("LargeAOA")) {
 			warning = new Warning.LargeAOA(parameterVal);
-		} else if (type.equals("HighSpeedDeployment")) {
+		} else if (type.equals("HighSpeedDeployment") || type.equals("RecoveryHighSpeedDeployment")) {
 			warning = new Warning.RecoveryHighSpeedDeployment(parameterVal, (RocketComponent) null);
 		} else if (type.equals("EventAfterLanding")) {
 			warning = new Warning.EventAfterLanding(null);

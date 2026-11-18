@@ -2,8 +2,10 @@ package info.openrocket.core.file.openrocket;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -51,6 +53,8 @@ import info.openrocket.core.file.motor.GeneralMotorLoader;
 import info.openrocket.core.l10n.DebugTranslator;
 import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.logging.ErrorSet;
+import info.openrocket.core.logging.MessagePriority;
+import info.openrocket.core.logging.Warning;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.motor.Manufacturer;
 import info.openrocket.core.motor.Motor;
@@ -64,6 +68,7 @@ import info.openrocket.core.rocketcomponent.FlightConfiguration;
 import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.rocketcomponent.InnerTube;
 import info.openrocket.core.rocketcomponent.MotorMount;
+import info.openrocket.core.rocketcomponent.Parachute;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.extension.impl.ScriptingExtension;
@@ -78,6 +83,8 @@ import info.openrocket.core.util.TestRockets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -425,6 +432,54 @@ public class OpenRocketSaverTest {
 		assertFalse(loadedRandomSeedSimulation.getOptions().isRandomSeedFixed());
 	}
 	
+	@ParameterizedTest
+	@ValueSource(strings = { "HighSpeedDeployment", "RecoveryHighSpeedDeployment" })
+	public void testRecoveryHighSpeedWarningRoundTrip(String warningType) throws IOException {
+		Rocket rocket = new Rocket();
+		AxialStage stage = new AxialStage();
+		rocket.addChild(stage);
+		BodyTube tube = new BodyTube(0.3, 0.025, 0.002);
+		stage.addChild(tube);
+		Parachute parachute = new Parachute();
+		tube.addChild(parachute);
+		rocket.enableEvents();
+		OpenRocketDocument document = OpenRocketDocumentFactory.createDocumentFromRocket(rocket);
+
+		double speed = 25.638137572014113;
+		Warning.RecoveryHighSpeedDeployment warning = new Warning.RecoveryHighSpeedDeployment(speed, parachute);
+		warning.setPriority(MessagePriority.HIGH);
+		FlightDataBranch branch = new FlightDataBranch("Sustainer", FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 0.0);
+		branch.setValue(FlightDataType.TYPE_ALTITUDE, 0.0);
+		FlightData data = new FlightData(branch);
+		data.getWarningSet().add(warning);
+		document.addSimulation(new Simulation(document, rocket, Simulation.Status.UPTODATE, "warning test",
+				new SimulationOptions(), Collections.emptyList(), data));
+
+		StorageOptions options = new StorageOptions();
+		options.setSaveSimulationData(true);
+		File file = saveRocket(document, options);
+		String xml = Files.readString(file.toPath());
+		assertTrue(xml.contains("<warning type=\"RecoveryHighSpeedDeployment\">"));
+		Files.writeString(file.toPath(), xml.replace("<warning type=\"RecoveryHighSpeedDeployment\">",
+				"<warning type=\"" + warningType + "\">"));
+
+		for (int roundTrip = 0; roundTrip < 2; roundTrip++) {
+			OpenRocketDocument loaded = loadRocket(file.getPath());
+			WarningSet warnings = loaded.getSimulations().get(0).getSimulatedData().getWarningSet();
+			assertEquals(1, warnings.size());
+			Warning.RecoveryHighSpeedDeployment actual = assertInstanceOf(Warning.RecoveryHighSpeedDeployment.class,
+					warnings.iterator().next());
+			assertEquals(speed, actual.getSpeed());
+			assertEquals(warning.getID(), actual.getID());
+			assertEquals(MessagePriority.HIGH, actual.getPriority());
+			assertEquals(1, actual.getSources().length);
+			assertSame(loaded.getRocket().findComponent(parachute.getID()), actual.getSources()[0]);
+			file = saveRocket(loaded, options);
+		}
+	}
+
 	////////////////////////////////
 	// Tests for File Version 1.11 //
 	////////////////////////////////
