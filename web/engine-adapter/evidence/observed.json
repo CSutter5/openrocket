@@ -1,0 +1,859 @@
+{
+  "date": "2026-11-17",
+  "scope": "Bounded G1 subset; not complete G1/parity acceptance",
+  "manifest": {
+    "adaptedJvmExact": true,
+    "sourceRevision": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+    "sourceTreeListingSha256": "8545103cbaf5dd67416ae1b02785eee96176791b9f2e2c55c686cb9e7bca73d1",
+    "teavm": "0.15.0",
+    "java": "17",
+    "catalogPolicy": "Explicit synthetic curve and explicit fixture materials; desktop catalogs are not loaded",
+    "catalogs": {
+      "core/src/main/resources/datafiles/thrustcurves/initial_motors.db": {
+        "sha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f",
+        "usedByProof": false
+      },
+      "core/src/main/java/info/openrocket/core/database/Databases.java": {
+        "sha256": "29604737dffcbd4fa515339505e6b4ebfd14e0efb940e3a8bdcac358a5eaa107",
+        "usedByProof": false
+      }
+    },
+    "hashes": {
+      "build/generated/teavm/js/openrocket-g1-engine.js": {
+        "sha256": "64aebc15f1c7178e563bd037856054a36709a4fd140b8a80d89cc92778340421",
+        "bytes": 2580479
+      },
+      "build/generated/teavm/js/reducer.js": {
+        "sha256": "a4eb7e241189bb619c363892e539c3001685588b6459f82f22f51c658ae07b20",
+        "bytes": 1433105
+      },
+      "src/main/java/proof/FlightProof.java": {
+        "sha256": "22f7993930d5400d65bc76323abc0c6f60db25a0e4a6396e8e0795298457b99d",
+        "bytes": 6283
+      },
+      "src/main/java/proof/EditingProof.java": {
+        "sha256": "99e0bbaa664cdebf9f3429af3e58be5c07f451450b825143a6af93bddb5c8981",
+        "bytes": 7734
+      },
+      "build.gradle": {
+        "sha256": "31e6049b1d8d9286c2280a782e6b6934fab612af8ff88b27f13448c4c576332a",
+        "bytes": 5880
+      },
+      "src/main/java/info/openrocket/core/preferences/ApplicationPreferences.java": {
+        "sha256": "c664e21229878a232cc4bec90258cd28ab5010b42901a342ce6dedab0d8abd5b",
+        "bytes": 4710
+      },
+      "src/main/java/com/google/inject/Injector.java": {
+        "sha256": "45fca002ffb3d21465c1873604cef59aaff44e4157449c97c580d2d9ce94100b",
+        "bytes": 278
+      },
+      "src/main/java/info/openrocket/core/document/Simulation.java": {
+        "sha256": "badb68c3cb8ea28a6bd5426f73a30b34da2b510ba372ec261ca062d3ea3697e2",
+        "bytes": 770
+      },
+      "src/main/java/info/openrocket/core/startup/Application.java": {
+        "sha256": "d04e90c0c94c88448e43a08772ddf9c7671e260f41c634a855d0d6b18cd1a96a",
+        "bytes": 2673
+      },
+      "src/main/java/info/openrocket/core/startup/ShimRocketDescriptor.java": {
+        "sha256": "6cebc35c67274c0ce586be160aafa9a91dfb3ea43ba1d237890ae1bcf21fdefb",
+        "bytes": 798
+      },
+      "src/main/java/info/openrocket/core/util/LongUUID.java": {
+        "sha256": "3e12156321939cbb444ccf625af3e5ff113369cd5951458a3fe1739505c9c969",
+        "bytes": 3176
+      },
+      "src/main/java/proof/CalculatorRegistry.java": {
+        "sha256": "92b20d33059809b81c380688600421aa741f3250fa18d41ab898d0a6fea683f4",
+        "bytes": 1238
+      },
+      "src/main/java/proof/EngineProof.java": {
+        "sha256": "06c79680fcbbb2aad6f8fee671e12201fee11914a86ff5dadce975121309e9ac",
+        "bytes": 2352
+      },
+      "src/main/java/proof/PortableCollator.java": {
+        "sha256": "69290d5d4c7c170d943fb2908596d7fdc3084c49f9f1dbd13ade2fe9cf4b1e29",
+        "bytes": 1525
+      },
+      "src/main/java/proof/PortablePoint2D.java": {
+        "sha256": "657d663dee5541e2a6a0bda29d334ffef464eff98078a82e3dba1b7486e4ccc2",
+        "bytes": 1618
+      },
+      "src/main/java/proof/ReducerFacade.java": {
+        "sha256": "ccf91232a06e31f98c9eb9b85dd597aef25790394cbff589486b933450b87e82",
+        "bytes": 734
+      },
+      "classpath.gradle": {
+        "sha256": "3ebf3e31426cf15769821f0b1d930bfd69c2ed8321722522893b40ab48dc3d7e",
+        "bytes": 423
+      },
+      "scripts/build.mjs": {
+        "sha256": "c55671d5ae6b9187407fce75d53de328e4649917f57425e25486273f35491581",
+        "bytes": 3056
+      },
+      "scripts/browser.mjs": {
+        "sha256": "ca99086b40b31d334322e995a4892daad8056b3f01a5718ed8518eacfb59e8c5",
+        "bytes": 8620
+      },
+      "scripts/workerd.mjs": {
+        "sha256": "1319eda7753da25eff954659d42de4388cfada984ebd82e01fa19a9f1a7e299f",
+        "bytes": 6122
+      }
+    }
+  },
+  "jvm": {
+    "version": "OpenJDK17.0.21.0.2",
+    "adaptedTranscriptExact": true,
+    "flightSummaries": [
+      {
+        "rk6": false,
+        "mass": 0.029495792158092407,
+        "cg": 0.18503220432365364,
+        "cp": 0.29930990044674194,
+        "motorImpulse": 10.4,
+        "motorThrustSamples": [
+          6.0,
+          9.0
+        ],
+        "summary": [
+          330.1532738129991,
+          114.25890711638196,
+          6.954121643288665,
+          101.44904144192022
+        ],
+        "events": [
+          [
+            "LAUNCH",
+            0.0
+          ],
+          [
+            "IGNITION",
+            0.0
+          ],
+          [
+            "LIFTOFF",
+            0.05
+          ],
+          [
+            "LAUNCHROD",
+            0.1478636443613125
+          ],
+          [
+            "BURNOUT",
+            2.0
+          ],
+          [
+            "APOGEE",
+            6.954121643288665
+          ],
+          [
+            "EJECTION_CHARGE",
+            7.0
+          ],
+          [
+            "RECOVERY_DEVICE_DEPLOYMENT",
+            7.001
+          ],
+          [
+            "GROUND_HIT",
+            101.44904144192022
+          ],
+          [
+            "SIMULATION_END",
+            101.44904144192022
+          ]
+        ],
+        "warningCount": 0
+      },
+      {
+        "rk6": true,
+        "mass": 0.029495792158092407,
+        "cg": 0.18503220432365364,
+        "cp": 0.29930990044674194,
+        "motorImpulse": 10.4,
+        "motorThrustSamples": [
+          6.0,
+          9.0
+        ],
+        "summary": [
+          330.1631026096055,
+          114.34994894545912,
+          6.952985468936105,
+          101.45191083809299
+        ],
+        "events": [
+          [
+            "LAUNCH",
+            0.0
+          ],
+          [
+            "IGNITION",
+            0.0
+          ],
+          [
+            "LIFTOFF",
+            0.05
+          ],
+          [
+            "LAUNCHROD",
+            0.14784250242292055
+          ],
+          [
+            "BURNOUT",
+            2.0
+          ],
+          [
+            "APOGEE",
+            6.952985468936105
+          ],
+          [
+            "EJECTION_CHARGE",
+            7.0
+          ],
+          [
+            "RECOVERY_DEVICE_DEPLOYMENT",
+            7.001
+          ],
+          [
+            "GROUND_HIT",
+            101.45191083809299
+          ],
+          [
+            "SIMULATION_END",
+            101.45191083809299
+          ]
+        ],
+        "warningCount": 0
+      }
+    ]
+  },
+  "browser": {
+    "runtime": "149.0.7827.55",
+    "artifactBytes": 2580479,
+    "maxAbsoluteErrors": {
+      "atmosphere": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "wind": [
+        0,
+        0,
+        0
+      ]
+    },
+    "flightComparisons": [
+      {
+        "stepper": "RK4",
+        "rows": 716,
+        "scalarErrors": {
+          "mass": 0,
+          "cg": 0,
+          "cp": 0
+        },
+        "summaryErrors": [
+          3.7269889560320735e-05,
+          5.171401085135585e-09,
+          0.00014213603073987002,
+          5.554105086957861e-08
+        ],
+        "eventErrors": [
+          [
+            "LAUNCH",
+            0
+          ],
+          [
+            "IGNITION",
+            0
+          ],
+          [
+            "LIFTOFF",
+            0
+          ],
+          [
+            "LAUNCHROD",
+            0
+          ],
+          [
+            "BURNOUT",
+            0
+          ],
+          [
+            "APOGEE",
+            0.00014213603073987002
+          ],
+          [
+            "EJECTION_CHARGE",
+            0
+          ],
+          [
+            "RECOVERY_DEVICE_DEPLOYMENT",
+            0
+          ],
+          [
+            "GROUND_HIT",
+            5.554105086957861e-08
+          ],
+          [
+            "SIMULATION_END",
+            5.554105086957861e-08
+          ]
+        ],
+        "maxAbsoluteErrors": [
+          0.00042654240804074206,
+          0.04307197297364951,
+          0.032034023310160364,
+          0.042617910776485246
+        ],
+        "maxRelativeErrors": [
+          0.00020380803505117085,
+          0.0002542172418361632,
+          0.0016971933607915215,
+          0.0015476227900709596
+        ],
+        "absoluteLimits": [
+          0.001,
+          0.12,
+          0.25,
+          3
+        ],
+        "summaryLimits": [
+          0.001,
+          1e-06,
+          0.001,
+          0.001
+        ],
+        "relativeFloor": 1e-09
+      },
+      {
+        "stepper": "RK6",
+        "rows": 733,
+        "scalarErrors": {
+          "mass": 0,
+          "cg": 0,
+          "cp": 0
+        },
+        "summaryErrors": [
+          1.537737318813015e-06,
+          5.285343718242075e-09,
+          7.392590356758433e-06,
+          7.088375753028231e-08
+        ],
+        "eventErrors": [
+          [
+            "LAUNCH",
+            0
+          ],
+          [
+            "IGNITION",
+            0
+          ],
+          [
+            "LIFTOFF",
+            0
+          ],
+          [
+            "LAUNCHROD",
+            0
+          ],
+          [
+            "BURNOUT",
+            0
+          ],
+          [
+            "APOGEE",
+            7.392590356758433e-06
+          ],
+          [
+            "EJECTION_CHARGE",
+            0
+          ],
+          [
+            "RECOVERY_DEVICE_DEPLOYMENT",
+            0
+          ],
+          [
+            "GROUND_HIT",
+            7.088375753028231e-08
+          ],
+          [
+            "SIMULATION_END",
+            7.088375753028231e-08
+          ]
+        ],
+        "maxAbsoluteErrors": [
+          1.5061963160700742e-05,
+          0.0011756554578994383,
+          0.0007280713198412059,
+          0.0007312693638539258
+        ],
+        "maxRelativeErrors": [
+          6.087671828278785e-06,
+          5.784286753565661e-06,
+          9.351868738905356e-05,
+          8.412690432501459e-05
+        ],
+        "absoluteLimits": [
+          0.001,
+          0.12,
+          0.25,
+          3
+        ],
+        "summaryLimits": [
+          0.001,
+          1e-06,
+          0.001,
+          0.001
+        ],
+        "relativeFloor": 1e-09
+      }
+    ],
+    "calculations": {
+      "atmosphere": [
+        [
+          288.15,
+          101325,
+          1.2249994633486807,
+          340.3889
+        ],
+        [
+          281.6510223716947,
+          89876.28248259629,
+          1.111659230616184,
+          336.450519557247
+        ],
+        [
+          216.77351270445553,
+          22699.952216044647,
+          0.36480151877500605,
+          297.13474869890007
+        ],
+        [
+          216.65,
+          5530.179819886914,
+          0.08892389346046907,
+          297.05989999999997
+        ]
+      ],
+      "wind": [
+        [
+          2.6342301250690316,
+          1.6130007454416608e-16,
+          0
+        ],
+        [
+          2.4734687445889625,
+          1.5145627904259475e-16,
+          0
+        ],
+        [
+          2.546817724810888,
+          1.5594760873506993e-16,
+          0
+        ],
+        [
+          3.1981064151296,
+          1.9582753923105405e-16,
+          0
+        ],
+        [
+          3.0931713405231402,
+          1.8940211906929958e-16,
+          0
+        ],
+        [
+          3.4331122221139694,
+          2.102174946962765e-16,
+          0
+        ],
+        [
+          3.2523627822667676,
+          1.9914978354844886e-16,
+          0
+        ],
+        [
+          2.986049218555607,
+          1.8284278088002896e-16,
+          0
+        ],
+        [
+          2.763992961197191,
+          1.6924575663979773e-16,
+          0
+        ],
+        [
+          2.2644994311762554,
+          1.3866059900305017e-16,
+          0
+        ],
+        [
+          2.5458129791206665,
+          1.558860858053956e-16,
+          0
+        ],
+        [
+          2.585770424148,
+          1.583327736631371e-16,
+          0
+        ],
+        [
+          2.575149524404094,
+          1.5768243111936514e-16,
+          0
+        ],
+        [
+          3.021383686992633,
+          1.8500639306357784e-16,
+          0
+        ],
+        [
+          3.134083616594252,
+          1.9190727346611558e-16,
+          0
+        ],
+        [
+          3.035601855008905,
+          1.8587700476112116e-16,
+          0
+        ],
+        [
+          2.931704041020696,
+          1.795150984941678e-16,
+          0
+        ],
+        [
+          2.7805841642877906,
+          1.7026167482774305e-16,
+          0
+        ],
+        [
+          2.7047103067210334,
+          1.6561574098733848e-16,
+          0
+        ],
+        [
+          3.014114299491155,
+          1.8456127145680549e-16,
+          0
+        ]
+      ]
+    },
+    "durationMs": 951.1999999880791,
+    "workerMethodMs": [
+      9.699999988079071,
+      33.89999997615814,
+      493.30000001192093,
+      319.2000000476837
+    ],
+    "pageTicks": 95,
+    "cancellation": {
+      "completed": false,
+      "observationMs": 100.09999996423721
+    }
+  },
+  "workerd": {
+    "runtime": "Miniflare/workerd (versions in lockfile)",
+    "startupWallMs": 265.760763,
+    "firstCommandWallMs": 6.670072000000005,
+    "artifactBytes": 1433105,
+    "invalidInputs": 9,
+    "projects": 2,
+    "acceptedCommands": 3,
+    "duplicateRetries": 1,
+    "transcript": {
+      "before": {
+        "sequence": 0,
+        "stageCount": 2,
+        "childCount": 2,
+        "secondStageChildCount": 0,
+        "activeStages": 1,
+        "tube": {
+          "identity": "component-3/10000003",
+          "parent": "component-1/10000001",
+          "length": 0.3,
+          "radius": 0.025,
+          "innerRadius": 0.010000000000000002,
+          "thickness": 0.015,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.3364645731994668,
+          "cg": 0.15,
+          "density": 680,
+          "listeners": 1,
+          "bypassEvents": false
+        },
+        "listener": {
+          "identity": "component-4/10000004",
+          "parent": "none",
+          "length": 0.1,
+          "radius": 0.02,
+          "innerRadius": 0.005000000000000001,
+          "thickness": 0.015,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.08011061266653974,
+          "cg": 0.05,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": true
+        },
+        "automatic": {
+          "identity": "component-5/10000005",
+          "parent": "component-1/10000001",
+          "length": 0.2,
+          "radius": 0.025,
+          "innerRadius": 0.023,
+          "thickness": 0.002,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.041016633685268374,
+          "cg": 0.1,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": false
+        }
+      },
+      "after": {
+        "sequence": 1,
+        "stageCount": 2,
+        "childCount": 2,
+        "secondStageChildCount": 0,
+        "activeStages": 1,
+        "tube": {
+          "identity": "component-3/10000003",
+          "parent": "component-1/10000001",
+          "length": 0.3,
+          "radius": 0.005,
+          "innerRadius": 0,
+          "thickness": 0.005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.01602212253330795,
+          "cg": 0.15,
+          "density": 680,
+          "listeners": 1,
+          "bypassEvents": false
+        },
+        "listener": {
+          "identity": "component-4/10000004",
+          "parent": "none",
+          "length": 0.1,
+          "radius": 0.005,
+          "innerRadius": 0,
+          "thickness": 0.005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.005340707511102649,
+          "cg": 0.05,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": true
+        },
+        "automatic": {
+          "identity": "component-5/10000005",
+          "parent": "component-1/10000001",
+          "length": 0.2,
+          "radius": 0.005,
+          "innerRadius": 0.003,
+          "thickness": 0.002,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.006836105614211391,
+          "cg": 0.1,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": false
+        }
+      },
+      "moved": {
+        "sequence": 2,
+        "stageCount": 2,
+        "childCount": 1,
+        "secondStageChildCount": 1,
+        "activeStages": 2,
+        "tube": {
+          "identity": "component-3/10000003",
+          "parent": "component-1/10000001",
+          "length": 0.3,
+          "radius": 0.005,
+          "innerRadius": 0,
+          "thickness": 0.005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.01602212253330795,
+          "cg": 0.15,
+          "density": 680,
+          "listeners": 1,
+          "bypassEvents": false
+        },
+        "listener": {
+          "identity": "component-4/10000004",
+          "parent": "none",
+          "length": 0.1,
+          "radius": 0.005,
+          "innerRadius": 0,
+          "thickness": 0.005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.005340707511102649,
+          "cg": 0.05,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": true
+        },
+        "automatic": {
+          "identity": "component-5/10000005",
+          "parent": "component-2/10000002",
+          "length": 0.2,
+          "radius": 0.005,
+          "innerRadius": 0.003,
+          "thickness": 0.002,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.006836105614211391,
+          "cg": 0.1,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": false
+        }
+      },
+      "otherBefore": {
+        "sequence": 0,
+        "stageCount": 2,
+        "childCount": 2,
+        "secondStageChildCount": 0,
+        "activeStages": 1,
+        "tube": {
+          "identity": "component-3/10000003",
+          "parent": "component-1/10000001",
+          "length": 0.3,
+          "radius": 0.025,
+          "innerRadius": 0.010000000000000002,
+          "thickness": 0.015,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.3364645731994668,
+          "cg": 0.15,
+          "density": 680,
+          "listeners": 1,
+          "bypassEvents": false
+        },
+        "listener": {
+          "identity": "component-4/10000004",
+          "parent": "none",
+          "length": 0.1,
+          "radius": 0.02,
+          "innerRadius": 0.005000000000000001,
+          "thickness": 0.015,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.08011061266653974,
+          "cg": 0.05,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": true
+        },
+        "automatic": {
+          "identity": "component-5/10000005",
+          "parent": "component-1/10000001",
+          "length": 0.2,
+          "radius": 0.025,
+          "innerRadius": 0.023,
+          "thickness": 0.002,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.041016633685268374,
+          "cg": 0.1,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": false
+        }
+      },
+      "otherAfter": {
+        "sequence": 1,
+        "stageCount": 2,
+        "childCount": 2,
+        "secondStageChildCount": 0,
+        "activeStages": 1,
+        "tube": {
+          "identity": "component-3/10000003",
+          "parent": "component-1/10000001",
+          "length": 0.3,
+          "radius": 0.01,
+          "innerRadius": 0,
+          "thickness": 0.01,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.0640884901332318,
+          "cg": 0.15,
+          "density": 680,
+          "listeners": 1,
+          "bypassEvents": false
+        },
+        "listener": {
+          "identity": "component-4/10000004",
+          "parent": "none",
+          "length": 0.1,
+          "radius": 0.01,
+          "innerRadius": 0,
+          "thickness": 0.01,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.021362830044410596,
+          "cg": 0.05,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": true
+        },
+        "automatic": {
+          "identity": "component-5/10000005",
+          "parent": "component-1/10000001",
+          "length": 0.2,
+          "radius": 0.01,
+          "innerRadius": 0.008,
+          "thickness": 0.002,
+          "automatic": true,
+          "preset": false,
+          "mass": 0.015381237631975627,
+          "cg": 0.1,
+          "density": 680,
+          "listeners": 0,
+          "bypassEvents": false
+        }
+      },
+      "cycle": "rejected",
+      "parent": "rejected",
+      "stale": "rejected",
+      "reused": "rejected"
+    }
+  },
+  "runtimeVersions": {
+    "miniflare": "5.20261117.0-beta",
+    "workerd": "1.20261117.1",
+    "compatibilityDate": "2026-11-17"
+  },
+  "independentExpectations": {
+    "drySeaLevelDensityKgPerM3": 1.2249994633486807,
+    "solidTubeMassKg": 0.01602212253330795,
+    "tubeCentroidM": 0.15,
+    "motorImpulseNs": 10.4,
+    "motorThrustN": [
+      6,
+      9
+    ]
+  },
+  "unproved": [
+    "Preset clearing",
+    "Complete flight configuration listener coverage",
+    "Mutable per-user preference isolation",
+    "Multistage/cluster browser fixtures",
+    "Catalogs and extension execution",
+    "General UUID/collation compatibility",
+    "Memory and deployed Worker CPU budgets",
+    "Approved general numerical tolerances",
+    "Compatible-type ancestor cycles (pod/body nesting)",
+    "Debug-enabled SafetyMutex/Invalidator semantics"
+  ],
+  "verification": "Coordinator rebuilt in an independent integration worktree; all manifest hashes match the agent build, original/adapted JVM assertions and browser/workerd comparisons passed."
+}

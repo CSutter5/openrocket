@@ -1,0 +1,15 @@
+{
+  "name": "@openrocket/engine-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test:browser": "node scripts/browser.mjs",
+    "test:workerd": "node scripts/workerd.mjs",
+    "test": "npm run test:browser && npm run test:workerd"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1",
+    "miniflare": "5.20261117.0-beta"
+  }
+}

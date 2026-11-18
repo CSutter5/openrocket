@@ -1,0 +1,80 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :adaptCore
+
+> Task :compileJava
+warning: Supported source version 'RELEASE_11' from annotation processor 'org.gradle.api.internal.tasks.compile.processing.TimeTrackingProcessor' less than -source '17'
+1 warning
+
+> Task :processResources NO-SOURCE
+> Task :classes
+> Task :compileTeavmJava NO-SOURCE
+> Task :processTeavmResources NO-SOURCE
+> Task :teavmClasses UP-TO-DATE
+
+> Task :generateJavaScript FAILED
+Class java.text.Collator was not found
+    at info.openrocket.core.motor.ThrustCurveMotor.<clinit>(ThrustCurveMotor.java:27)
+    at info.openrocket.core.motor.ThrustCurveMotor.<init>
+    at info.openrocket.core.motor.ThrustCurveMotor$Builder.<init>
+    at proof.FlightProof.run
+    at proof.EngineProof.flight
+    at proof.EngineProof.main
+Class java.awt.geom.Point2D$Double was not found
+    at info.openrocket.core.rocketcomponent.FinSet.calculateFilletVolumeCentroid(FinSet.java:636)
+    at info.openrocket.core.rocketcomponent.FinSet.calculateCM
+    at info.openrocket.core.rocketcomponent.FinSet.getComponentVolume
+    at info.openrocket.core.rocketcomponent.ExternalComponent.getComponentMass
+    at proof.EditingProof.tube
+    at proof.EditingProof.snapshot
+    at proof.EditingProof.state
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+Class java.text.Collator was not found
+    at info.openrocket.core.motor.ThrustCurveMotor.compareTo(ThrustCurveMotor.java:844)
+    at info.openrocket.core.motor.ThrustCurveMotor.compareTo
+    at java.util.Collections.lambda$static$0
+    at java.util.Collections$<clinit>$lambda$_59_0.compare
+    at java.util.Collections.binarySearch
+    at info.openrocket.core.models.wind.MultiLevelPinkNoiseWindModel.addWindLevel
+    at info.openrocket.core.models.wind.MultiLevelPinkNoiseWindModel.addInitialLevel
+    at info.openrocket.core.models.wind.MultiLevelPinkNoiseWindModel.<init>
+    at info.openrocket.core.simulation.SimulationOptions.<init>
+    at info.openrocket.core.document.Simulation.<init>
+    at proof.FlightProof.run
+    at proof.EngineProof.flight
+    at proof.EngineProof.main
+Method info.openrocket.core.rocketcomponent.InstanceMap.keySet()Ljava/util/concurrent/ConcurrentHashMap$KeySetView; was not found
+    at info.openrocket.core.aerodynamics.BarrowmanCalculator.getForceAnalysis(BarrowmanCalculator.java:70)
+    at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.computeAerodynamicDampingMomentCoefficient
+    at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.computeDampingMomentCoefficientComponents
+    at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.storeData
+    at info.openrocket.core.simulation.RK4SimulationStepper.step
+    at info.openrocket.core.simulation.BasicEventSimulationEngine.simulateLoop
+    at info.openrocket.core.simulation.BasicEventSimulationEngine.simulate
+    at proof.FlightProof.run
+    at proof.EngineProof.flight
+    at proof.EngineProof.main
+
+[Incubating] Problems report is available at: file:///tmp/openrocket-g1-engine/web/engine-adapter/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':generateJavaScript' (registered by plugin 'org.teavm').
+> Errors occurred during TeaVM build
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 11s
+3 actionable tasks: 3 executed

@@ -1,0 +1,11 @@
+gradle.projectsEvaluated {
+    def core = rootProject.project(':core')
+    core.tasks.register('g1EngineClasspath') {
+        dependsOn core.tasks.named('compileJava')
+        doLast {
+            def output = new File(rootProject.projectDir, 'web/engine-adapter/build/reference-classpath.txt')
+            output.parentFile.mkdirs()
+            output.text = core.sourceSets.main.runtimeClasspath.asPath
+        }
+    }
+}

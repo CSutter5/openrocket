@@ -1,0 +1,93 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Task :compileJava
+warning: Supported source version 'RELEASE_11' from annotation processor 'org.gradle.api.internal.tasks.compile.processing.TimeTrackingProcessor' less than -source '17'
+1 warning
+
+> Task :processResources NO-SOURCE
+> Task :classes
+> Task :compileTeavmJava NO-SOURCE
+> Task :processTeavmResources NO-SOURCE
+> Task :teavmClasses UP-TO-DATE
+
+> Task :generateJavaScript FAILED
+Class java.util.concurrent.ConcurrentLinkedQueue was not found
+    at info.openrocket.core.rocketcomponent.FlightConfiguration.<init>(FlightConfiguration.java:73)
+    at info.openrocket.core.rocketcomponent.Rocket.<init>
+    at proof.EditingProof$Project.<init>
+    at proof.EditingProof.project
+    at proof.EditingProof.state
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+Method java.util.UUID.<init>(JJ)V was not found
+    at info.openrocket.core.rocketcomponent.FlightConfigurationId.<clinit>(FlightConfigurationId.java:16)
+    at info.openrocket.core.rocketcomponent.FlightConfigurableParameterSet.<init>
+    at info.openrocket.core.rocketcomponent.AxialStage.<init>
+    at proof.EditingProof.command
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+Method java.util.UUID.getMostSignificantBits()J was not found
+    at info.openrocket.core.motor.MotorConfigurationId.<init>(MotorConfigurationId.java:37)
+    at info.openrocket.core.motor.MotorConfiguration.<init>
+    at info.openrocket.core.motor.MotorConfigurationSet.<init>
+    at info.openrocket.core.rocketcomponent.BodyTube.<init>
+    at info.openrocket.core.rocketcomponent.BodyTube.<init>
+    at proof.EditingProof$Project.<init>
+    at proof.EditingProof.project
+    at proof.EditingProof.state
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+Method java.util.UUID.<init>(JJ)V was not found
+    at info.openrocket.core.motor.MotorConfigurationId.<clinit>(MotorConfigurationId.java:20)
+    at info.openrocket.core.motor.MotorConfigurationId.<init>
+    at info.openrocket.core.motor.MotorConfiguration.<init>
+    at info.openrocket.core.motor.MotorConfigurationSet.<init>
+    at info.openrocket.core.rocketcomponent.BodyTube.<init>
+    at info.openrocket.core.rocketcomponent.BodyTube.<init>
+    at proof.EditingProof$Project.<init>
+    at proof.EditingProof.project
+    at proof.EditingProof.state
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+Field java.util.Locale$Category.FORMAT was not found
+    at info.openrocket.core.unit.Unit.getLocaleDecimalFormats(Unit.java:134)
+    at info.openrocket.core.unit.Unit.toString
+    at info.openrocket.core.unit.Unit.toStringUnit
+    at info.openrocket.core.material.Material.getName
+    at info.openrocket.core.material.Material.toString
+    at java.lang.String.valueOf
+    at java.lang.Integer.parseIntImpl
+    at java.lang.Integer.parseInt
+    at java.lang.Integer.parseInt
+    at info.openrocket.core.util.Coordinate.<clinit>
+    at info.openrocket.core.util.Coordinate.<init>
+    at info.openrocket.core.rocketcomponent.RocketComponent.<init>
+    at info.openrocket.core.rocketcomponent.ComponentAssembly.<init>
+    at info.openrocket.core.rocketcomponent.AxialStage.<init>
+    at proof.EditingProof.command
+    at proof.EngineProof.editing
+    at proof.EngineProof.main
+
+[Incubating] Problems report is available at: file:///tmp/openrocket-g1-engine/web/engine-adapter/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':generateJavaScript' (registered by plugin 'org.teavm').
+> Errors occurred during TeaVM build
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 11s
+2 actionable tasks: 2 executed

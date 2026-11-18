@@ -1,0 +1,34 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :adaptCore
+> Task :compileJava UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+
+> Task :adaptedReference FAILED
+Exception in thread "main" java.lang.IncompatibleClassChangeError: Found interface java.util.Set, but class was expected
+	at info.openrocket.core.aerodynamics.BarrowmanCalculator.getForceAnalysis(BarrowmanCalculator.java:70)
+	at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.computeAerodynamicDampingMomentCoefficient(AbstractSimulationStepper.java:632)
+	at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.computeDampingMomentCoefficientComponents(AbstractSimulationStepper.java:616)
+	at info.openrocket.core.simulation.AbstractSimulationStepper$DataStore.storeData(AbstractSimulationStepper.java:536)
+	at info.openrocket.core.simulation.RK4SimulationStepper.step(RK4SimulationStepper.java:55)
+	at info.openrocket.core.simulation.BasicEventSimulationEngine.simulateLoop(BasicEventSimulationEngine.java:245)
+	at info.openrocket.core.simulation.BasicEventSimulationEngine.simulate(BasicEventSimulationEngine.java:159)
+	at proof.FlightProof.run(FlightProof.java:70)
+	at proof.EngineProof.flight(EngineProof.java:16)
+	at proof.EngineProof.main(EngineProof.java:13)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':adaptedReference' (registered in build file 'build.gradle').
+> Process 'command '/usr/lib/jvm/java-17-openjdk/bin/java'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6s
+3 actionable tasks: 2 executed, 1 up-to-date

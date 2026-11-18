@@ -1,0 +1,100 @@
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath "org.ow2.asm:asm-commons:9.9" }
+}
+plugins {
+    id 'java'
+    id 'org.teavm' version '0.15.0'
+}
+repositories { mavenCentral() }
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+def referenceClasspath = file('build/reference-classpath.txt')
+dependencies {
+    implementation files("build/adapted-core")
+    implementation files(referenceClasspath.exists() ? referenceClasspath.text.split(File.pathSeparator).findAll { !it.endsWith('/core/build/classes/java/main') } : [])
+    implementation 'org.teavm:teavm-extras-slf4j:0.15.0'
+    implementation 'org.teavm:teavm-jso:0.15.0'
+}
+teavm.js {
+    mainClass = project.hasProperty('reducer') ? 'proof.ReducerFacade' : 'proof.EngineProof'
+    targetFileName = project.hasProperty('reducer') ? 'reducer.js' : 'openrocket-g1-engine.js'
+    obfuscated = false
+    moduleType = org.teavm.gradle.api.JSModuleType.ES2015
+    fastGlobalAnalysis = true
+}
+tasks.register('reference', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'proof.EngineProof'
+    doFirst { standardOutput = new FileOutputStream(file('build/reference.jsonl')) }
+}
+
+// Keep the pinned desktop bytecode intact on disk. Only the TeaVM classpath sees
+// the API adaptations listed below; the JVM oracle uses original model/physics classfiles.
+tasks.register('adaptCore') {
+    inputs.file(referenceClasspath)
+    inputs.dir('../../core/build/classes/java/main')
+    outputs.dir('build/adapted-core')
+    doLast {
+        def root = file('../../core/build/classes/java/main')
+        def output = file('build/adapted-core')
+        delete output
+        fileTree(root).matching { include '**/*.class'; exclude 'module-info.class'; exclude 'info/openrocket/core/startup/Application*.class'; exclude 'info/openrocket/core/preferences/ApplicationPreferences*.class'; exclude 'info/openrocket/core/document/Simulation.class'; exclude 'info/openrocket/core/document/Simulation$*.class' }.each { source ->
+            def reader = new org.objectweb.asm.ClassReader(source.bytes)
+            def writer = new org.objectweb.asm.ClassWriter(0)
+            def remapper = new org.objectweb.asm.commons.SimpleRemapper([
+                'java/util/UUID': 'info/openrocket/core/util/LongUUID',
+                'java/util/concurrent/ConcurrentLinkedQueue': 'java/util/ArrayDeque',
+                'java/util/concurrent/ConcurrentHashMap': 'java/util/LinkedHashMap',
+                'java/util/concurrent/ConcurrentHashMap$KeySetView': 'java/util/Set',
+                'java/util/concurrent/ConcurrentMap': 'java/util/Map',
+                'java/text/Collator': 'proof/PortableCollator',
+                'java/awt/geom/Point2D': 'proof/PortablePoint2D',
+                'java/awt/geom/Point2D$Double': 'proof/PortablePoint2D$Double'
+            ])
+            def registryCalls = new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9, writer) {
+                @Override
+                org.objectweb.asm.MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                    def delegate = super.visitMethod(access, name, descriptor, signature, exceptions)
+                    return new org.objectweb.asm.MethodVisitor(org.objectweb.asm.Opcodes.ASM9, delegate) {
+                        @Override
+                        void visitFieldInsn(int opcode, String owner, String field, String desc) {
+                            if (owner == 'java/util/Locale$Category' && field == 'FORMAT') return
+                            super.visitFieldInsn(opcode, owner, field, desc)
+                        }
+                        @Override
+                        void visitMethodInsn(int opcode, String owner, String method, String desc, boolean isInterface) {
+                            if (owner == 'java/util/Set' && opcode == org.objectweb.asm.Opcodes.INVOKEVIRTUAL) {
+                                opcode = org.objectweb.asm.Opcodes.INVOKEINTERFACE
+                                isInterface = true
+                            }
+                            if (owner == 'java/util/Locale' && method == 'getDefault' && desc == '(Ljava/util/Locale$Category;)Ljava/util/Locale;') {
+                                super.visitFieldInsn(org.objectweb.asm.Opcodes.GETSTATIC, 'java/util/Locale', 'US', 'Ljava/util/Locale;')
+                                return
+                            }
+                            if (owner == 'info/openrocket/core/util/Reflection' && method == 'construct') owner = 'proof/CalculatorRegistry'
+                            super.visitMethodInsn(opcode, owner, method, desc, isInterface)
+                        }
+                    }
+                }
+            }
+            reader.accept(new org.objectweb.asm.commons.ClassRemapper(registryCalls, remapper), 0)
+            def destination = new File(output, root.toPath().relativize(source.toPath()).toString())
+            destination.parentFile.mkdirs()
+            destination.bytes = writer.toByteArray()
+        }
+    }
+}
+tasks.named('generateJavaScript') { dependsOn 'adaptCore' }
+tasks.named('reference') {
+    classpath = files(sourceSets.main.output, referenceClasspath.text.split(File.pathSeparator), configurations.runtimeClasspath.filter { !it.path.contains('adapted-core') })
+}
+
+tasks.named('compileJava') { dependsOn 'adaptCore' }
+
+// Isolate API substitutions from JavaScript arithmetic in numerical investigations.
+tasks.register('adaptedReference', JavaExec) {
+    dependsOn 'classes'
+    classpath = files(sourceSets.main.output, file('build/adapted-core'), configurations.runtimeClasspath.filter { !it.path.endsWith('/core/build/classes/java/main') })
+    mainClass = 'proof.EngineProof'
+    doFirst { standardOutput = new FileOutputStream(file('build/adapted-reference.jsonl')) }
+}

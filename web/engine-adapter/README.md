@@ -1,0 +1,82 @@
+# Pinned-core engine and trusted editing feasibility
+
+This package builds the current OpenRocket Java core at `33bdb6d3062a6d9ef44a00d1ff865f962136e9e9` with TeaVM 0.15.0. It demonstrates a bounded subset in an actual Chromium Web Worker and local Cloudflare `workerd`. No production JVM, Containers, external compute, or deployed resources are involved. It is a feasibility harness, not a production editor or a complete engine adapter.
+
+From the repository root, after `npm ci --prefix web`:
+
+```sh
+node web/engine-adapter/scripts/build.mjs
+PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers npm exec --prefix web -- playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers node web/engine-adapter/scripts/browser.mjs
+node web/engine-adapter/scripts/workerd.mjs
+```
+
+Alternatively set `CHROMIUM_EXECUTABLE=/usr/bin/chromium`. The committed npm lockfile pins the tested JavaScript tools. The existing Gradle wrapper builds core; this isolated Gradle build adds TeaVM/ASM without changing desktop dependencies. Network access is needed for initial dependency downloads, and the runtime checks need permission to bind local sockets. Run `./gradlew -p web/engine-adapter adaptedReference --no-daemon` after a build to isolate adaptation effects on JVM.
+
+`build.mjs` rejects changes to baseline Java sources, compiles the real core, extracts its classpath, generates separate browser and reducer ES modules, runs the JVM oracle, and records hashes in `build/manifest.json`. Generated JS/classes and full raw runtime transcripts stay in ignored `build/`. The checked-in [observations](evidence/observed.json) retain measurements and summaries, while the runners regenerate and compare every captured sample. No copied 24.12 numerical core is compiled.
+
+## Coverage and actual observations
+
+Chromium 149.0.7827.55 ran the same explicit single-stage fixture with current RK4 and RK6. The fixture has a nose, body, three fins, mount, parachute and an explicit eight-point C6-like curve; it is synthetic, not a certified motor measurement. Seed 42, 0.05 s requested step, ISA atmosphere, spherical geodesy, WGS gravity, 1 m rod and seeded 1 m/s wind with 0.1 m/s deviation are fixed in `FlightProof`. All component IDs are fixed before event processing. The fixture is not imported through `.ork`; format 1.11 file preservation is the separate file proof.
+
+The browser runner asserts equal event order, event/series counts, warning counts and finite values. It compares all 716 RK4 and 733 RK6 rows of time, altitude, total velocity and acceleration, plus mass, CG, CP, max altitude/velocity, apogee time and flight time. Both flights have ten events and zero warnings. Atmosphere at four altitudes and 20 seeded wind vectors matched JVM exactly; fixture mass/CG/CP also matched exactly. Seeded flights were **not bit-identical**.
+
+| Quantity | RK4 maximum absolute difference | RK6 maximum absolute difference |
+| --- | ---: | ---: |
+| Series time (s) | 0.000426543 | 0.000015062 |
+| Series altitude (m) | 0.0430720 | 0.00117566 |
+| Series speed (m/s) | 0.0320340 | 0.000728071 |
+| Series acceleration (m/s²) | 0.0426179 | 0.000731269 |
+| Apogee event time (s) | 0.000142136 | 0.000007393 |
+| Maximum altitude (m) | 0.000037270 | 0.000001538 |
+
+Series comparisons use corresponding rows, whose times differ; the altitude error therefore includes movement between these times. `observed.json` records maximum relative differences excluding reference magnitudes ≤1e-9, all event-time errors and exact limits. Provisional G1 regression limits are 1 ms for event/row times (requested step/50), 0.12 m for row altitude, 0.25 m/s for row speed and 3 m/s² for acceleration. These row bounds follow propagation over 1 ms at approximately 120 m/s, 250 m/s² and 3000 m/s³; the last scale follows the fixture's 120 N/s initial thrust slope divided by roughly 0.04 kg. Summary maxima have tighter limits of 1 mm altitude and 1e-6 m/s speed. Mass uses 1e-12 kg and CG/CP 1e-10 m. These are deliberately bounded feasibility criteria, not approved general numerical tolerances or G5 acceptance. Adaptive step sensitivity, collection iteration changes, and floating-point library differences require investigation before claiming parity.
+
+Independent checks use the ideal gas law at sea level (`101325/(287.053×288.15)`), uniform cylinder mass (`680×π×0.005²×0.3`) and centroid (0.15 m), motor linear interpolation (6 N at 0.05 s; 9 N at 0.2 s), and the curve's trapezoid impulse (10.4 N·s). These are independent algebraic expectations; the complete flight remains a differential oracle, not an independent physics truth.
+
+A recorded run kept the page ticking 101 times while cold worker setup, calculations, editing and two flights took about 1016 ms. Individual worker methods took about 9/37/537/335 ms; a later run measured about 7/32/448/312 ms. Timings vary and are observations, not budgets. A second worker acknowledged the start of a real RK6 flight, was terminated 10 ms later while still computing, and emitted no completed result during the following 100 ms. This proves process cancellation, not cooperative cancellation/progress or resumability. The dedicated `workerd` run measured about 132 ms from process start to ready and 5.8 ms for the first HTTP editing command on the host clock; these are not Worker CPU measurements. Browser/Worker heap usage and deployed Worker CPU/startup budgets were not measured.
+
+The server entry point `ReducerFacade` excludes simulation exports and builds a roughly 1.43 MB module, compared with the roughly 2.58 MB browser module. Local `workerd` executes real current-core setters and graph methods, not a TypeScript reimplementation or a submitted snapshot. The proof is bounded to two fixed project documents, two stages/three tubes per document, 32 accepted operation IDs per project, 64-character operation IDs, and 2048-character request bodies. It supports tube-radius changes and moving the automatic tube between the two stages. Its ancestor-cycle attempt is `tube.addChild(rocket)`: desktop checks the root-ancestor rule before parent compatibility, but this does not cover compatible-type cycles such as pod/body nesting. The accepted move operation cannot create a cycle by construction; a compatible-type cycle fixture is a concrete next validator test. Unsupported actions, invalid numbers, invalid parents/cycles, stale sequence/preconditions, conflicting operation-ID reuse and unknown projects are rejected. Duplicate requests return the stored acknowledgment. This in-memory deduplication is not durable collaboration.
+
+The JVM/browser/workerd transcript compares the **captured relevant projection**: stage/child/active-stage counts; tube identities/parents, length, radius, inner radius, thickness, automatic flag, preset presence, mass, centroid, material density, listener count and event-bypass flag. Radius editing disables automatic sizing, clamps thickness, propagates to a component configuration listener and changes the following automatic tube's radius/mass. Moving that tube runs desktop remove/add methods with events enabled and exercises configuration invalidation. `addConfigListener` is a component editing listener; this does not establish coverage of all flight-configuration listeners, motors or stage events.
+
+Interleaved requests to two projects in one isolate leave the other project's state unchanged in both directions. Global preferences are immutable fixture policy; no per-request preference swap is allowed. **Mutable per-user preferences, preset clearing (presence starts false), arbitrary graphs, every setter and complete semantic state are unproved.** Strict sequence rejection is intentionally conservative; accepting independent edits against an older sequence and complete derived-effect preconditions remain unproved. The proof wrapper uses common protocol/model version 1 and project/branch/epoch/observed-sequence fields, then adapts its narrow action/value arguments to the Java facade. It is unauthenticated test code with no persistence; it must not be deployed as an application endpoint. Auth, R2 and DO durability are separate proofs.
+
+## Adaptation and reuse ledger
+
+The evaluated source is [MMRocket Sim 80e8df455e447b98fc94acc15dd4c04ffedc3357](https://github.com/mtnmanak/mmrocket-sim/tree/80e8df455e447b98fc94acc15dd4c04ffedc3357), whose package declares GPL-3.0-or-later and includes GPLv3. Its engine targets OpenRocket 24.12 and contains substantial aerodynamic, numerical, determinism, performance and behavioral patches; its README/test claims were not accepted as evidence for this checkout. Its complete harness was not run. Retained license text is [COPYING](COPYING).
+
+Reused/adapted source paths, all relative to that repository:
+
+- `engine-java/src/shims/java/com/google/inject/Injector.java`, `startup/Application.java`, `startup/ShimRocketDescriptor.java`, and `preferences/ApplicationPreferences.java` provide the starting bounded service locator. Here preferences have explicit fixture materials, humidity/gravity getters and no-op integrator-default persistence. Descriptor substitution/plugins are excluded. These shims are shared by JVM and TeaVM, so they do not establish real desktop startup or document lifecycle equivalence.
+- `engine-java/src/shims/java/info/openrocket/core/util/LongUUID.java` supplies UUID bits/formatting. The upstream deterministic counter was removed; generation delegates to the supported runtime UUID generator. General UUID conformance and malformed-ID parity still need tests.
+- `engine-java/src/awtstubs/java/java/awt/geom/Point2D.java` and `java/text/Collator.java` were relocated/renamed to explicit proof classes. JVM uses real JDK geometry/collation, while TeaVM uses the bridges. Collation remains an approximation, untested for locale-sensitive motor sorting.
+- `engine-java/src/harness/java/harness/GoldenMain.java` informed the explicit rocket dimensions and curve in `FlightProof`; calculations execute the current checkout's classes rather than the old port's patched core.
+
+`build.gradle` copies compiled baseline classfiles to an ignored adaptation directory and applies explicit ASM transformations only for TeaVM (and the diagnostic adapted-JVM task): UUID → the bridge; concurrent queue → `ArrayDeque`; concurrent map → `LinkedHashMap`, including its key-set return type; AWT point/collator → bridges; `Locale.Category.FORMAT` lookup → fixed US display locale; and built-in Barrowman reflective construction → `CalculatorRegistry`. Single-thread collection substitutions are appropriate only inside this bounded, synchronous facade. Changed iteration order is a possible cause of numerical differences. Fixed US formatting is not localization parity. The original JVM oracle retains native collections, UUIDs, reflection, geometry, locale and numerical classes.
+
+The startup shim fixes `useSafetyChecks=false`, matching desktop when `openrocket.debug.safetycheck` is absent. This disables `SafetyMutex` diagnostic lock/thread checks and `Invalidator` use-after-invalidation checks; these are diagnostic guards, while normal graph/parent/setter rules still execute. Debug-enabled desktop semantics and general concurrency validation are not established.
+
+The registry matches the current built-in Barrowman hierarchy (tube fins, rail buttons, launch lugs, fin sets, symmetric components and assemblies), rejects unknown invocations, and does not load uploaded classes. `Simulation.java` is an explicit conditions holder around the **current** `SimulationOptions`; both JVM and TeaVM share this holder and immutable startup policy. Actual document simulation lifecycle, expressions and extension initialization are outside this proof. `fastGlobalAnalysis=true` follows the candidate port's conservative linkage choice; optimization alternatives were not benchmarked here.
+
+The initial unadapted model attempt failed on missing queue, UUID and formatting-category APIs; the initial flight attempt additionally failed on collation, AWT geometry and concurrent-map key-set APIs. Exact compiler diagnostics are preserved in [model log](evidence/unadapted-model-teavm.log) and [flight log](evidence/unadapted-flight-teavm.log). These are successful narrowed adaptations of those failures, not proof that the entire desktop graph compiles.
+
+## Extension/runtime classification and remaining gate work
+
+This inventory is source-based classification, not executed extension validation:
+
+| Mechanism | Current baseline dependency / proof status |
+| --- | --- |
+| AirStart, StopSimulation, DampingMoment, RollControl | Built-in Java simulation listeners; plausible static registration candidates, none executed by this facade. |
+| PrintSimulation | Writes console output; browser download/log equivalent needs behavioral validation. |
+| CSVSave | Uses `File`, `PrintStream` and Swing `JOptionPane`; needs a browser output adapter and scale/content tests. |
+| Custom expressions | Bundled `de.congrace.exp4j`, document references and flight-data access; not linked/tested here. |
+| JavaCode extension | `Class.forName` and Guice listener construction; arbitrary runtime Java classes are unsupported by this closed-world build. |
+| ScriptingExtension / GraalJS | `javax.script`, Graal context and `HostAccess.ALL`; no equivalent capability sandbox has been proven in a browser/Workers runtime. |
+| Third-party discovery | ClassGraph/annotations, Guice modules, runtime JAR loading/migration; absent from the static registry, not execution-compatible by opaque XML preservation. |
+| Catalogs/presets | Desktop SQLite/JDBC and application defaults are excluded. Fixture curve/material hashes are recorded; full catalogs must be exported with versioned semantics and tested. |
+| Other core/native integrations | AWT/UI, preferences, resources, SQL/JNI and other non-reachable APIs are not made compatible by compiling this facade. |
+
+T01 therefore demonstrates real current-core calculations, seeded RK4/RK6 browser flights, a smaller trusted reducer in `workerd`, responsiveness and hard cancellation for one fixture. It leaves G1 incomplete: broader fixtures/current file projection, preset/flight-configuration effects, mutable preference isolation, approved numerical tolerances, budget/memory evidence and extension mechanism decisions remain open. The adapted-JVM diagnostic initially caught an invalid key-set interface invocation in the bytecode rewrite; the invocation kind was corrected and the failed diagnostic is retained. The final adapted-JVM transcript matches the original JVM exactly for all captured values, including complete sampled series. For this fixture the remaining numerical difference therefore appears when executing JavaScript, rather than from the tested API substitutions alone. The next concrete investigation is to vary TeaVM arithmetic/library implementations and compare adaptive-step intermediate states; broader fixtures are still needed to check collection-order effects. Add representative stage/cluster/recovery fixtures before extending the editor. Do not advance to later delivery packets or weaken full parity to resolve these gaps.
+
+AI assistance: Codex using GPT-6 (runtime family; exact variant unavailable) implemented this proof package. The coordinator reviews changes and reruns integrated checks; no human contributor declaration or PR was submitted by this agent.
