@@ -36,16 +36,18 @@ export interface Diagnostic {
 }
 export interface ArchiveEntry { path: string; bytes: Uint8Array; }
 export interface IdentitySidecar {
-  schema: 1;
-  components: Record<string, string>;
-  simulations: { id: string; fingerprint: Sha256 }[];
+  codecVersion: 1;
+  archiveHash: Sha256;
+  simulations: { id: string }[];
 }
 export interface ExpandedArchive {
   codecVersion: 1;
   original: Uint8Array;
   entries: ArchiveEntry[];
   mode: 'editable' | 'preservation';
-  diagnostics: Diagnostic[];
+  diagnostics: string[];
+  identity: IdentitySidecar;
+  xml: string;
 }
 export interface SimulationInput {
   schema: 1;

@@ -9,7 +9,7 @@ This file is the starting handoff for OpenRocket web application work. It collec
 3. Inspect the current branch, working tree, recent local commits, and relevant implementation. Preserve existing changes and identify which work belongs to you. The checkout's current state takes precedence over an old handoff's progress claims.
 4. Choose the next authorized work packet whose prerequisites are satisfied. Identify its owned paths, expected behavior, checks, and handoff before editing. Do not start every packet at once.
 
-At the time this guide was written, the web project consisted of planning documents. No browser engine, web application, authentication, collaboration, or deployment had been verified. The next implementation milestone is G1 feasibility. Update progress using actual commits and evidence rather than assuming this initial status remains current.
+The [G1 evidence record](g1-feasibility.md) supersedes the original planning-only status. Bounded browser, file and local/hosted Workers proofs now exist; G1 remains held for its recorded gaps. Update progress using actual commits and evidence rather than assuming a proof package is production infrastructure.
 
 ## Product context to retain
 

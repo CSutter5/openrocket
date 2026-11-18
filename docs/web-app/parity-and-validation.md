@@ -1,6 +1,6 @@
 # Parity and validation
 
-This is the initial acceptance framework for the [web application plan](README.md), not a completed test report. All implementation and validation rows below are pending. Expand them into testable individual capabilities during T00, then keep evidence and remaining gaps beside each capability.
+This is the acceptance framework for the [web application plan](README.md), not a completed parity report. The [G1 feasibility record](g1-feasibility.md) contains executed proof results and limitations; the capability rows below still require their delivery-phase acceptance. Expand them into testable individual capabilities during T00, then keep evidence and remaining gaps beside each capability.
 
 ## Desktop baseline and evidence
 
@@ -78,4 +78,4 @@ Test fresh local setup and fresh staging provision with documented commands. Run
 
 For every capability record the implementing revision, fixture/input, expected result and its basis, exact commands or manual steps, runtime/browser, observed outcome, and reviewer. Record skipped checks and environment limitations separately. Relevant tools include existing Gradle/JUnit tests, [Vitest's Workers integration](https://developers.cloudflare.com/workers/testing/vitest-integration/), and multi-context browser tests; proposed tool use is not a claim those checks ran.
 
-G6 requires all baseline capability rows to be implemented and verified or an explicit user-approved requirement change. G7 additionally requires deployment, recovery, isolation and measured workload evidence. The current planning contribution passes neither gate and claims neither a working app nor numerical/desktop parity.
+G6 requires all baseline capability rows to be implemented and verified or an explicit user-approved requirement change. G7 additionally requires deployment, recovery, isolation and measured workload evidence. The isolated G1 proofs establish neither gate, a production application, nor general numerical/desktop parity.

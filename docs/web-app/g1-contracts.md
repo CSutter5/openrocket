@@ -31,7 +31,7 @@ A simulation input manifest binds exact archive-tree and sidecar hashes, configu
 
 An input's selection does not mean its proof passed. Existing examples do not cover all current format-1.11 fields, and a generated current fixture is required. Every component class and desktop action remains mapped to T06/T10/T11/T12 and G5/G6 by the parity matrix. Full screen/action discovery remains incomplete; these minimum contracts unblock feasibility only.
 
-The browser feasibility policy is an actual headless Chromium run, version recorded by the runner; Firefox, WebKit, mobile, graphics and accessibility support remain untested. Local `workerd` supplies Worker evidence, not remote deployment or paid-plan CPU evidence. Remote staging is pending; no deployment is authorized here.
+The browser feasibility policy is an actual headless Chromium run, version recorded by the runner; Firefox, WebKit, mobile, graphics and accessibility support remain untested. Local `workerd` and the separately authorized disposable hosted smoke supply distinct evidence. The user selected the staging account during implementation; both test namespaces were removed. Hosted CPU observations do not establish heap limits or free-tier compatibility. Production deployment remains outside this task.
 
 ## Duplicate work and decisions
 

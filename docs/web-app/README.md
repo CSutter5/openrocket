@@ -1,6 +1,6 @@
 # OpenRocket web application plan
 
-Status: proposed implementation plan, prepared 2026-11-17. This change contains planning documents only; it does not implement or deploy a web application.
+Status: G1 feasibility implementation, 2026-11-17. Executable browser, desktop-file and Workers proofs now live under `web/`; they are isolated experiments, not a production application. See the [feasibility contracts](g1-contracts.md) and [observed G1 evidence](g1-feasibility.md) before starting dependent delivery work.
 
 ## Scope and constraints
 
@@ -68,6 +68,6 @@ The independent [MMRocket Sim repository](https://github.com/mtnmanak/mmrocket-s
 
 ## Planning verification and provenance
 
-Repository architecture, build/module dependencies, loader/saver behavior, format documentation, and desktop feature entry points were inspected. Current primary Cloudflare, TeaVM, Hono, Better Auth, and Drizzle documentation informed the choices; supporting links and unresolved checks are in the companion documents. Three research agents examined engine feasibility, file/collaboration behavior, and parity/reuse independently. No application, engine, numerical, browser, or Cloudflare deployment tests have been run for this plan.
+The original planning task inspected repository architecture, build/module dependencies, loader/saver behavior, format documentation, and desktop feature entry points. Primary Cloudflare, TeaVM, Hono, Better Auth, and Drizzle documentation informed the choices; supporting links are in the companion documents. Three research agents examined engine feasibility, file/collaboration behavior, and parity/reuse independently. That planning task ran no application/runtime tests; the subsequent [G1 record](g1-feasibility.md) contains the actual implementation checks and remaining gaps.
 
 AI assistance: Codex using GPT-6 (runtime-supplied family; exact variant unavailable) prepared and reviewed these planning documents with three agents inheriting that runtime model. Human contributors remain responsible for reviewing decisions and verifying implementation. Any future PR must use the repository template and report its actual checks and model identities.

@@ -1,16 +1,16 @@
 # Agent work plan
 
-Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. No implementation assignments have been executed by this planning change.
+Read [the general agent guide](agent-guide.md), [scope and constraints](README.md), [decisions](architecture.md), and [acceptance matrix](parity-and-validation.md) before starting. This is a sequence of focused contributions, not one application-wide PR. The [G1 evidence record](g1-feasibility.md) supersedes the original planning-only progress status; later packets remain gated by that assessment.
 
 ## Coordination rules
 
-The integration agent owns contracts, architecture decisions, shared dependency changes, and merge order. Other agents own the paths and behavior in their assignment. Proposed paths below do not exist yet. Only one agent edits a shared schema, lockfile, Wrangler configuration, or Java facade at a time; request the coordinating agent to integrate changes there. Prefer isolated branches/worktrees and small PRs. Do not overwrite another agent's work or update desktop dependencies opportunistically.
+The integration agent owns contracts, architecture decisions, shared dependency changes, and merge order. Other agents own the paths and behavior in their assignment. Some paths below now contain isolated G1 proofs; consult their evidence before treating them as application infrastructure. Only one agent edits a shared schema, lockfile, Wrangler configuration, or Java facade at a time; request the coordinating agent to integrate changes there. Prefer isolated branches/worktrees and small PRs. Do not overwrite another agent's work or update desktop dependencies opportunistically.
 
 Make focused local commits as coherent changes pass their appropriate checks and before handing off completed work. Do not push. Follow the general guide's staging and shared-checkout rules; commit hashes and actual verification outcomes belong in every handoff.
 
 Every assignment starts by reading repository `AGENTS.md` and `CONTRIBUTING.md`, the relevant decision records, upstream symbols, and any closer directory instructions. Check open issues/PRs for duplicate work and link findings; the initial search was incomplete. Broad upstream changes need a maintainer discussion record before implementation, as required by repository guidance. This plan does not authorize agents to message maintainers or other people automatically.
 
-The user has authorized planning and decomposition in this task. The first implementation milestone is G1, not an unrestricted rewrite. Keep failed experiments isolated and report their evidence. Do not replace a failed feasibility gate with reduced parity, new compute services, or an unreviewed physics rewrite.
+The user authorized the first G1 implementation milestone after the original planning task. This is not an unrestricted rewrite. Keep failed experiments isolated and report their evidence. Do not replace a failed feasibility gate with reduced parity, new compute services, or an unreviewed physics rewrite.
 
 ## Dependency graph and scheduling
 
