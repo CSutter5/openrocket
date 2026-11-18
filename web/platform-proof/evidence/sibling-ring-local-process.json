@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "correctedMeasurements": {
+    "overlap": {
+      "kind": "OS wait4 for the Node runner child and waited-for descendants, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 146.3309547189856,
+      "userCpuSeconds": 245.3526,
+      "systemCpuSeconds": 14.365006,
+      "maximumProcessRss": 1235408,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "explicitHoleControl": {
+      "kind": "OS wait4 for the Node runner child and waited-for descendants, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 119.48756165895611,
+      "userCpuSeconds": 187.249614,
+      "systemCpuSeconds": 12.527764,
+      "maximumProcessRss": 1485064,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    }
+  },
+  "historicalAggregateObservationsExcludedFromCpuRssConclusions": {
+    "apart-before": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 154.7646634109551,
+      "userCpuSeconds": 245.411205,
+      "systemCpuSeconds": 13.191832,
+      "maximumProcessRss": 1325168,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "apart-after": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 161.92813508596737,
+      "userCpuSeconds": 248.496041,
+      "systemCpuSeconds": 14.762995,
+      "maximumProcessRss": 1425828,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "partial": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 168.75263098499272,
+      "userCpuSeconds": 246.243059,
+      "systemCpuSeconds": 15.182131,
+      "maximumProcessRss": 1388396,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "contact-start": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 170.598450853955,
+      "userCpuSeconds": 247.647188,
+      "systemCpuSeconds": 16.935458,
+      "maximumProcessRss": 1494024,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "contact-end": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 181.04676949197892,
+      "userCpuSeconds": 252.522119,
+      "systemCpuSeconds": 17.072871,
+      "maximumProcessRss": 1621384,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    }
+  },
+  "note": "Development process trees may overlap on the same host. Corrected wait4 CPU/RSS cover the specific Node child and its waited-for descendants. RUSAGE_CHILDREN observations are retained without per-child attribution. Request wall times include local contention. Neither hosted request CPU nor isolate heap."
+}

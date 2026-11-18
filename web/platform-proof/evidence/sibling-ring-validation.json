@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "recordedDate": "2026-11-18",
+  "outcome": "passed",
+  "codeCheckpoint": "8ab654944",
+  "measurementCheckpoint": "2ef1efa1f",
+  "checks": [
+    {
+      "command": "./gradlew -I web/packages/ork-format/jvm/classpath.gradle :core:orkProofClasspath -Dork.proof.classpath=/tmp/g1-inner-classpath.txt --no-daemon",
+      "outcome": "passed"
+    },
+    {
+      "command": "npm run build --prefix web --workspace @openrocket/engine-proof",
+      "outcome": "passed",
+      "originalAndAdaptedJvmExact": true,
+      "sourcePin": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+      "reviewedCoreChanges": [
+        {
+          "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+          "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+          "commit": "40dd387ce"
+        },
+        {
+          "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+          "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+          "commit": "3648d87bd"
+        }
+      ]
+    },
+    {
+      "command": "npm test --prefix web",
+      "outcome": "passed",
+      "contracts": 2,
+      "fixtureManifests": 7,
+      "codec": 46,
+      "platformWorkerd": 12
+    },
+    {
+      "command": "node --test --test-isolation=none web/packages/ork-format/test/archive.test.js web/packages/ork-format/test/radius.test.js web/packages/ork-format/test/imported-effects.test.js",
+      "outcome": "passed",
+      "tests": 46
+    },
+    {
+      "command": "npm run typecheck --prefix web --workspace @openrocket/platform-proof",
+      "outcome": "passed"
+    },
+    {
+      "command": "npm run test:workerd --prefix web --workspace @openrocket/engine-proof",
+      "outcome": "passed",
+      "invalidInputs": 9,
+      "projects": 2,
+      "acceptedCommands": 3,
+      "duplicateRetries": 1
+    },
+    {
+      "command": "./gradlew :core:test --tests 'info.openrocket.core.file.openrocket.OpenRocketSaverTest' --tests 'info.openrocket.core.file.motor.TestMotorLoader' --tests 'info.openrocket.core.file.openrocket.importt.MotorHandlerTest' --tests 'info.openrocket.core.motor.MotorDigestTest' --tests 'info.openrocket.core.preset.BodyTubeComponentTests' --tests 'info.openrocket.core.preset.BodyTubePresetTests' --tests 'info.openrocket.core.preset.CenteringRingComponentTests' --tests 'info.openrocket.core.preset.CenteringRingPresetTests' --tests 'info.openrocket.core.preset.InnerTubeComponentTests' --tests 'info.openrocket.core.preset.InnerTubePresetTests' --no-daemon",
+      "outcome": "passed",
+      "tests": 83,
+      "classes": 8,
+      "failures": 0,
+      "note": "The two InnerTube preset filters matched no existing class; the eight existing I/O/digest/body-tube/centering-ring classes executed."
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=\"$(cat /tmp/g1-inner-classpath.txt)\" ORK_EFFECTS_SIBLING_RING=<variant> ORK_EFFECTS_OUTPUT=<output> python3 web/platform-proof/scripts/measure-imported-effects.py",
+      "variants": [
+        "overlap",
+        "apart-before",
+        "apart-after",
+        "partial",
+        "contact-start",
+        "contact-end"
+      ],
+      "outcome": "passed",
+      "acceptedActionDesktopComparisons": 84,
+      "rejectedRequests": 306,
+      "evidence": "sibling-ring.json",
+      "sourceHashesIdenticalAcrossVariants": true,
+      "radiusEvictionRetryInEveryVariant": true,
+      "digestVectorsPerRun": 136
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=\"$(cat /tmp/g1-inner-classpath.txt)\" ORK_EFFECTS_AUTOMATIC_RING=1 ORK_EFFECTS_OUTPUT=/tmp/g1-sibling-explicit-hole-measured python3 web/platform-proof/scripts/measure-imported-effects.py",
+      "outcome": "passed",
+      "acceptedActionDesktopComparisons": 11,
+      "rejectedRequests": 36,
+      "underfit": {
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.0009999999999999974,
+          "automatic": false,
+          "preset": true,
+          "mass": 0.03781220917860666,
+          "cg": 0.15,
+          "presetDigest": "726e26d7f3618af491f94460622c5110",
+          "length": 0.3,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.029,
+          "volume": 5.56061899685392e-05,
+          "listeners": 0,
+          "ring": {
+            "outerRadius": 0.029,
+            "innerRadius": 0.006,
+            "outerAutomatic": true,
+            "innerAutomatic": false,
+            "thickness": 0.023,
+            "length": 0.004,
+            "density": 500,
+            "mass": 0.005057964172279567,
+            "cg": 0.002,
+            "cgMass": 0.005057964172279567,
+            "longitudinalUnitInertia": 0.00022058333333333335,
+            "rotationalUnitInertia": 0.00043850000000000003,
+            "axialMethod": "TOP",
+            "axialOffset": 0.02,
+            "positionX": 0.02,
+            "radialPosition": 0,
+            "radialDirection": 0,
+            "instanceCount": 1,
+            "instanceSeparation": 0,
+            "bounds": [
+              0,
+              0.004,
+              -0.029,
+              0.029,
+              -0.029,
+              0.029
+            ],
+            "preset": false,
+            "listeners": 0
+          }
+        },
+        "live": {
+          "radius": 0.0005,
+          "thickness": 0.0005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.00016022122533307945,
+          "cg": 0.15,
+          "presetDigest": null,
+          "length": 0.3,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0,
+          "volume": 2.3561944901923448e-07,
+          "listeners": 0,
+          "ring": {
+            "outerRadius": 0,
+            "innerRadius": 0.006,
+            "outerAutomatic": true,
+            "innerAutomatic": false,
+            "thickness": 0,
+            "length": 0.004,
+            "density": 500,
+            "mass": 0,
+            "cg": 0.002,
+            "cgMass": 0,
+            "longitudinalUnitInertia": 1.0333333333333333e-05,
+            "rotationalUnitInertia": 1.8e-05,
+            "axialMethod": "TOP",
+            "axialOffset": 0.02,
+            "positionX": 0.02,
+            "radialPosition": 0,
+            "radialDirection": 0,
+            "instanceCount": 1,
+            "instanceSeparation": 0,
+            "bounds": [
+              0,
+              0.004,
+              0,
+              0,
+              0,
+              0
+            ],
+            "preset": false,
+            "listeners": 0
+          }
+        },
+        "reloaded": {
+          "outerAutomatic": false,
+          "innerRadius": 0.006,
+          "outerRadius": 0.006,
+          "mass": 0
+        },
+        "outcome": "classified-rejection-required",
+        "reason": "Desktop reload disables automatic outer radius when the explicit ring hole exceeds the parent inner radius"
+      },
+      "rawEvidence": "/tmp/g1-sibling-explicit-hole-measured"
+    },
+    {
+      "command": "npx wrangler deploy --dry-run --config platform-proof/wrangler.radius.jsonc --outdir /tmp/g1-sibling-bundle (from web)",
+      "outcome": "passed",
+      "uploadKiB": 4267.2,
+      "gzipKiB": 753.47,
+      "deployed": false,
+      "bundleSha256": "96cc785bdde88377785d8b2d1741b30f7fc5cdd9e39004d538d6ae96ee424ca4"
+    },
+    {
+      "command": "Two-child Python os.wait4 probe; observed values retained in sibling-ring-initial-failures.json",
+      "outcome": "passed",
+      "wait4ExcludesEarlierChild": true
+    }
+  ],
+  "measurementWrapperSha256": "a4122503adff778919d1300aa9738ad6c67506f5bbd3e59165b74226fcbad9c6",
+  "processEvidence": "sibling-ring-local-process.json",
+  "initialFailures": "sibling-ring-initial-failures.json",
+  "unmeasured": [
+    "Hosted domain-command CPU",
+    "Worker isolate heap",
+    "Worst-case input budgets",
+    "Production latency"
+  ],
+  "skipped": [
+    "Full desktop JUnit suite",
+    "Swing/OpenGL UI",
+    "Chromium rerun (browser artifact byte-identical)",
+    "Simulation rerun",
+    "Hosted deployment/domain proof",
+    "Fresh dependency audit"
+  ],
+  "isolationGaps": [
+    "Immutable fixture preferences do not prove arbitrary account/document defaults",
+    "General static caches, catalogs and extension registries are not proven isolated",
+    "Other graph/configuration and independent-field concurrency semantics remain unsupported"
+  ],
+  "checkout": {
+    "mainStart": "87a5ce931, web-g1-feasibility; only user archive untracked",
+    "oldTmp": "/tmp/openrocket-g1-preset-validation at 54f183b88 with uncommitted prior work; left intact",
+    "validationTmp": "/tmp/openrocket-g1-inner-validation detached at 87a5ce931 with owned source overlay; source/artifact hashes compared with committed code",
+    "dependencyPolicy": "Copied installed dependencies from inspected old worktree; identical package-lock.json SHA-256 d8a1caf8298bd3d4d55bc5e125679b7f0fc8141410867a7155f45943708ea3b3; no main-checkout npm install"
+  },
+  "originalFile": {
+    "path": "example rocket.ork",
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "unchanged": true,
+    "addedToGit": false
+  },
+  "g1": "hold"
+}
