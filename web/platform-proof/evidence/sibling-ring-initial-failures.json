@@ -37,5 +37,27 @@
     }
   ],
   "explicitHoleUnderfitEvidence": "../../packages/ork-format/evidence/automatic-ring-underfit.json",
-  "g1": "hold"
+  "g1": "hold",
+  "measurementFailure": {
+    "error": "Aggregate RUSAGE_CHILDREN can include CPU/RSS of earlier reaped children across exec; it is not necessarily this proof child tree.",
+    "legacyControl": {
+      "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+      "platform": "Linux",
+      "wallSeconds": 116.55006681499071,
+      "userCpuSeconds": 690.249161,
+      "systemCpuSeconds": 48.283551,
+      "maximumProcessRss": 1494024,
+      "maximumProcessRssUnit": "KiB",
+      "exitCode": 0,
+      "hostedCpu": null,
+      "isolateHeap": null
+    },
+    "perChildProbe": {
+      "priorChildUserCpuSeconds": 0.167729,
+      "measuredChildUserCpuSeconds": 0.027023,
+      "aggregateAfterUserCpuSeconds": 0.19475199999999998,
+      "wait4ExcludesEarlierChild": true
+    },
+    "resolution": "Collect the Node runner child and its waited-for descendants using os.wait4(child.pid, 0). Retain prior aggregate observations without using them as corrected child CPU/RSS."
+  }
 }
