@@ -1,4 +1,4 @@
-import type { ExpandedArchive } from './index.js';
+import type { ExpandedArchive, XmlNode } from './index.js';
 /** Bounded intrinsic projection; not a full rocket or the product model schema. */
 export interface TubeRadiusInput {
   schema: 1; componentId: string; preset?: ProofPreset; ring?: RingInput; configurationIds?: string[];
@@ -36,3 +36,6 @@ export function radiusSimulationEffects(archive: ExpandedArchive, input: TubeRad
 export function applyTubeRadius(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): Promise<ExpandedArchive>;
 export interface ProofPreset { key: string; type: string; manufacturer: string; partno: string; digest: string }
 export const PROOF_PRESETS: readonly ProofPreset[];
+
+export function field(archive: ExpandedArchive, component: XmlNode, name: string): { node: XmlNode; raw: string; text: string };
+export function numeric(text: string, name: string): number;

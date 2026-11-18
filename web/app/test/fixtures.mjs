@@ -19,7 +19,7 @@ export async function prepare() {
   const source = name => resolve(repo, 'web/packages/ork-format/jvm', name + '.java');
   const engine = name => resolve(repo, 'web/engine-adapter/src/main/java', name + '.java');
   await run('javac', ['-cp', classpath, '-d', resolve(output, 'classes'), source('ArchiveDesktopProof'), source('RadiusDesktopProof'),
-    source('ImportedEffectsDesktopProof'), engine('proof/ImportedTubeProof'), engine('proof/ImportedRingProof'),
+    source('ImportedEffectsDesktopProof'), resolve(repo, 'web/app/test/EditorDesktopProof.java'), engine('proof/EditorDrawing'), engine('proof/ImportedTubeProof'), engine('proof/ImportedRingProof'),
     engine('proof/ImportedDeploymentProof'), engine('proof/PortableDigest'), engine('info/openrocket/core/preset/ProofPresetCatalog')], 'javac');
   await java('ImportedEffectsDesktopProof', ['digests'], 'digests');
   for (const kind of ['explicit', 'ring']) {

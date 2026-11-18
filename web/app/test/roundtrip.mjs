@@ -108,6 +108,8 @@ try {
     const expectedMass = input.density * Math.PI * (0.035 ** 2 - (0.035 - input.thickness) ** 2) * input.length;
     assert.ok(Math.abs(Number(await page.getByTestId('mass').textContent()) - expectedMass) < 1e-12);
     assert.equal(Number(await page.getByTestId('cg').textContent()), input.length / 2);
+    const details = page.locator('details.preview');
+    if (!(await details.getAttribute('open') !== null)) await details.locator('summary').click();
     await page.getByRole('img', { name: /outer radius 0.035 m/ }).waitFor();
     await page.screenshot({ path: resolve(output, `${kind}-editor.png`), fullPage: true });
     const edited = await download(`${kind}-edited.ork`), reimported = await read(edited);

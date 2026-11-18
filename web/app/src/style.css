@@ -29,3 +29,8 @@ input:disabled { background: #edf2f6; color: #485e6c; }
 .preview { margin: 1.25rem 0; padding: 1.25rem; background: white; border: 1px solid #ccd8e0; border-radius: .5rem; }
 svg { display: block; width: 100%; max-height: 340px; } svg text { font: 14px system-ui, sans-serif; fill: #172b3a; }
 summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
+
+.rocket-drawing { background: white; border: 1px solid #ccd8e0; border-radius: .5rem; padding: 1.25rem; margin: 1rem 0; }
+.drawing-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.drawing-title span { color: #485e6c; } .rocket-drawing polygon { cursor: pointer; }
+.drawing-selection { margin: .5rem 0; }

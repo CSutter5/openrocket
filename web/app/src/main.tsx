@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { LIMITS } from '@openrocket/ork-format';
 import { request } from './bridge';
 import type { Action, ComponentView, DocumentView } from './model';
+import { RocketDrawing } from './RocketDrawing';
 import { Schematic } from './Schematic';
 import './style.css';
 
@@ -55,6 +56,7 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('Open the bundled sample or a local archive to begin.');
+  useEffect(() => { void openSample('rocket-sample.ork'); }, []);
   useEffect(() => {
     if (!document?.dirty) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
@@ -71,9 +73,16 @@ function App() {
     setBusy(true); setError('');
     try {
       const reply = await request({ type: 'import', bytes: await load(), filename });
-      setDocument(reply.view); setSelected(0); setNotice(reply.notice);
+      setDocument(reply.view); setSelected(Math.max(0, reply.view.components.findIndex(c => c.tube))); setNotice(reply.notice);
     } catch (failure) { setError(`Import rejected; previous document retained. ${message(failure)}`); }
     finally { setBusy(false); }
+  }
+  async function openSample(filename: string) {
+    return open(async () => {
+      const response = await fetch('/' + filename);
+      if (!response.ok) throw new Error('Bundled sample unavailable');
+      return new Uint8Array(await response.arrayBuffer());
+    }, filename);
   }
   async function download() {
     setBusy(true); setError('');
@@ -101,6 +110,7 @@ function App() {
     <header><div><p className="eyebrow">OPENROCKET / LOCAL POC</p><h1>Rocket editor</h1></div><span className="badge">Local memory only</span></header>
     <main>
       <section className="toolbar" aria-label="Local files">
+        <button disabled={busy} onClick={() => openSample('rocket-sample.ork')}>Open rocket sample</button>
         <button disabled={busy} onClick={() => open(async () => {
           const response = await fetch('/explicit-tube.ork');
           if (!response.ok) throw new Error('Bundled sample unavailable');
@@ -124,11 +134,12 @@ function App() {
           <span>{document.mode === 'editable' ? 'Names editable; geometry limited below' : 'Preservation only: all properties read-only'}</span>
         </div>
         {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
+        <RocketDrawing drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }}/>
         <div className="workspace">
           <nav aria-label="Component tree"><h2>Components</h2>{tree()}</nav>
           <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
         </div>
-        <section className="preview" aria-label="Schematic"><h2>Local side schematic</h2>{component && <Schematic component={component}/>}</section>
+        <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic component={component}/>}</details>
         <details><summary>Stored results · {document.simulations.length} simulations (not run)</summary>
           <p>Imported series are retained, unverified and never executed. Physical edits mark affected stored results outdated.</p>
           <ul>{document.simulations.map((s, i) => <li key={i}>{s.name}: {s.status}</li>)}</ul>

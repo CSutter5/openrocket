@@ -7,6 +7,7 @@ export interface ComponentView {
   radiusReason?: string;
 }
 export interface DocumentView {
+  drawing: import('./drawing').Drawing;
   filename: string; mode: 'editable' | 'preservation'; diagnostics: string[];
   hash: string; dirty: boolean; components: ComponentView[];
   simulations: { name: string; status: string }[];

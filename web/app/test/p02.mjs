@@ -32,6 +32,7 @@ try {
   await page.getByTestId('radius').filter({hasText:'0.03'}).waitFor();
   assert.ok(Number(await value('mass'))>mass);
   assert.equal(Number(await value('cg')),0.3809999999999999);
+  await page.getByText('Selected tube measurements and local schematic',{exact:true}).click();
   await page.getByRole('img',{name:/outer radius 0.03 m/}).waitFor();
   await page.getByRole('button',{name:'Apply radius',exact:true}).click();
   await page.getByRole('status').filter({hasText:'No change'}).waitFor();

@@ -1,6 +1,7 @@
 import { componentNames, renameComponent, importArchive, exportArchive, type ExpandedArchive } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
 import { radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
 let archive: ExpandedArchive | undefined;
@@ -20,7 +21,7 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
 function describe(current: ExpandedArchive, name: string, lastExport: string): DocumentView {
   const nodes = current.parsed.components;
   return {
-    filename: name, mode: current.mode, diagnostics: current.diagnostics,
+    drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
     components: componentNames(current).map((component, index) => {
       const node = nodes[index];
