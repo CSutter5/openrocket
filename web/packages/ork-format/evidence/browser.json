@@ -1,0 +1,43 @@
+{
+  "runtime": "149.0.7827.55",
+  "bundleBytes": 109183,
+  "durationMs": 469.4000000357628,
+  "inputBytes": 546448,
+  "exportBytes": 570264,
+  "components": 13,
+  "simulations": 5,
+  "entryHashes": [
+    {
+      "path": "rocket.ork",
+      "sha256": "a3870a8e55bcab784c163a8ba108493fabe806a709f79f2513c8e7d5edc1adb4"
+    },
+    {
+      "path": "preview.png",
+      "sha256": "e83fef024d52a96677db7087e297a984a31862a4afd45530592920a5ea7230d8"
+    },
+    {
+      "path": "thumbnail.png",
+      "sha256": "014eb57d610067a1be3ec2bef4e4773ef8f5d5609a0df34462c90a47cc6537df"
+    },
+    {
+      "path": "decals/BodyStripe.png",
+      "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+    },
+    {
+      "path": "decals/TailStripe.png",
+      "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+    },
+    {
+      "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+      "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+    },
+    {
+      "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+      "sha256": "b5bf46b0331b19e8f95cc09a9580112bf1a215ec3bd6c6ed9f7348a6b9de7ca4"
+    },
+    {
+      "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+      "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+    }
+  ]
+}

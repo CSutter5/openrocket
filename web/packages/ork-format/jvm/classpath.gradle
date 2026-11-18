@@ -1,0 +1,14 @@
+allprojects {
+    afterEvaluate { project ->
+        if (project.path == ':core') {
+            tasks.register('orkProofClasspath') {
+                dependsOn tasks.named('testClasses')
+                doLast {
+                    def destination = System.getProperty('ork.proof.classpath')
+                    if (destination == null) throw new GradleException('Set -Dork.proof.classpath')
+                    new File(destination).text = sourceSets.test.runtimeClasspath.asPath
+                }
+            }
+        }
+    }
+}

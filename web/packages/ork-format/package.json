@@ -1,0 +1,16 @@
+{
+  "name": "@openrocket/ork-format",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.js",
+  "scripts": {
+    "test": "node test/archive.test.js",
+    "test:browser": "node test/browser-proof.mjs",
+    "test:desktop": "node test/desktop-proof.mjs"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "saxes": "6.0.0"
+  }
+}

@@ -10,6 +10,7 @@
     "check:fixtures": "python3 scripts/fixture-inventory.py --check"
   },
   "devDependencies": {
+    "esbuild": "0.28.2",
     "playwright": "1.61.1"
   }
 }

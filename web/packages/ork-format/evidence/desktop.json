@@ -1,0 +1,35 @@
+{
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "fixture": "core/src/main/resources/datafiles/examples/A simple model rocket.ork",
+  "inputSha256": "47973b6db4c5b7ed64c8aaed6cbf2442403d5303581218903da1b44d8e2b3615",
+  "webExportSha256": "a12e07182d6c50b806b6ecb5b76af3b6588b7a4894780628c1c58873e2a98265",
+  "desktopExportSha256": "b8dcfeec6c315703f3d1e553b4612efd2b15d1c741003e9ee5c5588dbec61ff6",
+  "targetId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+  "name": "Web & desktop <proof>",
+  "desktopResult": "PROOF components=13 decals=2 motorAssignments=5 motorDigests=[2967cd7a160b396ef96f09695429d8e9, be11a726b56813c4b1aea0574c8302b2, c049499ca03fd69115352e5d4be72de7] simulations=5 resultPoints=2751 semanticSha256=3bb75bfd84480f6678f075497b740631ef64f4bb329f25d4461db1ecfe764cab originalWarnings=Messages[] editedWarnings=Messages[]",
+  "assets": [
+    {
+      "path": "decals/BodyStripe.png",
+      "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+    },
+    {
+      "path": "decals/TailStripe.png",
+      "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+    },
+    {
+      "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+      "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+    },
+    {
+      "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+      "sha256": "b5bf46b0331b19e8f95cc09a9580112bf1a215ec3bd6c6ed9f7348a6b9de7ca4"
+    },
+    {
+      "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+      "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+    }
+  ],
+  "sidecarDiagnostics": [
+    "SIDECAR_RECONCILIATION_REQUIRED"
+  ]
+}

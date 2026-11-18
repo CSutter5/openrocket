@@ -1,0 +1,35 @@
+{
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "fixture": "generated-format111-from-A-simple-model-rocket",
+  "inputSha256": "1aa5e195618e8b7ba2ffbbb07b25d6967e74a554b141000daa72375c2c41c2f3",
+  "webExportSha256": "1c236d4e09bd267139179c91c55ed35e6e765f6adcc358212b004d76112feece",
+  "desktopExportSha256": "c7486f29646ad9d798b71b7c6ae5bf48157b8ba0ff98869ad2945ae93ad263ff",
+  "targetId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+  "name": "Web & desktop <proof>",
+  "desktopResult": "PROOF components=13 decals=2 motorAssignments=5 motorDigests=[2967cd7a160b396ef96f09695429d8e9, be11a726b56813c4b1aea0574c8302b2, c049499ca03fd69115352e5d4be72de7] simulations=5 resultPoints=2751 semanticSha256=3ab9f022ddd9829d59e1b85239f04ca0cd390609054e7c5ecfe15b46afffe474 originalWarnings=Messages[] editedWarnings=Messages[]",
+  "assets": [
+    {
+      "path": "decals/BodyStripe.png",
+      "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454"
+    },
+    {
+      "path": "decals/TailStripe.png",
+      "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb"
+    },
+    {
+      "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+      "sha256": "b920aee2e1c6394db91d15c100b995cf43f566767c8a0ed9e1f1811356e65e49"
+    },
+    {
+      "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+      "sha256": "b5bf46b0331b19e8f95cc09a9580112bf1a215ec3bd6c6ed9f7348a6b9de7ca4"
+    },
+    {
+      "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+      "sha256": "d09129c9d25a7389ee12e2d81ca1c40441852adb4ec7b31d1ee8d6cc50ab18c4"
+    }
+  ],
+  "sidecarDiagnostics": [
+    "SIDECAR_RECONCILIATION_REQUIRED"
+  ]
+}
