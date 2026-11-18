@@ -75,6 +75,18 @@ function App() {
     } catch (failure) { setError(`Import rejected; previous document retained. ${message(failure)}`); }
     finally { setBusy(false); }
   }
+  async function download() {
+    setBusy(true); setError('');
+    try {
+      const reply = await request({ type: 'export' });
+      const url = URL.createObjectURL(new Blob([reply.bytes!.slice().buffer as ArrayBuffer], { type: 'application/octet-stream' }));
+      const link = window.document.createElement('a');
+      link.href = url; link.download = reply.view.filename.replace(/\.ork$/i, '') + '-edited.ork';
+      link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setDocument(reply.view); setNotice(reply.notice);
+    } catch (failure) { setError(`Export failed. ${message(failure)}`); }
+    finally { setBusy(false); }
+  }
   const components = document?.components ?? [], component = components[selected];
   function tree(parent = -1): React.ReactNode {
     const children = components.map((n, i) => ({ n, i })).filter(({ n }) => n.parent === parent);
@@ -101,6 +113,7 @@ function App() {
             return new Uint8Array(await file.arrayBuffer());
           }, file.name);
         }}/></label>
+        <button disabled={busy || !document} onClick={download}>Download .ork</button>
       </section>
       <p className="muted">One document, one browser. Opening another file or reloading discards this session, including changes. No account or backend is used.</p>
       {error && <p role="alert" className="error">{error}</p>}

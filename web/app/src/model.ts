@@ -14,5 +14,6 @@ export interface DocumentView {
 export type Action =
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }
-  | { type: 'radius'; id: string; expected: number; value: number };
-export interface Reply { view: DocumentView; notice: string }
+  | { type: 'radius'; id: string; expected: number; value: number }
+  | { type: 'export' };
+export interface Reply { view: DocumentView; notice: string; bytes?: Uint8Array }

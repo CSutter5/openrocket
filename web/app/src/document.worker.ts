@@ -51,6 +51,12 @@ async function execute(action: Action): Promise<Reply> {
     return { view, notice: 'Archive opened. Original upload retained in memory.' };
   }
   if (!archive) throw new Error('Open an archive first');
+  if (action.type === 'export') {
+    const exported = await exportArchive(archive);
+    const view = describe(archive, filename, exported.identity.archiveHash);
+    exportHash = exported.identity.archiveHash;
+    return { view, bytes: exported.bytes, notice: 'Download prepared locally. Check your browser downloads; this is not cloud or durable save confirmation.' };
+  }
   let candidate = archive, notice = 'No change; accepted document retained.';
   if (action.type === 'rename') {
     const component = componentNames(archive).find(c => c.id === action.id);
