@@ -1,0 +1,12 @@
+{
+  "measuredAt": "2026-11-18T02:31:22.844Z",
+  "cliReadyMs": 1666.026044,
+  "firstHealthMs": 50.48774000000003,
+  "hundredHealthWallMs": 381.4316289999997,
+  "hundredHealthWorkerdProcessCpuMs": 260,
+  "workerdProcessRssKiB": [
+    93524,
+    161196
+  ],
+  "caveat": "Local Linux workerd processes including Miniflare dev services; startup includes Wrangler/build. These are not production isolate CPU/memory measurements."
+}

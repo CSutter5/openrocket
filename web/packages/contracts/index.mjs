@@ -23,7 +23,8 @@ export async function simulationInputHash(input) {
     throw new Error('invalid: exact simulation input fields required');
   }
   if (input.schema !== 1 || input.desktopRevision !== DESKTOP_REVISION ||
-      !Number.isSafeInteger(input.seed) || !['RK4', 'RK6'].includes(input.integrator)) {
+      !Number.isInteger(input.seed) || input.seed < -2147483648 || input.seed > 2147483647 ||
+      !['RK4', 'RK6'].includes(input.integrator)) {
     throw new Error('unsupported: input schema, baseline, seed or integrator');
   }
   for (const field of inputFields.filter(field => field.endsWith('Hash'))) {

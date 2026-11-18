@@ -1,0 +1,32 @@
+npm notice run test
+npm notice run vitest run --reporter=verbose
+
+ RUN  v4.1.12 /tmp/openrocket-g1-platform/web/platform-proof
+
+stderr | test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation
+2026-11-18T02:31:15.986Z WARN [Better Auth]: Invalid password
+
+ ✓ test/platform.test.ts > serves actual static assets and Hono through Workers, with applied D1 migrations 18ms
+stderr | test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation
+2026-11-18T02:31:15.996Z ERROR [Better Auth]: Invalid origin: https://attacker.test
+
+ ✓ test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation 119ms
+ ✓ test/platform.test.ts > enforces private R2 membership across known project/file IDs, including global admin 58ms
+ ✓ test/platform.test.ts > hibernates live sockets, reconstructs SQLite state, deduplicates acknowledgments and isolates projects 52ms
+ ✓ test/platform.test.ts > rejects WebSocket origin spoofing and non-members 21ms
+stderr | test/platform.test.ts > supports concurrent admin operations, ban/session revocation, recovery password and expiry
+2026-11-18T02:31:16.446Z WARN [Better Auth]: Invalid password
+
+ ✓ test/platform.test.ts > supports concurrent admin operations, ban/session revocation, recovery password and expiry 529ms
+
+   ❯ test/platform.test.ts:165:17 local-workerd-wall-ms
+     ↳ {"migrate":11,"bootstrapHash":102,"login-admin@example.test":87,"login-owner@example.test":70,"login-stranger@example.test":60,"login-recover@example.test":70}
+
+ ✓ test/platform.test.ts > rechecks revoked sessions on existing sockets and logs out without cached authority 17ms
+ ✓ test/platform.test.ts > binds shared browser results to exact inputs using Workers Web Crypto 1ms
+ ✓ test/platform.test.ts > closes live sockets after suspension or project membership removal 280ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  20:31:09
+   Duration  7.94s (transform 2.86s, setup 0ms, import 5.35s, tests 1.61s, environment 0ms)

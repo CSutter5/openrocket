@@ -6,11 +6,13 @@
   "workspaces": ["packages/*", "engine-adapter", "platform-proof"],
   "engines": {"node": ">=22.12"},
   "scripts": {
+    "test": "npm run test:contracts && npm run check:fixtures && npm test --workspace @openrocket/ork-format && npm test --workspace @openrocket/platform-proof",
     "test:contracts": "npm test --workspace @openrocket/contracts",
     "check:fixtures": "python3 scripts/fixture-inventory.py --check"
   },
   "devDependencies": {
     "esbuild": "0.28.2",
+    "miniflare": "5.20261117.0-beta",
     "playwright": "1.61.1"
   }
 }

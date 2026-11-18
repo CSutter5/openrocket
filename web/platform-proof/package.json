@@ -1,0 +1,27 @@
+{
+  "name": "@openrocket/platform-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "wrangler deploy --dry-run --outdir build",
+    "typecheck": "tsc --noEmit",
+    "measure:local": "node scripts/measure-local.mjs"
+  },
+  "dependencies": {
+    "better-auth": "1.7.25",
+    "@better-auth/drizzle-adapter": "1.7.25",
+    "drizzle-orm": "0.45.4",
+    "hono": "4.13.19"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.8.4",
+    "vitest": "4.1.12",
+    "wrangler": "4.164.0",
+    "typescript": "5.9.3",
+    "@cloudflare/workers-types": "5.20261118.1",
+    "@openrocket/contracts": "0.0.0",
+    "@openrocket/ork-format": "0.0.0",
+    "fflate": "0.8.3"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "openrocket-g1-local-proof",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "assets": { "directory": "public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "openrocket-g1-local", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "openrocket-g1-local-private" }],
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "ProofRoom" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ProofRoom"] }]
+}

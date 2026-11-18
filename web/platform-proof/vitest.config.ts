@@ -1,0 +1,14 @@
+import { cloudflareTest } from '@cloudflare/vitest-plugin';
+import { readD1Migrations } from '@cloudflare/vitest-plugin';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  plugins: [cloudflareTest({
+    wrangler: { configPath: './wrangler.jsonc' },
+    miniflare: { bindings: {
+      TEST_MIGRATIONS: await readD1Migrations('migrations'),
+      AUTH_SECRET: 'local-test-only-secret-longer-than-thirty-two-bytes',
+    } },
+  })],
+  test: { testTimeout: 30000, hookTimeout: 30000 },
+});

@@ -25,6 +25,7 @@ test('late completion retains its input identity; each relevant input makes it s
 test('provenance rejects incomplete/ambiguous manifests and negotiates protocol explicitly', async () => {
   assert.equal(await simulationInputHash(input), await simulationInputHash(Object.fromEntries(Object.entries(input).reverse())));
   await assert.rejects(simulationInputHash({...input, seed: NaN}));
+  await assert.rejects(simulationInputHash({...input, seed: 2147483648}));
   await assert.rejects(simulationInputHash({...input, engineHash: 'missing'}));
   await assert.rejects(simulationInputHash({...input, extra: 'unbound input'}));
   assert.equal(negotiateProtocol([2, 1]), 1);
