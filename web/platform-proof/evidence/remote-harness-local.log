@@ -1,0 +1,33 @@
+npm notice run test
+npm notice run vitest run --reporter=verbose
+
+ RUN  v4.1.12 /tmp/openrocket-g1-platform/web/platform-proof
+
+ ✓ test/remote-harness.test.ts > gates the remote-only one-time harness and exercises setup in local workerd 315ms
+stderr | test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation
+2026-11-18T02:44:02.356Z WARN [Better Auth]: Invalid password
+
+stderr | test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation
+2026-11-18T02:44:02.365Z ERROR [Better Auth]: Invalid origin: https://attacker.test
+
+ ✓ test/platform.test.ts > serves actual static assets and Hono through Workers, with applied D1 migrations 14ms
+ ✓ test/platform.test.ts > rejects public signup, wrong passwords, hostile origins, unauthenticated admin and privilege escalation 87ms
+ ✓ test/platform.test.ts > enforces private R2 membership across known project/file IDs, including global admin 34ms
+ ✓ test/platform.test.ts > hibernates live sockets, reconstructs SQLite state, deduplicates acknowledgments and isolates projects 27ms
+ ✓ test/platform.test.ts > rejects WebSocket origin spoofing and non-members 12ms
+stderr | test/platform.test.ts > supports concurrent admin operations, ban/session revocation, recovery password and expiry
+2026-11-18T02:44:02.684Z WARN [Better Auth]: Invalid password
+
+ ✓ test/platform.test.ts > supports concurrent admin operations, ban/session revocation, recovery password and expiry 434ms
+
+   ❯ test/platform.test.ts:165:17 local-workerd-wall-ms
+     ↳ {"migrate":15,"bootstrapHash":126,"login-admin@example.test":94,"login-owner@example.test":63,"login-stranger@example.test":57,"login-recover@example.test":55}
+
+ ✓ test/platform.test.ts > rechecks revoked sessions on existing sockets and logs out without cached authority 72ms
+ ✓ test/platform.test.ts > binds shared browser results to exact inputs using Workers Web Crypto 4ms
+ ✓ test/platform.test.ts > closes live sockets after suspension or project membership removal 334ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  20:43:56
+   Duration  7.00s (transform 4.13s, setup 0ms, import 8.88s, tests 1.85s, environment 0ms)

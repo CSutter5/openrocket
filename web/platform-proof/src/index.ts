@@ -8,6 +8,7 @@ export interface Bindings {
   ROOMS: DurableObjectNamespace<ProofRoom>;
   ASSETS: Fetcher;
   AUTH_SECRET: string;
+  AUTH_BASE_URL: string;
 }
 interface Identity { userId: string; sessionId: string; projectId: string }
 // Transport persistence probe only; this counter does not validate rocket edits.
@@ -58,7 +59,7 @@ export class ProofRoom extends DurableObject<Bindings> {
     const state = this.state();
     const identity = { userId: session.user.id, sessionId: session.session.id, projectId: state.project };
     if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
-      if (request.headers.get('origin') !== 'https://proof.openrocket.test') return error('forbidden', 'Origin rejected', 403);
+      if (request.headers.get('origin') !== this.env.AUTH_BASE_URL) return error('forbidden', 'Origin rejected', 403);
       const pair = new WebSocketPair();
       this.ctx.acceptWebSocket(pair[1]);
       pair[1].serializeAttachment(identity);
@@ -84,7 +85,7 @@ app.all('/api/auth/*', c => {
 });
 app.get('/health', c => c.json({ runtime: 'workers', protocol: 1, modelSchema: 1 }));
 app.get('/projects/:project/ws', async c => {
-  if (c.req.header('origin') !== 'https://proof.openrocket.test') return error('forbidden', 'Origin rejected', 403);
+  if (c.req.header('origin') !== c.env.AUTH_BASE_URL) return error('forbidden', 'Origin rejected', 403);
   return c.env.ROOMS.getByName(c.req.param('project')).fetch(c.req.raw);
 });
 app.get('/projects/:project/files/:name', async c => {

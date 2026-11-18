@@ -1,0 +1,104 @@
+{
+  "namespace": "g1-feasibility-c6117a0cc36741ac",
+  "startedAt": "2026-11-18T02:39:15.778Z",
+  "phases": [
+    {
+      "action": "1-d1-create",
+      "exitCode": 0,
+      "wallMs": 1420.799589
+    },
+    {
+      "action": "2-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1622.591634
+    },
+    {
+      "action": "3-d1-migrations",
+      "exitCode": 0,
+      "wallMs": 1749.0495050000004
+    },
+    {
+      "action": "4-deploy",
+      "exitCode": 0,
+      "wallMs": 7354.570016
+    },
+    {
+      "action": "5-deploy",
+      "exitCode": 0,
+      "wallMs": 6620.7920460000005
+    },
+    {
+      "action": "6-secret-put",
+      "exitCode": 0,
+      "wallMs": 1403.3745630000012
+    },
+    {
+      "action": "7-secret-put",
+      "exitCode": 0,
+      "wallMs": 1260.3080269999991
+    },
+    {
+      "action": "8-delete-g1-feasibility-c6117a0cc36741ac",
+      "exitCode": 0,
+      "wallMs": 2767.933803
+    },
+    {
+      "action": "9-r2-object",
+      "exitCode": 0,
+      "wallMs": 1168.198605999998
+    },
+    {
+      "action": "10-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1521.136419999999
+    },
+    {
+      "action": "11-d1-delete",
+      "exitCode": 0,
+      "wallMs": 1521.9011109999992
+    },
+    {
+      "action": "12-d1-list",
+      "exitCode": 0,
+      "wallMs": 928.5501369999984
+    },
+    {
+      "action": "13-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1000.0987600000008
+    }
+  ],
+  "checks": [
+    "hosted-health",
+    "hosted-static-asset",
+    "cleanup-D1-absence",
+    "cleanup-R2-absence"
+  ],
+  "cleanup": [
+    "worker-deleted",
+    "r2-bucket-deleted",
+    "d1-deleted"
+  ],
+  "measurements": {
+    "workerStartupMs": 110
+  },
+  "outcome": "failed",
+  "failure": "Remote assertion failed: one-time-operator-setup",
+  "completedAt": "2026-11-18T02:39:46.661Z",
+  "cleanupVerification": {
+    "workerAbsent": true,
+    "durableObjectNamespacesRemaining": 0,
+    "namespaceRowsInspected": 0,
+    "namespacePaginationComplete": true,
+    "exactD1LookupStatus": 404,
+    "exactD1Absent": true,
+    "exactR2LookupStatus": 404,
+    "exactR2Absent": true
+  },
+  "limitation": "The failed setup HTTP status/body was not captured; its cause cannot be classified from this attempt.",
+  "fixture": {
+    "input": "operator setup: three distinct fixture emails and one generated 43-character base64url password; no imported design",
+    "expected": "HTTP200; users+password credentials created, two project-local DOs initialized, one private R2 blob",
+    "passwordHash": "Better Auth default scrypt; no work-factor change"
+  }
+}

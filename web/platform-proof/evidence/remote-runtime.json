@@ -1,0 +1,269 @@
+{
+  "namespace": "g1-feasibility-1d9cca1d9a26885f",
+  "startedAt": "2026-11-18T02:44:20.806Z",
+  "phases": [
+    {
+      "action": "1-d1-create",
+      "exitCode": 0,
+      "wallMs": 1263.9813399999998
+    },
+    {
+      "action": "2-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1455.395513
+    },
+    {
+      "action": "3-d1-migrations",
+      "exitCode": 0,
+      "wallMs": 1642.3978240000001
+    },
+    {
+      "action": "4-d1-execute",
+      "exitCode": 0,
+      "wallMs": 1151.3078700000005
+    },
+    {
+      "action": "5-deploy",
+      "exitCode": 0,
+      "wallMs": 7228.849978
+    },
+    {
+      "action": "6-deploy",
+      "exitCode": 0,
+      "wallMs": 6004.242903000002
+    },
+    {
+      "action": "7-secret-put",
+      "exitCode": 0,
+      "wallMs": 1411.0683219999992
+    },
+    {
+      "action": "8-secret-put",
+      "exitCode": 0,
+      "wallMs": 1698.5055900000007
+    },
+    {
+      "action": "9-delete-g1-feasibility-1d9cca1d9a26885f",
+      "exitCode": 0,
+      "wallMs": 2930.7740909999993
+    },
+    {
+      "action": "10-r2-object",
+      "exitCode": 0,
+      "wallMs": 1145.5707279999988
+    },
+    {
+      "action": "11-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1451.603372999998
+    },
+    {
+      "action": "12-d1-delete",
+      "exitCode": 0,
+      "wallMs": 1464.9278259999992
+    },
+    {
+      "action": "13-d1-list",
+      "exitCode": 0,
+      "wallMs": 1067.9498759999988
+    },
+    {
+      "action": "14-r2-bucket",
+      "exitCode": 0,
+      "wallMs": 1183.8795449999961
+    }
+  ],
+  "checks": [
+    "remote-one-time-marker-table-exists",
+    "hosted-health",
+    "hosted-static-asset",
+    "authenticated-current-version-and-secret-readiness",
+    "one-time-operator-setup",
+    "login-admin",
+    "secure-cookie-admin",
+    "login-owner",
+    "secure-cookie-owner",
+    "login-other",
+    "secure-cookie-other",
+    "private-file-anonymous-denial",
+    "private-file-cross-project-denial",
+    "private-file-admin-denial",
+    "private-R2-owner-download",
+    "role-escalation-denial",
+    "authenticated-CSRF-origin-denial",
+    "hosted-socket-initial-state",
+    "hosted-SQLite-ack",
+    "hosted-reconnect-state",
+    "hosted-dedup",
+    "hosted-admin-suspension",
+    "hosted-live-socket-session-revocation",
+    "hosted-logout",
+    "cleanup-D1-absence",
+    "cleanup-R2-absence",
+    "cleanup-Worker-absence",
+    "cleanup-DO-namespace-absence"
+  ],
+  "cleanup": [
+    "worker-deleted",
+    "r2-bucket-deleted",
+    "d1-deleted"
+  ],
+  "measurements": {
+    "workerStartupMs": 112,
+    "/api/auth/sign-in/email": 426.624366,
+    "/projects/g1-project-a/files/design.ork": 387.34213699999964,
+    "/api/auth/admin/set-role": 126.68552599999748,
+    "/api/auth/sign-out": 299.4760529999985,
+    "/api/auth/admin/ban-user": 412.3062499999978,
+    "hostedUpload": "Total Upload: 2105.24 KiB / gzip: 388.28 KiB"
+  },
+  "outcome": "passed-covered-smoke",
+  "readinessStatus": 200,
+  "setup": {
+    "status": 200,
+    "wallMs": 2399.794952
+  },
+  "tail": {
+    "outcomes": [
+      "ok",
+      "canceled"
+    ],
+    "cpuTimeMs": [
+      1,
+      0,
+      524,
+      166,
+      119,
+      117,
+      5,
+      0,
+      11,
+      12,
+      0,
+      0,
+      12,
+      18,
+      6,
+      3,
+      50,
+      0,
+      3,
+      2,
+      34,
+      1,
+      13,
+      0,
+      3
+    ],
+    "exceededCpuMention": false,
+    "memoryLimitMention": false,
+    "requests": [
+      {
+        "path": "/__g1/setup",
+        "outcome": "ok",
+        "cpuTimeMs": 524,
+        "wallTimeMs": 2295
+      },
+      {
+        "path": "/api/auth/sign-in/email",
+        "outcome": "ok",
+        "cpuTimeMs": 166,
+        "wallTimeMs": 362
+      },
+      {
+        "path": "/api/auth/sign-in/email",
+        "outcome": "ok",
+        "cpuTimeMs": 119,
+        "wallTimeMs": 253
+      },
+      {
+        "path": "/api/auth/sign-in/email",
+        "outcome": "ok",
+        "cpuTimeMs": 117,
+        "wallTimeMs": 256
+      },
+      {
+        "path": "/projects/g1-project-a/files/design.ork",
+        "outcome": "ok",
+        "cpuTimeMs": 5,
+        "wallTimeMs": 5
+      },
+      {
+        "path": "/projects/g1-project-a/files/design.ork",
+        "outcome": "ok",
+        "cpuTimeMs": 11,
+        "wallTimeMs": 105
+      },
+      {
+        "path": "/projects/g1-project-a/files/design.ork",
+        "outcome": "ok",
+        "cpuTimeMs": 12,
+        "wallTimeMs": 132
+      },
+      {
+        "path": "/projects/g1-project-a/files/design.ork",
+        "outcome": "ok",
+        "cpuTimeMs": 12,
+        "wallTimeMs": 311
+      },
+      {
+        "path": "/api/auth/admin/set-role",
+        "outcome": "ok",
+        "cpuTimeMs": 18,
+        "wallTimeMs": 78
+      },
+      {
+        "path": "/api/auth/sign-out",
+        "outcome": "ok",
+        "cpuTimeMs": 6,
+        "wallTimeMs": 7
+      },
+      {
+        "path": "/projects/g1-project-a/ws",
+        "outcome": "ok",
+        "cpuTimeMs": 50,
+        "wallTimeMs": 105
+      },
+      {
+        "path": "/projects/g1-project-a/ws",
+        "outcome": "ok",
+        "cpuTimeMs": 3,
+        "wallTimeMs": 205
+      },
+      {
+        "path": "/api/auth/admin/ban-user",
+        "outcome": "ok",
+        "cpuTimeMs": 34,
+        "wallTimeMs": 315
+      },
+      {
+        "path": "/projects/g1-project-a/ws",
+        "outcome": "ok",
+        "cpuTimeMs": 13,
+        "wallTimeMs": 60
+      },
+      {
+        "path": "/projects/g1-project-a/ws",
+        "outcome": "canceled",
+        "cpuTimeMs": 3,
+        "wallTimeMs": 117
+      }
+    ]
+  },
+  "cleanupVerification": {
+    "workerAbsent": true,
+    "durableObjectNamespacesRemaining": 0,
+    "namespaceRowsInspected": 0,
+    "namespacePaginationComplete": true,
+    "exactD1LookupStatus": 404,
+    "exactD1Absent": true,
+    "exactR2LookupStatus": 404,
+    "exactR2Absent": true
+  },
+  "completedAt": "2026-11-18T02:45:05.374Z",
+  "fixture": {
+    "input": "operator setup: three distinct fixture emails and one generated 43-character base64url password; no imported design",
+    "expected": "HTTP200; users+password credentials created, two project-local DOs initialized, one private R2 blob",
+    "passwordHash": "Better Auth default scrypt; no work-factor change"
+  }
+}

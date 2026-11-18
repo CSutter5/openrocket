@@ -7,7 +7,7 @@ import type { Bindings } from './index';
 
 export function authentication(env: Bindings) {
   return betterAuth({
-    baseURL: 'https://proof.openrocket.test',
+    baseURL: env.AUTH_BASE_URL,
     secret: env.AUTH_SECRET,
     database: drizzleAdapter(drizzle(env.DB, { schema }), { provider: 'sqlite', schema, transaction: false }),
     emailAndPassword: { enabled: true, disableSignUp: true },

@@ -6,7 +6,8 @@
     "test": "vitest run",
     "build": "wrangler deploy --dry-run --outdir build",
     "typecheck": "tsc --noEmit",
-    "measure:local": "node scripts/measure-local.mjs"
+    "measure:local": "node scripts/measure-local.mjs",
+    "smoke:remote": "node scripts/remote-smoke.mjs"
   },
   "dependencies": {
     "better-auth": "1.7.25",
@@ -22,6 +23,7 @@
     "@cloudflare/workers-types": "5.20261118.1",
     "@openrocket/contracts": "0.0.0",
     "@openrocket/ork-format": "0.0.0",
-    "fflate": "0.8.3"
+    "fflate": "0.8.3",
+    "ws": "8.21.0"
   }
 }
