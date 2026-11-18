@@ -12,6 +12,11 @@ responding to review. AI assistance does not replace that responsibility.
 - Choose colors in UI elements, plots, and images so that they remain distinguishable for people with color vision deficiencies (for example, vary lightness as well as hue, and prefer a colorblind-safe palette such as Okabe-Ito). Do not rely on color alone to convey information; add labels, numbers, patterns, or shapes.
 - Put only files the application loads at runtime in `core/src/main/resources` or `swing/src/main/resources`; everything there is packaged into the distribution JARs. Keep editable originals, high-resolution exports, and other branding or design assets in `artwork/` (see [artwork/README.md](artwork/README.md)).
 - Review the entire diff before submitting. Remove generated clutter, redundant comments, scratch files, and changes you cannot explain. Do not submit batches of speculative fixes or generate follow-up PRs without a concrete need.
+- Make focused local commits at coherent, verified checkpoints and before handing off completed work. Stage only the changes you own; coordinate Git mutations when agents share a checkout. Do not push commits, branches, or tags.
+
+## Web application work
+
+Before working on the multiuser web application, read the [general agent guide](docs/web-app/agent-guide.md), then the linked architecture decisions, work packets, and acceptance gates. Keep decisions and handoffs in repository documents so future agents can continue without the chat history.
 
 ## Verification
 

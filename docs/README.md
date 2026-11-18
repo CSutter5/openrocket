@@ -1,5 +1,7 @@
 This directory contains the source files for the OpenRocket documentation, built using Sphinx. It includes both the User Guide and the Developer Guide.
 
+The proposed multiuser browser application architecture, decisions, agent assignments, and acceptance gates are documented in the [web application plan](web-app/README.md).
+
 The latest version of the documentation is available online at [ReadTheDocs](https://openrocket.readthedocs.io/en/latest/).
 
 ---

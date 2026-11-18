@@ -1,0 +1,44 @@
+# General guidance for future agents
+
+This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
+
+## Start a task
+
+1. Read the root [AGENTS.md](../../AGENTS.md) and [CONTRIBUTING.md](../../CONTRIBUTING.md), then any closer directory instructions.
+2. Read the [project plan](README.md), [architecture decisions](architecture.md), [agent work packets](agent-work-plan.md), and [parity requirements](parity-and-validation.md).
+3. Inspect the current branch, working tree, recent local commits, and relevant implementation. Preserve existing changes and identify which work belongs to you. The checkout's current state takes precedence over an old handoff's progress claims.
+4. Choose the next authorized work packet whose prerequisites are satisfied. Identify its owned paths, expected behavior, checks, and handoff before editing. Do not start every packet at once.
+
+At the time this guide was written, the web project consisted of planning documents. No browser engine, web application, authentication, collaboration, or deployment had been verified. The next implementation milestone is G1 feasibility. Update progress using actual commits and evidence rather than assuming this initial status remains current.
+
+## Product context to retain
+
+- Production uses Cloudflare Workers and storage services. The user explicitly excluded Containers and external compute. Java/Node are allowed for development and build-time tooling; production must not require a JVM service.
+- Build a custom browser UI around adapted OpenRocket design and physics logic. The proposed UI stack is React/TypeScript/Vite with SVG and Three.js. TeaVM JavaScript is the first engine adaptation to investigate, not an already verified solution.
+- Users share a project's design and simulation setup. A user runs a simulation in their browser, and saved completed results are available to collaborators without each collaborator rerunning it. Bind results to the exact input snapshot, settings, engine, catalogs, and author. Changes make older results visibly stale. Browser jobs require the running browser to remain available.
+- The proposed backend uses Hono/Workers, Better Auth with D1/Drizzle for accounts and admin management, SQLite-backed Durable Objects for trusted commands and collaboration, and private R2 for files/revisions. Prove compatibility before treating these choices as established infrastructure.
+- Keep `.ork` files compatible with desktop OpenRocket. An expanded archive includes XML, images/decals, embedded motor curves, and other preserved entries. Web membership, history, and identity sidecars stay outside exported desktop files. Keep originals for recovery and write `rocket.ork` first in ZIP exports.
+- Use server-validated commands for shared edits. Preserve structural constraints and setter side effects; untrusted client snapshots are not authority. Autosaved shared drafts and deliberate history commits are separate concepts.
+- Git-style project history means commits, branches, semantic diffs, three-way merges, conflicts, and revert/restore. This application feature is separate from agents committing source changes in this repository.
+- Feature parity targets the pinned desktop baseline in the plan. An early editor demo is an increment. Arbitrary Java plugins, scripting, native integrations, and browser numerical behavior remain explicit feasibility risks; do not silently exclude them or introduce prohibited compute to work around them.
+
+## Commit locally as work progresses; do not push
+
+The user explicitly wants agents to make local commits as often as needed and **not push**. Routine local commits within the authorized task do not need another permission question.
+
+- Make a focused commit whenever a coherent, reviewable change is ready and its appropriate checks have run. Commit useful completed steps before switching tasks or handing work to another agent; do not accumulate an entire workstream into one final commit.
+- Keep code, relevant regression tests, and necessary documentation together when they describe one change. Split unrelated changes. Each implementation commit should remain buildable; keep experiments isolated and clearly describe incomplete or failing work rather than claiming it passes.
+- Before committing, inspect `git status`, review the complete intended diff, run appropriate checks and `git diff --check`, and stage only owned paths or hunks. Review `git diff --cached` so another person's changes are not accidentally included. Avoid blanket staging in a shared dirty checkout.
+- Use descriptive commit messages naming the change and its purpose. Include a real issue number only when one exists. Record meaningful checks, limitations, and decisions in the handoff or relevant project document; never fabricate test results.
+- Work on a dedicated feature branch. Do not commit directly on `unstable`. Do not amend another contributor's commits, reset or rewrite shared history, bypass required hooks/signing, or change repository identity/configuration to force a commit through. If a commit fails, diagnose it and report the actual blocker.
+- Do not run `git push`, publish branches/tags, or otherwise upload commits. Opening/publishing PRs is also outside this local workflow unless the user later requests it. Local commit permission does not grant permission to contact maintainers or deploy infrastructure.
+
+When multiple agents are involved, prefer separate worktrees/branches. If agents share a checkout, one coordinating agent owns index/commit operations; others hand over owned changes and evidence. Do not run concurrent Git mutations or commit unreviewed files from another active agent. The coordinator should still commit completed contributions promptly.
+
+## Decisions, verification, and handoff
+
+Keep changes scoped to the selected packet. Read the relevant implementation before adapting it; maintain desktop build behavior and existing numerical semantics. Record a new or superseding architecture decision when evidence changes a stack choice, contract, data representation, or runtime boundary. Include context, alternatives, reasoning, consequences, and validation. Do not make a speculative abstraction merely to prepare for later packets.
+
+Run checks appropriate to the actual change. Numerical work needs JVM/browser comparisons and independently justified expectations. File work needs semantic and asset comparisons through desktop/web round trips. Collaboration/history need concurrency and recovery cases. Account changes need server-side authorization and isolation checks. UI changes need the affected browser interaction where possible. Report environment limitations and skipped or failed checks plainly. Follow repository rules for live OpenGL tests, resource placement, accessible colors, and AI attribution.
+
+At handoff, state what changed and why, local commit hashes, exact checks and outcomes, decisions/contracts updated, unresolved blockers, and the next ready packet. Link to durable files and fixtures rather than relying on chat history. Confirm whether the working tree is clean and explicitly state that nothing was pushed. A later agent must be able to continue without guessing which changes are complete.
