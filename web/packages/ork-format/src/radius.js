@@ -37,31 +37,82 @@ function ringDependency(archive, tube, preset) {
     require(!preset || automatic.length === 0, 'UNSUPPORTED_RADIUS_INPUT', 'Preset radius proof requires explicit or supported ring dependencies');
     return {};
   }
-  require(children.length === 1 && automatic.length === 1, 'UNSUPPORTED_RADIUS_INPUT', 'Only one automatic geometry dependency is supported');
+  require(children.length <= 2 && automatic.length === children.length && children.every(c => c.component === children[0].component), 'UNSUPPORTED_RADIUS_INPUT', 'Only one automatic geometry dependency is supported');
   const ring = children[0].component;
-  require(ring.name === 'centeringring' && ring.id && children[0].node.name === 'outerradius' &&
+  require(ring.name === 'centeringring' && ring.id && children.some(c => c.node.name === 'outerradius') &&
     !ring.children.some(n => ['preset', 'subcomponents'].includes(n.name)), 'UNSUPPORTED_RADIUS_INPUT', 'Expected one direct child CenteringRing without preset/children');
   require(field(archive, ring, 'outerradius').text === 'auto', 'UNSUPPORTED_RADIUS_INPUT', 'Expected exact automatic outer-radius token');
-  const innerRadius = numeric(field(archive, ring, 'innerradius').text, 'explicit ring inner radius');
+  const innerText = field(archive, ring, 'innerradius').text, innerAutomatic = innerText === 'auto';
+  const innerRadius = innerAutomatic ? 0 : numeric(innerText, 'explicit ring inner radius');
   const length = numeric(field(archive, ring, 'length').text, 'ring length');
   const materials = ring.children.filter(n => n.name === 'material');
   require(materials.length === 1 && materials[0].attributes.type?.value === 'bulk' && !materials[0].children.length,
     'UNSUPPORTED_RADIUS_INPUT', 'Expected one ring bulk material');
   const density = numeric(materials[0].attributes.density?.value ?? '', 'ring density');
-  const position = (name, attribute) => {
-    const nodes = ring.children.filter(n => n.name === name), node = nodes[0];
+  const position = (component, name, attribute) => {
+    const nodes = component.children.filter(n => n.name === name), node = nodes[0];
     require(nodes.length === 1 && !node.selfClosing && !node.children.length && Object.keys(node.attributes).join(',') === attribute &&
       node.attributes[attribute].value === 'top', 'UNSUPPORTED_RADIUS_INPUT', 'Ring must use explicit TOP positioning');
     const raw = archive.xml.slice(node.contentStart, node.contentEnd).trim();
     return numeric(raw, 'ring position');
   };
-  const axialOffset = position('axialoffset', 'method');
-  require(position('position', 'type') === axialOffset, 'UNSUPPORTED_RADIUS_INPUT', 'Legacy/current ring positions disagree');
+  const axialOffset = position(ring, 'axialoffset', 'method');
+  require(position(ring, 'position', 'type') === axialOffset, 'UNSUPPORTED_RADIUS_INPUT', 'Legacy/current ring positions disagree');
   for (const name of ['radialposition', 'radialdirection', 'instanceseparation']) require(numeric(field(archive, ring, name).text, name) === 0,
     'UNSUPPORTED_RADIUS_INPUT', 'Ring must be centered and have no instance separation');
   require(numeric(field(archive, ring, 'instancecount').text, 'instance count') === 1 && length > 0 && length <= 100 &&
     innerRadius >= 0 && innerRadius <= 1 && density > 0 && density <= 50000 && axialOffset >= 0,
     'UNSUPPORTED_RADIUS_INPUT', 'Ring input exceeds proof bounds');
+  let sibling, precedingNoseLength;
+  if (innerAutomatic) {
+    const stages = archive.parsed.components.filter(n => ['stage', 'parallelstage'].includes(n.name));
+    const stage = tube.parent?.parent;
+    require(stages.length === 1 && stage === stages[0] && stage.name === 'stage' && stage.parent?.parent?.name === 'rocket' &&
+      !tube.children.some(n => ['axialoffset', 'position'].includes(n.name)),
+      'UNSUPPORTED_RADIUS_INPUT', 'Sibling proof requires an AFTER parent in the sole direct axial stage');
+    const prefix = archive.parsed.components.filter(n => n.parent === tube.parent);
+    require(prefix.length === 2 && prefix[0].name === 'nosecone' && prefix[1] === tube &&
+      !prefix[0].children.some(n => ['preset', 'axialoffset', 'position'].includes(n.name)),
+      'UNSUPPORTED_RADIUS_INPUT', 'Expected exactly one explicit AFTER nose cone before the tube');
+    precedingNoseLength = numeric(field(archive, prefix[0], 'length').text, 'preceding nose length');
+    require(precedingNoseLength > 0 && precedingNoseLength <= 100, 'UNSUPPORTED_RADIUS_INPUT', 'Preceding nose length outside proof bounds');
+    require(!stage.children.some(n => ['axialoffset', 'position'].includes(n.name)),
+      'UNSUPPORTED_RADIUS_INPUT', 'Explicit axial stage positioning unsupported');
+    const rocket = stage.parent.parent;
+    for (const configuration of rocket.children.filter(n => n.name === 'motorconfiguration')) {
+      const stages = configuration.children.filter(n => n.name === 'stage');
+      require(stages.length <= 1 && stages.every(n => n.selfClosing && Object.keys(n.attributes).sort().join(',') === 'active,number' &&
+        n.attributes.number.value === '0' && n.attributes.active.value === 'true'),
+        'UNSUPPORTED_RADIUS_INPUT', 'Expected the sole stage active in every configuration');
+    }
+    for (const [name, attribute] of [['axialoffset', 'method'], ['position', 'type']]) {
+      const nodes = rocket.children.filter(n => n.name === name), n = nodes[0];
+      require(nodes.length === 1 && !n.selfClosing && !n.children.length && Object.keys(n.attributes).join(',') === attribute &&
+        n.attributes[attribute].value === 'absolute' && numeric(archive.xml.slice(n.contentStart, n.contentEnd).trim(), 'root position') === 0,
+        'UNSUPPORTED_RADIUS_INPUT', 'Sibling proof requires zero root location');
+    }
+    const siblings = archive.parsed.components.filter(n => n.name === 'innertube' && n.parent === ring.parent);
+    require(siblings.length === 1, 'UNSUPPORTED_RADIUS_INPUT', 'Exactly one direct InnerTube sibling required');
+    const n = siblings[0];
+    require(n.id && !n.children.some(c => c.name === 'preset'),
+      'UNSUPPORTED_RADIUS_INPUT', 'Sibling preset unsupported');
+    const read = name => numeric(field(archive, n, name).text, `sibling ${name}`);
+    const siblingLength = read('length'), outerRadius = read('outerradius'), thickness = read('thickness');
+    const axialOffset = position(n, 'axialoffset', 'method');
+    require(position(n, 'position', 'type') === axialOffset && axialOffset >= 0 && siblingLength > 0 && siblingLength <= 100 &&
+      outerRadius > 0 && outerRadius <= 1 && thickness >= 0 && thickness <= outerRadius &&
+      field(archive, n, 'clusterconfiguration').text === 'single' && read('clusterscale') === 1 && read('clusterrotation') === 0 &&
+      read('radialposition') === 0 && read('radialdirection') === 0,
+      'UNSUPPORTED_RADIUS_INPUT', 'Expected explicit centered TOP single-instance sibling');
+    const materials = n.children.filter(c => c.name === 'material');
+    require(materials.length === 1 && materials[0].attributes.type?.value === 'bulk' && !materials[0].children.length,
+      'UNSUPPORTED_RADIUS_INPUT', 'Expected one sibling bulk material');
+    const density = numeric(materials[0].attributes.density?.value ?? '', 'sibling density');
+    require(density > 0 && density <= 50000, 'UNSUPPORTED_RADIUS_INPUT', 'Sibling density outside proof bounds');
+    sibling = { componentId: n.id, parentId: tube.id, length: siblingLength, outerRadius, thickness, density,
+      axialOffset, axialMethod: 'TOP', radialPosition: 0, radialDirection: 0, instanceCount: 1,
+      clusterConfiguration: 'single', clusterScale: 1, clusterRotation: 0 };
+  }
   const rockets = archive.parsed.components.filter(n => n.name === 'rocket');
   require(rockets.length === 1, 'UNSUPPORTED_RADIUS_INPUT', 'Expected one rocket');
   const configurationIds = rockets[0].children.filter(n => n.name === 'motorconfiguration').map(n => n.attributes.configid?.value);
@@ -69,7 +120,7 @@ function ringDependency(archive, tube, preset) {
     configurationIds.every(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id ?? '')),
     'UNSUPPORTED_RADIUS_INPUT', 'Unsupported/ambiguous flight configurations');
   return { ring: { componentId: ring.id, parentId: tube.id, length, innerRadius, density, axialOffset,
-    axialMethod: 'TOP', radialPosition: 0, radialDirection: 0, instanceCount: 1, instanceSeparation: 0 }, configurationIds };
+    axialMethod: 'TOP', radialPosition: 0, radialDirection: 0, instanceCount: 1, instanceSeparation: 0, ...(innerAutomatic ? { innerAutomatic: true, precedingNoseLength, sibling } : {}) }, configurationIds };
 }
 
 function projection(archive, id) {
@@ -105,7 +156,8 @@ function projection(archive, id) {
     'UNSUPPORTED_RADIUS_INPUT', 'Input exceeds the bounded Java radius facade');
   const dependency = ringDependency(archive, tube, preset);
   require(!dependency.ring || (dependency.ring.innerRadius <= (filled ? 0 : outerRadius - wall) &&
-    dependency.ring.axialOffset + dependency.ring.length <= bodyLength), 'UNSUPPORTED_RADIUS_INPUT', 'Ring does not fit its parent tube');
+    dependency.ring.axialOffset + dependency.ring.length <= bodyLength &&
+    (!dependency.ring.sibling || dependency.ring.sibling.axialOffset + dependency.ring.sibling.length <= bodyLength)), 'UNSUPPORTED_RADIUS_INPUT', 'Ring does not fit its parent tube');
   return { input: { schema: 1, componentId: id, length: bodyLength, radius: outerRadius,
     thickness: wall, filled, density, ...(preset ? { preset } : {}), ...dependency }, radius, thickness, preset: presets[0] };
 }
@@ -118,7 +170,7 @@ function validateEdit(archive, input, effects) {
   const current = projection(archive, input.componentId);
   require(Object.entries(current.input).every(([key, value]) => (value !== null && typeof value === 'object' ? JSON.stringify(input[key]) === JSON.stringify(value) : Object.is(input[key], value))),
     'CONFLICT', 'The complete tube radius input changed');
-  require(exactShape(effects, input.ring ? presetEffectKeys.replace(',thickness', ',ring,thickness') : input.preset ? presetEffectKeys : effectKeys) && effects.automatic === false &&
+  require(exactShape(effects, input.ring ? [...presetEffectKeys.split(','), 'ring', ...(input.ring.sibling ? ['sibling'] : [])].sort().join(',') : input.preset ? presetEffectKeys : effectKeys) && effects.automatic === false &&
     effects.preset === (!!input.preset && effects.radius === input.radius) &&
     (!(input.preset || input.ring) || (effects.presetDigest === (effects.preset ? input.preset.digest : null) &&
       effects.length === input.length && effects.density === input.density && effects.filled === input.filled && effects.listeners === 0 &&
@@ -128,14 +180,25 @@ function validateEdit(archive, input, effects) {
     effects.mass >= 0 && effects.cg >= 0 && (!input.filled || effects.thickness === effects.radius),
     'INVALID_RADIUS_EFFECTS', 'Expected bounded intrinsic effects from the trusted Java facade');
   if (input.ring) {
-    require(exactShape(effects.ring, ringEffectKeys) && effects.ring.outerAutomatic === true && effects.ring.innerAutomatic === false && effects.ring.preset === false &&
+    require(exactShape(effects.ring, ringEffectKeys) && effects.ring.outerAutomatic === true && effects.ring.innerAutomatic === !!input.ring.innerAutomatic && effects.ring.preset === false &&
       effects.ring.listeners === 0 && ['outerRadius', 'innerRadius', 'mass', 'cg', 'cgMass', 'thickness', 'positionX',
         'longitudinalUnitInertia', 'rotationalUnitInertia'].every(k => Number.isFinite(effects.ring[k])) &&
       effects.ring.axialMethod === input.ring.axialMethod && effects.ring.axialOffset === input.ring.axialOffset &&
       effects.ring.radialPosition === 0 && effects.ring.radialDirection === 0 && effects.ring.instanceCount === 1 && effects.ring.instanceSeparation === 0 &&
       Array.isArray(effects.ring.bounds) && effects.ring.bounds.length === 6 && effects.ring.bounds.every(Number.isFinite) &&
-      effects.ring.innerRadius === input.ring.innerRadius && effects.ring.length === input.ring.length && effects.ring.density === input.ring.density,
+      (input.ring.innerAutomatic ? effects.ring.innerRadius >= 0 && effects.ring.innerRadius <= effects.ring.outerRadius : effects.ring.innerRadius === input.ring.innerRadius) && effects.ring.length === input.ring.length && effects.ring.density === input.ring.density,
       'INVALID_RADIUS_EFFECTS', 'Expected actual Java automatic ring effects');
+    if (input.ring.sibling) {
+      const sibling = effects.sibling, expected = input.ring.sibling;
+      require(exactShape(sibling, ['parentLocationX', 'length', 'outerRadius', 'innerRadius', 'thickness', 'density', 'mass', 'cg', 'cgMass',
+        'longitudinalUnitInertia', 'rotationalUnitInertia', 'outerAutomatic', 'innerAutomatic', 'axialMethod', 'axialOffset',
+        'positionX', 'radialPosition', 'radialDirection', 'instanceCount', 'clusterConfiguration', 'clusterScale', 'clusterRotation',
+        'preset', 'listeners', 'relativeStart', 'relativeEnd', 'bounds'].sort().join(',')) &&
+        ['length', 'outerRadius', 'thickness', 'density', 'axialMethod', 'axialOffset', 'radialPosition', 'radialDirection',
+          'instanceCount', 'clusterConfiguration', 'clusterScale', 'clusterRotation'].every(k => sibling[k] === expected[k]) &&
+        sibling.parentLocationX === input.ring.precedingNoseLength && sibling.outerAutomatic === false && sibling.innerAutomatic === false && sibling.preset === false && sibling.listeners === 0,
+        'INVALID_RADIUS_EFFECTS', 'Expected actual Java sibling state');
+    }
     require(effects.ring.outerRadius >= effects.ring.innerRadius, 'UNSUPPORTED_RADIUS_INPUT',
       'Edit would make the automatic ring hole larger than its parent; desktop reload would disable automation');
   }

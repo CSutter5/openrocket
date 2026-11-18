@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "records": [
+    {
+      "phase": "fixture generation",
+      "error": "AssertionError: Need leaf sibling",
+      "classification": "harness/input-boundary failure; no accepted desktop geometry mismatch",
+      "resolution": "The existing desktop example has an engine-block child. It is already made explicit by the generator; preserve it because it is outside the getter read set.",
+      "rawLog": null,
+      "rawLogSha256": null,
+      "note": "Original generation log was overwritten by the next experiment; the observed assertion excerpt is retained here."
+    },
+    {
+      "phase": "zero-cap independent bound expectation",
+      "error": "expected [ +0, 0.00390625, +0, +0, +0, +0 ] to deeply equal [ +0, 0.00390625, -0, +0, -0, +0 ]",
+      "classification": "harness/input-boundary failure; no accepted desktop geometry mismatch",
+      "resolution": "JSON serializes signed zero as zero. Canonicalize zero in the independent expected bounds; geometry comparisons remain exact.",
+      "rawLog": "/tmp/g1-sibling-overlap/workerd.log",
+      "rawLogSha256": "70845e59b0e414fbe4ac8c67bf48d9b933698b1dcd1d8d9d1c8458843aaf3295"
+    },
+    {
+      "phase": "parent-position boundary",
+      "error": "TypeError: Cannot read properties of undefined (reading digest)",
+      "classification": "harness/input-boundary failure; no accepted desktop geometry mismatch",
+      "resolution": "The state projection refused the attempted TOP parent. SymmetricComponent.isAfter() forces AFTER through the ordinary event path. Reconstruct the actual nose-cone prefix instead.",
+      "rawLog": "/tmp/g1-sibling-overlap-final/workerd.log",
+      "rawLogSha256": "55909f6e42f24a203bb3125e0761f4b041c07afbb4abd0d99b873d8a794e8fa5",
+      "projectionError": "OrkError: Ring must use explicit TOP positioning"
+    },
+    {
+      "phase": "unsupported duplicate-sibling fixture",
+      "error": "expected 422 to be 200",
+      "classification": "harness/input-boundary failure; no accepted desktop geometry mismatch",
+      "resolution": "Cloning the sibling also cloned its engine-block component ID. Import correctly classified it as preservation-only. Give every cloned component a unique ID before testing multiple-sibling command rejection.",
+      "rawLog": "/tmp/g1-sibling-overlap-final2/workerd.log",
+      "rawLogSha256": "a25e33c585b3dc547f3eeea15883f0d8d12253c54b8ac9470f75c13ccf9fe556"
+    }
+  ],
+  "explicitHoleUnderfitEvidence": "../../packages/ork-format/evidence/automatic-ring-underfit.json",
+  "g1": "hold"
+}

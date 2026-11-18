@@ -26,7 +26,8 @@ const artifacts = {
 export default defineConfig({
   plugins: [cloudflareTest({ wrangler: { configPath: './wrangler.radius.jsonc' }, miniflare: { bindings: {
     TEST_MIGRATIONS: await readD1Migrations('migrations'), AUTH_SECRET: 'local-radius-test-only-secret-longer-than-thirty-two-bytes',
-    EFFECTS_AUTOMATIC_RING: process.env.ORK_EFFECTS_AUTOMATIC_RING === '1',
+    EFFECTS_AUTOMATIC_RING: !!process.env.ORK_EFFECTS_SIBLING_RING || process.env.ORK_EFFECTS_AUTOMATIC_RING === '1',
+    EFFECTS_SIBLING_CASE: process.env.ORK_EFFECTS_SIBLING_RING || '',
     EFFECTS_FIXTURES: fixtures.map(f => f.toString('base64')), EFFECTS_DIGESTS: JSON.parse(process.env.ORK_EFFECTS_DIGESTS || '[]'),
   } } })],
   test: { include: ['effects-proof/integration.ts'], testTimeout: 120000, hookTimeout: 60000, reporters: ['default', artifacts] },

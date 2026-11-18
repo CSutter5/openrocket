@@ -148,3 +148,27 @@ For optional local process measurements on systems with Python's `resource.getru
 Local reducer/codec/oracle checkpoint: `15cc000ed`. G1 remains held for broader automatic graphs (including sibling-dependent automatic inner radii), the underfit reload gap, mutable preference isolation, general catalogs/configurations/extensions, numerical parity, unmeasured hosted CPU/heap, absolute archive resources, desktop identity reconciliation and dependency advisories. The next bounded investigation is the ring's automatic inner-radius dependency on overlapping sibling InnerTubes; keep rejecting that input until its full read/effect set and desktop reload behavior are established. T04–T13 remain gated. No resources were deployed or commits pushed.
 
 AI assistance: Codex using GPT-6 (runtime-supplied family; exact variant unavailable), without subagents, implemented and reviewed this follow-up. Executable workerd, JVM and Node checks supplied verification; no human contributor declaration or PR was submitted.
+
+## Sibling-dependent automatic inner radius
+
+The existing `proof:effects` runner accepts `ORK_EFFECTS_SIBLING_RING=overlap`, `apart-before`, `apart-after`, `partial`, `contact-start` or `contact-end`. These generate desktop-valid both-automatic rings and explicitly sized sibling InnerTubes with different geometry/materials in the two authenticated projects. Exact contact uses binary-exact offsets and lengths; the test asserts actual Java relative endpoints equal zero or the sibling length and independently expects contact to count. Separated fixtures independently expect no hole. Independent annular-cylinder formulas check ring/sibling mass, local CG/CG weight, inertias and bounds, including zero-mass capped rings.
+
+All geometry runs in the pinned Java methods in workerd. The [contract](../../docs/web-app/g1-contracts.md#sibling-dependent-automatic-inner-radius) records sibling selection, absolute/relative positions, instances, outer-radius dependencies and the cap, including the necessary preceding nose-cone length. Only the supported graph is editable. The same endpoint, private R2 preservation and SQLite publication/deduplication transaction are reused. Imported scripts and simulations are never run. Both automatic tokens, sibling/descendant XML, IDs/parents, configuration and motor references, attachments, unknown XML, historical series and sidecar identities remain exact.
+
+Each interval run compares accepted commands with complete relevant actual-document JVM state, primed/repeated geometry reads, event/configuration effects, full desktop serialization and export/reopen/save/reload. It exercises equal-radius preset retention, growth/preset clearing, subsequent shrinkage, binding/nonbinding/zero caps, different interleaved projects, stale sibling preconditions, unsupported imports/commands, eviction and exact retry of both configuration and zero-cap radius commands, simultaneous identical retries and competing radius commands. Rejected commands publish no revision; the transaction-level duplicate recheck still returns two successes with one sequence increment. The older explicit-hole proof is run separately and must continue rejecting underfit edits while retaining its desktop reload failure.
+
+From the isolated `/tmp` worktree, after the documented classpath and engine build:
+
+```sh
+for sibling_case in overlap apart-before apart-after partial contact-start contact-end; do
+  ORK_PROOF_CLASSPATH="$(cat /tmp/g1-inner-classpath.txt)" \
+  ORK_EFFECTS_SIBLING_RING="$sibling_case" \
+  ORK_EFFECTS_OUTPUT="/tmp/g1-sibling-$sibling_case" \
+  python3 web/platform-proof/scripts/measure-imported-effects.py || exit 1
+done
+ORK_PROOF_CLASSPATH="$(cat /tmp/g1-inner-classpath.txt)" \
+ORK_EFFECTS_AUTOMATIC_RING=1 ORK_EFFECTS_OUTPUT=/tmp/g1-explicit-hole-regression \
+python3 web/platform-proof/scripts/measure-imported-effects.py
+```
+
+Create `/tmp/g1-inner-classpath.txt` using `:core:orkProofClasspath` as shown above; the filename is only a development output. Each output directory contains the generated archives, accepted exports, desktop re-saves, full raw comparisons, compact evidence and local process measurements. No hosted resources are used. Request wall times include authentication/archive/storage work; process CPU/RSS include javac/JVM/Vitest/workerd. They do not measure hosted command CPU or isolate heap. G1 remains held for the documented broader parity, preference, interoperability, dependency and budget gaps; no T04–T13 work is authorized by these proofs.

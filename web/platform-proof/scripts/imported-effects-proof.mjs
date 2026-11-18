@@ -7,7 +7,8 @@ import { zipSync, unzipSync, strFromU8, strToU8 } from 'fflate';
 import { importArchive } from '../../packages/ork-format/src/index.js';
 import { PROOF_PRESETS } from '../../packages/ork-format/src/radius.js';
 
-const automaticRing = process.env.ORK_EFFECTS_AUTOMATIC_RING === '1';
+const siblingCase = process.env.ORK_EFFECTS_SIBLING_RING || '';
+const automaticRing = !!siblingCase || process.env.ORK_EFFECTS_AUTOMATIC_RING === '1';
 const root = resolve(import.meta.dirname, '..'), repo = resolve(root, '../..');
 const output = resolve(process.env.ORK_EFFECTS_OUTPUT || resolve(root, 'build/imported-effects'));
 const classpath = process.env.ORK_PROOF_CLASSPATH?.trim();
@@ -38,7 +39,7 @@ await run('javac', ['-cp', classpath, '-d', classes, source('ArchiveDesktopProof
   resolve(engineRoot, 'src/main/java/info/openrocket/core/preset/ProofPresetCatalog.java'), resolve(engineRoot, 'src/main/java/proof/PortableDigest.java')], resolve(output, 'javac.log'));
 const java = [`-Djava.util.prefs.userRoot=${output}/jvm-preferences`, '-cp', classes + delimiter + classpath, 'ImportedEffectsDesktopProof'];
 await run('java', [...java, 'digests'], resolve(output, 'jvm-digests.log'));
-await run('java', [...java, automaticRing ? 'generate-ring' : 'generate', resolve(repo, 'core/src/main/resources/datafiles/examples/A simple model rocket.ork'), output], resolve(output, 'generate.log'));
+await run('java', [...java, automaticRing ? 'generate-ring' : 'generate', resolve(repo, 'core/src/main/resources/datafiles/examples/A simple model rocket.ork'), output, ...(siblingCase ? [siblingCase] : [])], resolve(output, 'generate.log'));
 assert.deepEqual(JSON.parse(await readFile(resolve(output, 'catalog.json'), 'utf8')), PROOF_PRESETS);
 // Add opaque content after desktop generation; preserved lexically even when the
 // desktop loader ignores it. Historical series are unverified fixture data.
@@ -54,7 +55,7 @@ for (const key of ['G1-A', 'G1-B']) {
   await writeFile(path, zipSync(entries, { level: 6, mtime: new Date(1980, 0, 1) }));
 }
 let underfit;
-if (automaticRing) {
+if (automaticRing && !siblingCase) {
   const report = resolve(output, 'underfit/report.json');
   await run('java', [...java, 'probe-ring-underfit', resolve(output, 'G1-A.ork'), report], resolve(output, 'underfit.log'));
   underfit = JSON.parse(await readFile(report, 'utf8'));
@@ -112,9 +113,9 @@ await writeFile(resolve(output, 'evidence.json'), JSON.stringify({ schema: 1, ou
   artifacts: Object.fromEntries(Object.entries(engine.hashes).filter(([p]) => p.endsWith('.js'))), sourceHashes,
   fixtures, catalog: PROOF_PRESETS, stateSnapshots, cases, digestVectors: worker.digestVectors,
   rejectedRequests: worker.rejectedRequests, preservation: worker.preservation, durability: worker.durability,
-  measurements: worker.measurements, automaticRing, underfit, g1: 'hold',
+  measurements: worker.measurements, automaticRing, siblingCase, underfit, g1: 'hold',
   rawEvidence: output, runtime: { node: process.versions.node, java: engine.java, teavm: engine.teavm, workers: worker.runtime },
-  limitations: [automaticRing ? 'One direct automatic-outer/explicit-inner CenteringRing; centered TOP-positioned single instance; underfit edits refused' : 'Bounded two-record preset catalog and explicit geometry', 'One parachute configuration reset, at most 16 configurations',
+  limitations: [siblingCase ? 'One both-automatic ring with one explicit centered TOP single-instance sibling InnerTube' : automaticRing ? 'One direct automatic-outer/explicit-inner CenteringRing; centered TOP-positioned single instance; underfit edits refused' : 'Bounded two-record preset catalog and explicit geometry', 'One parachute configuration reset, at most 16 configurations',
     'No mutable preference isolation policy', 'No hosted reducer CPU, isolate heap or budget-limit proof', 'No simulation rerun or GUI exercise'],
 }, null, 2) + '\n');
 console.log(JSON.stringify({ outcome: 'passed', output, cases: worker.cases.length, rejectedRequests: worker.rejectedRequests, measurements: worker.measurements }));

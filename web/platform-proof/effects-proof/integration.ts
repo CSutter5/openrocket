@@ -9,9 +9,10 @@ import type { Command } from '@openrocket/contracts';
 
 const bindings = env as unknown as RadiusBindings & {
   TEST_MIGRATIONS: import('@cloudflare/vitest-plugin').D1Migration[];
-  EFFECTS_AUTOMATIC_RING: boolean; EFFECTS_FIXTURES: string[]; EFFECTS_DIGESTS: { length: number; digest: string }[];
+  EFFECTS_SIBLING_CASE: string; EFFECTS_AUTOMATIC_RING: boolean; EFFECTS_FIXTURES: string[]; EFFECTS_DIGESTS: { length: number; digest: string }[];
 };
 const automaticRing = bindings.EFFECTS_AUTOMATIC_RING;
+const siblingCase = bindings.EFFECTS_SIBLING_CASE;
 const origin = 'https://proof.openrocket.test';
 const password = 'a-long-radius-proof-password-only';
 const fromBase64 = (text: string) => Uint8Array.from(atob(text), character => character.charCodeAt(0));
@@ -79,7 +80,8 @@ it('proves preset clearing and configuration-dependent reset through the authent
   expect(initial[0].recovery[0].default.altitude).not.toBe(initial[1].recovery[0].default.altitude);
   if (automaticRing) {
     expect(initial[0].tubes[0].ring.density).not.toBe(initial[1].tubes[0].ring.density);
-    expect(initial[0].tubes[0].ring.innerRadius).not.toBe(initial[1].tubes[0].ring.innerRadius);
+    if (siblingCase) expect(initial[0].tubes[0].ring.sibling.outerRadius).not.toBe(initial[1].tubes[0].ring.sibling.outerRadius);
+    else expect(initial[0].tubes[0].ring.innerRadius).not.toBe(initial[1].tubes[0].ring.innerRadius);
   }
   const exports: { name: string; base64: string }[] = [], cases: any[] = [], timings: any[] = [];
   const source = ['G1-A.ork', 'G1-B.ork'];
@@ -105,16 +107,30 @@ it('proves preset clearing and configuration-dependent reset through the authent
       if (automaticRing) {
         const r = tube.ring, actual = after.ring;
         expect(actual.outerRadius).toBe(inner);
-        expect(actual.innerRadius).toBe(r.innerRadius);
-        expect(actual.outerAutomatic).toBe(true); expect(actual.innerAutomatic).toBe(false);
-        const ringMass = Math.PI * Math.max(inner ** 2 - r.innerRadius ** 2, 0) * r.length * r.density;
+        // Independently specified interval cases and annular-cylinder formulas;
+        // no production TypeScript geometry implementation is used.
+        const hole = siblingCase ? (siblingCase.startsWith('apart-') ? 0 : Math.min(inner, i === 0 ? 0.0095 : 0.012)) : r.innerRadius;
+        expect(actual.innerRadius).toBe(hole);
+        expect(actual.outerAutomatic).toBe(true); expect(actual.innerAutomatic).toBe(!!siblingCase);
+        const ringMass = Math.PI * Math.max(inner ** 2 - hole ** 2, 0) * r.length * r.density;
         expect(Math.abs(actual.mass - ringMass)).toBeLessThan(1e-12);
         expect(actual.cg).toBe(r.length / 2); expect(actual.cgMass).toBe(actual.mass);
-        expect(actual.bounds).toEqual([0, r.length, -inner, inner, -inner, inner]);
+        expect(actual.bounds).toEqual([0, r.length, -inner || 0, inner, -inner || 0, inner]);
         expect(actual.positionX).toBe(r.axialOffset);
-        expect(actual.thickness).toBe(Math.max(inner - r.innerRadius, 0));
-        expect(Math.abs(actual.longitudinalUnitInertia - (3 * (inner ** 2 + r.innerRadius ** 2) + r.length ** 2) / 12)).toBeLessThan(1e-12);
-        expect(Math.abs(actual.rotationalUnitInertia - (inner ** 2 + r.innerRadius ** 2) / 2)).toBeLessThan(1e-12);
+        expect(actual.thickness).toBe(Math.max(inner - hole, 0));
+        expect(Math.abs(actual.longitudinalUnitInertia - (3 * (inner ** 2 + hole ** 2) + r.length ** 2) / 12)).toBeLessThan(1e-12);
+        expect(Math.abs(actual.rotationalUnitInertia - (inner ** 2 + hole ** 2) / 2)).toBeLessThan(1e-12);
+        if (siblingCase) {
+          const sibling = after.sibling, expected = r.sibling;
+          expect(sibling).toEqual(ack.intrinsic.before.sibling);
+          const ri = expected.outerRadius - expected.thickness;
+          expect(Math.abs(sibling.mass - Math.PI * (expected.outerRadius ** 2 - ri ** 2) * expected.length * expected.density)).toBeLessThan(1e-12);
+          expect(sibling.cg).toBe(expected.length / 2); expect(sibling.cgMass).toBe(sibling.mass);
+          expect(Math.abs(sibling.longitudinalUnitInertia - (3 * (expected.outerRadius ** 2 + ri ** 2) + expected.length ** 2) / 12)).toBeLessThan(1e-12);
+          expect(Math.abs(sibling.rotationalUnitInertia - (expected.outerRadius ** 2 + ri ** 2) / 2)).toBeLessThan(1e-12);
+          if (siblingCase === 'contact-start') expect(sibling.relativeStart).toBe(expected.length);
+          if (siblingCase === 'contact-end') expect(sibling.relativeEnd).toBe(0);
+        }
         const changed = after.radius !== tube.radius;
         expect(ack.intrinsic.configurationChanged).toEqual(tube.configurationIds.map(() => changed));
         expect(ack.intrinsic.rocketChanged).toEqual({ document: changed, mass: changed, aerodynamic: changed, tree: false, functional: changed });
@@ -196,7 +212,7 @@ it('proves preset clearing and configuration-dependent reset through the authent
       const n = ring.children.find(n => n.name === name)!;
       return originals[0].xml.slice(0, n.contentStart) + text + originals[0].xml.slice(n.contentEnd);
     };
-    for (const [i, xml] of [replaceField('innerradius', 'auto'), replaceField('instancecount', '2'), replaceField('radialposition', '0.1'),
+    for (const [i, xml] of [replaceField('innerradius', siblingCase ? 'auto 0.01' : 'auto'), replaceField('instancecount', '2'), replaceField('radialposition', '0.1'),
       replaceField('position', '0.021'), replaceField('outerradius', 'auto 0.029')].entries()) {
       const project = `ring-unsupported-${i}`, bytes = new TextEncoder().encode(xml);
       await bindings.RADIUS_ROOMS.getByName(project).initialize(project, users[0].id);
@@ -205,10 +221,47 @@ it('proves preset clearing and configuration-dependent reset through the authent
       expect(new Uint8Array(await (await request(project, 'export', users[0].cookie)).arrayBuffer())).toEqual(bytes);
       rejectedRequests++;
     }
-    const underfit = command(initial[0], 'ring-underfit', radius(0, 0.0005));
-    const response = await request(projects[0], 'commands', users[0].cookie, underfit);
-    expect(response.status, await response.clone().text()).toBe(422); rejectedRequests++;
-    expect(new Uint8Array(await (await request(projects[0], 'export', users[0].cookie)).arrayBuffer())).toEqual(fromBase64(bindings.EFFECTS_FIXTURES[0]));
+    if (siblingCase) {
+      const input = initial[0].tubes[0].ring.sibling;
+      const sibling = originals[0].parsed.components.find(n => n.id === input.componentId)!;
+      const replace = (name: string, text: string) => {
+        const n = sibling.children.find(n => n.name === name)!;
+        return originals[0].xml.slice(0, n.contentStart) + text + originals[0].xml.slice(n.contentEnd);
+      };
+      const raw = originals[0].xml.slice(sibling.start, sibling.end);
+      let duplicateId = 1;
+      const duplicate = raw.replace(/<id>[^<]+<\/id>/g, () => `<id>3000000${++duplicateId}-0000-4000-8000-000000000000</id>`);
+      const unsupported = [replace('outerradius', 'auto'), replace('length', 'NaN'), replace('thickness', 'filled'),
+        replace('clusterconfiguration', 'double'), replace('clusterscale', '2'), replace('clusterrotation', '45'),
+        replace('radialposition', '0.001'), replace('position', '0.001'),
+        originals[0].xml.replace(raw, ''), originals[0].xml.replace(raw, raw + duplicate)];
+      for (const [index, xml] of unsupported.entries()) {
+        const project = `sibling-unsupported-${index}`, bytes = new TextEncoder().encode(xml);
+        const stub = bindings.RADIUS_ROOMS.getByName(project);
+        await stub.initialize(project, users[0].id);
+        expect((await request(project, 'import', users[0].cookie, bytes)).status).toBe(200);
+        expect((await request(project, 'commands', users[0].cookie, { ...sample, projectId: project, preconditions: [] })).status).toBe(422);
+        const exported = await request(project, 'export', users[0].cookie);
+        expect(exported.headers.get('x-workspace-sequence')).toBe('0');
+        expect(new Uint8Array(await exported.arrayBuffer())).toEqual(bytes);
+        await runInDurableObject(stub, (_room: RadiusRoom, ctx) => {
+          expect(ctx.storage.sql.exec('SELECT COUNT(*) AS count FROM radius_operations').one().count).toBe(0);
+        });
+        rejectedRequests++;
+      }
+      for (const field of ['length', 'outerRadius', 'thickness', 'density', 'axialOffset', 'parentId']) {
+        const preconditions = sample.preconditions.map(p => p.field === 'ring' ? { ...p, expected: { ...(p.expected as any),
+          sibling: { ...input, [field]: field === 'parentId' ? projects[1] : input[field] + 0.001 } } } : p);
+        expect((await request(projects[0], 'commands', users[0].cookie, { ...sample, preconditions })).status).toBe(409);
+        rejectedRequests++;
+      }
+    }
+    if (!siblingCase) {
+      const underfit = command(initial[0], 'ring-underfit', radius(0, 0.0005));
+      const response = await request(projects[0], 'commands', users[0].cookie, underfit);
+      expect(response.status, await response.clone().text()).toBe(422); rejectedRequests++;
+      expect(new Uint8Array(await (await request(projects[0], 'export', users[0].cookie)).arrayBuffer())).toEqual(fromBase64(bindings.EFFECTS_FIXTURES[0]));
+    }
     for (const preconditions of [sample.preconditions.filter(p => p.field !== 'ring'), sample.preconditions.map(p => p.field === 'ring'
       ? { ...p, expected: { ...(p.expected as any), density: (p.expected as any).density + 1 } } : p)]) {
       expect((await request(projects[0], 'commands', users[0].cookie, { ...sample, preconditions })).status).toBe(409); rejectedRequests++;
@@ -247,6 +300,19 @@ it('proves preset clearing and configuration-dependent reset through the authent
   const shrink = await accepted(0, 'preset-shrink', radius(0, automaticRing ? 0.012 : 0.0005));
   expect(shrink.ack.intrinsic).toMatchObject({ before: { preset: !automaticRing }, after: { preset: false, presetDigest: null,
     thickness: automaticRing ? initial[0].tubes[0].thickness : 0.0005 } });
+  if (siblingCase) {
+    await accepted(0, 'cap-binding', radius(0, 0.008));
+    const zero = await accepted(0, 'zero-cap', radius(0, 0.0005));
+    await evictDurableObject(stub);
+    const rehydrated = await state(0);
+    expect(rehydrated.instance).not.toBe(zero.after.instance);
+    expect(rehydrated.sequence).toBe(zero.ack.sequence);
+    expect(rehydrated.tubes).toEqual(zero.after.tubes);
+    expect(await (await request(projects[0], 'commands', users[0].cookie, zero.body)).json()).toEqual({ ...zero.ack, duplicate: true });
+    expect((await state(0)).sequence).toBe(zero.ack.sequence);
+    await accepted(0, 'cap-released', radius(0, 0.02));
+  }
+  const aFinal = await state(0);
   const bEqual = await accepted(1, 'b-preset-equal', radius(1, initial[1].tubes[0].radius));
   expect(bEqual.ack.intrinsic.after.presetDigest).toBe(initial[1].tubes[0].preset.digest);
   await accepted(1, 'b-preset-clear', radius(1, 0.041));
@@ -281,13 +347,13 @@ it('proves preset clearing and configuration-dependent reset through the authent
   await restore(); expect((await state(1)).sequence).toBe(current.sequence + 1);
   filename = 'simultaneous-retry.ork'; exports.push({ name: filename, base64: toBase64(await archiveBytes(1)) });
   cases.push({ name: 'simultaneous-retry', source: source[1], export: filename, edit: retry.edit, ack: acks[0] });
-  expect((await state(0)).archiveHash).toBe(shrink.ack.archiveHash);
+  expect((await state(0)).archiveHash).toBe(aFinal.archiveHash);
   await runInDurableObject(otherStub, (_room: RadiusRoom, ctx) => {
     expect(ctx.storage.sql.exec('SELECT COUNT(*) AS count FROM radius_operations').one().count).toBe(current.sequence + 1);
   });
-  await context.annotate(JSON.stringify({ schema: 1, automaticRing, runtime: 'actual local workerd', cases, exports, rejectedRequests,
+  await context.annotate(JSON.stringify({ schema: 1, automaticRing, siblingCase, runtime: 'actual local workerd', cases, exports, rejectedRequests,
     presetCatalog: initial.map(s => s.tubes[0].preset), digestVectors: bindings.EFFECTS_DIGESTS.length,
     preservation: { lexical: true, attachments: true, ids: true, sidecar: true, flightdata: true, scriptsUnexecuted: true },
-    durability: { evictionRetry: true, concurrentIdenticalRetry: true, competingCommands: true, interleavedDifferentProjects: true },
+    durability: { evictionRetry: true, ...(siblingCase ? { radiusEvictionRetry: true } : {}), concurrentIdenticalRetry: true, competingCommands: true, interleavedDifferentProjects: true },
     measurements: { totalLocalWallMs: performance.now() - started, commands: timings, hostedCpu: null, isolateHeap: null } }), 'effects-proof-artifacts');
 });

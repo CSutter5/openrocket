@@ -125,3 +125,28 @@ test('underfitting ring edits and stale ring density reject before changing pres
   await assert.rejects(applyTubeRadius(original, input, { ...ringEffects(0.035), ring: { ...ringEffects(0.035).ring, extra: true } }), { code: 'INVALID_RADIUS_EFFECTS' });
   assert.equal(original.xml, automaticXml);
 });
+
+const siblingId = '30000001-0000-4000-8000-000000000000';
+const siblingXml = `<innertube><name>Sibling</name><id>${siblingId}</id><axialoffset method="top">0.015625</axialoffset><position type="top">0.015625</position><material type="bulk" density="600">Sibling bulk</material><length>0.0625</length><radialposition>0</radialposition><radialdirection>0</radialdirection><outerradius>0.0095</outerradius><thickness>0.0005</thickness><clusterconfiguration>single</clusterconfiguration><clusterscale>1</clusterscale><clusterrotation>0</clusterrotation></innertube>`;
+const bothXml = automaticXml.replace(`<id>${rocket}</id>`, `<id>${rocket}</id><axialoffset method="absolute">0</axialoffset><position type="absolute">0</position>`)
+  .replace('<subcomponents><bodytube>', '<subcomponents><stage><name>Stage</name><id>40000000-0000-4000-8000-000000000000</id><subcomponents><nosecone><name>Nose</name><id>40000001-0000-4000-8000-000000000000</id><length>0.07</length></nosecone><bodytube>')
+  .replace('</bodytube></subcomponents></rocket>', '</bodytube></subcomponents></stage></subcomponents></rocket>')
+  .replace(ringXml, ringXml.replace('<innerradius>0.006</innerradius>', '<innerradius>auto</innerradius>') + siblingXml);
+
+test('both-automatic ring captures complete identified sibling inputs and requires the bounded location graph', async () => {
+  const input = tubeRadiusInput(await archive(bothXml), tube);
+  assert.equal(input.ring.innerAutomatic, true);
+  assert.equal(input.ring.precedingNoseLength, 0.07);
+  assert.deepEqual(input.ring.sibling, { componentId: siblingId, parentId: tube, length: 0.0625, outerRadius: 0.0095, thickness: 0.0005,
+    density: 600, axialOffset: 0.015625, axialMethod: 'TOP', radialPosition: 0, radialDirection: 0, instanceCount: 1,
+    clusterConfiguration: 'single', clusterScale: 1, clusterRotation: 0 });
+  for (const source of [bothXml.replace(siblingXml, ''), bothXml.replace(siblingXml, siblingXml + siblingXml.replace(siblingId, '30000002-0000-4000-8000-000000000000')),
+    ...['<clusterconfiguration>single</clusterconfiguration>', '<clusterscale>1</clusterscale>', '<clusterrotation>0</clusterrotation>',
+      '<outerradius>0.0095</outerradius>', '<length>0.0625</length>', '<thickness>0.0005</thickness>', '<radialposition>0</radialposition>',
+      '<position type="top">0.015625</position>'].map(field => bothXml.replace(siblingXml, siblingXml.replace(field, field.replace(/>[^<]*</, '>NaN<')))),
+    bothXml.replace('method="absolute">0', 'method="absolute">1'), bothXml.replace('<length>0.07</length>', '<length>NaN</length>'),
+    bothXml.replace(siblingXml, siblingXml.replace('<clusterscale>', '<clusterscale>1</clusterscale><clusterscale>'))]) {
+    const imported = await archive(source);
+    assert.throws(() => tubeRadiusInput(imported, tube), { code: 'UNSUPPORTED_RADIUS_INPUT' });
+  }
+});

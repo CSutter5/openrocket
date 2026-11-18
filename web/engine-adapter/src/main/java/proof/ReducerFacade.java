@@ -13,6 +13,12 @@ public final class ReducerFacade {
             boolean filled, double density, double ringLength, double ringInner, double ringDensity, double offset, String configurations, double value) {
         return ImportedRingProof.radiusEdit(key, digest, length, radius, thickness, filled, density, ringLength, ringInner, ringDensity, offset, configurations, value);
     }
+    @JSExport public static String siblingRingRadiusEdit(String key, String digest, double length, double radius, double thickness,
+            boolean filled, double density, double ringLength, double ringDensity, double offset, String configurations, double value,
+            double siblingLength, double siblingRadius, double siblingThickness, double siblingDensity, double siblingOffset, double precedingNoseLength) {
+        return ImportedRingProof.siblingRadiusEdit(key, digest, length, radius, thickness, filled, density, ringLength, ringDensity,
+            offset, configurations, value, siblingLength, siblingRadius, siblingThickness, siblingDensity, siblingOffset, precedingNoseLength);
+    }
     @JSExport public static String resetDeployment(String event, double altitude, double delay, String overrides, String configurations, String selected) {
         return ImportedDeploymentProof.resetDeployment(event, altitude, delay, overrides, configurations, selected);
     }

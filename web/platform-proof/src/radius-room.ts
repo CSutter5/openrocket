@@ -2,7 +2,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { importArchive, exportArchive, sha256, LIMITS } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects } from '../../packages/ork-format/src/radius.js';
 import { deploymentInput, applyDeploymentReset, deploymentSimulationEffects } from '../../packages/ork-format/src/deployment.js';
-import { radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, resetDeployment } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit, resetDeployment } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { authentication } from './auth';
 import type { Bindings } from './index';
 import type { Command, AcceptedCommand, IdentitySidecar } from '@openrocket/contracts';
@@ -150,7 +150,11 @@ export class RadiusRoom extends DurableObject<RadiusBindings> {
       const domainEffects: AcceptedCommand['effects'] = [];
       if (radiusCommand) {
         const tube = tubeRadiusInput(archive, input.edit.componentId);
-        effects = JSON.parse(tube.ring
+        effects = JSON.parse(tube.ring?.sibling
+          ? siblingRingRadiusEdit(tube.preset?.key ?? '', tube.preset?.digest ?? '', tube.length, tube.radius, tube.thickness,
+            tube.filled, tube.density, tube.ring.length, tube.ring.density, tube.ring.axialOffset, tube.configurationIds!.join(';'), input.edit.value,
+            tube.ring.sibling.length, tube.ring.sibling.outerRadius, tube.ring.sibling.thickness, tube.ring.sibling.density, tube.ring.sibling.axialOffset, tube.ring.precedingNoseLength!)
+          : tube.ring
           ? automaticRingRadiusEdit(tube.preset?.key ?? '', tube.preset?.digest ?? '', tube.length, tube.radius, tube.thickness,
             tube.filled, tube.density, tube.ring.length, tube.ring.innerRadius, tube.ring.density, tube.ring.axialOffset, tube.configurationIds!.join(';'), input.edit.value)
           : tube.preset

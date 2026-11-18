@@ -5,7 +5,7 @@ import info.openrocket.core.rocketcomponent.*;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
 import info.openrocket.core.util.ModID;
 
-/** One imported child CenteringRing with automatic outer radius and explicit inner radius. */
+/** Bounded imported CenteringRing, optionally reading one explicit sibling InnerTube. */
 public final class ImportedRingProof {
     private ImportedRingProof() { }
 
@@ -26,6 +26,7 @@ public final class ImportedRingProof {
         var bounds = ring.getInstanceBoundingBox();
         var cg = ring.getComponentCG();
         String state = ImportedTubeProof.presetSnapshot(tube);
+        if (ring.isInnerRadiusAutomatic()) state = state.substring(0, state.length() - 1) + ",\"sibling\":" + siblingSnapshot(tube, ring) + "}";
         return state.substring(0, state.length() - 1) + ",\"ring\":{\"outerRadius\":" + ring.getOuterRadius()
             + ",\"innerRadius\":" + ring.getInnerRadius() + ",\"outerAutomatic\":" + ring.isOuterRadiusAutomatic()
             + ",\"innerAutomatic\":" + ring.isInnerRadiusAutomatic() + ",\"thickness\":" + ring.getThickness()
@@ -45,17 +46,74 @@ public final class ImportedRingProof {
     public static String radiusEdit(String key, String digest, double length, double radius, double thickness,
                                      boolean filled, double density, double ringLength, double ringInner,
                                      double ringDensity, double offset, String configurations, double value) {
+        return radiusEdit(key, digest, length, radius, thickness, filled, density, ringLength, ringInner, ringDensity,
+            offset, configurations, value, false, 0, 0, 0, 0, 0, 0);
+    }
+
+    public static String siblingRadiusEdit(String key, String digest, double length, double radius, double thickness,
+            boolean filled, double density, double ringLength, double ringDensity, double offset, String configurations, double value,
+            double siblingLength, double siblingRadius, double siblingThickness, double siblingDensity, double siblingOffset, double precedingNoseLength) {
+        return radiusEdit(key, digest, length, radius, thickness, filled, density, ringLength, 0, ringDensity, offset,
+            configurations, value, true, siblingLength, siblingRadius, siblingThickness, siblingDensity, siblingOffset, precedingNoseLength);
+    }
+
+    static String siblingSnapshot(BodyTube tube, CenteringRing ring) {
+        InnerTube sibling = null;
+        for (var child : tube.getChildren()) if (child instanceof InnerTube inner) {
+            if (sibling != null) throw new IllegalArgumentException("Multiple InnerTube siblings");
+            sibling = inner;
+        }
+        if (sibling == null) throw new IllegalArgumentException("InnerTube sibling required");
+        var bounds = sibling.getInstanceBoundingBox();
+        return "{\"parentLocationX\":" + tube.getComponentLocations()[0].getX() + ",\"length\":" + sibling.getLength() + ",\"outerRadius\":" + sibling.getOuterRadius()
+            + ",\"innerRadius\":" + sibling.getInnerRadius() + ",\"thickness\":" + sibling.getThickness()
+            + ",\"density\":" + sibling.getMaterial().getDensity() + ",\"mass\":" + sibling.getComponentMass()
+            + ",\"cg\":" + sibling.getComponentCG().getX() + ",\"cgMass\":" + sibling.getComponentCG().getWeight()
+            + ",\"longitudinalUnitInertia\":" + sibling.getLongitudinalUnitInertia()
+            + ",\"rotationalUnitInertia\":" + sibling.getRotationalUnitInertia()
+            + ",\"outerAutomatic\":" + sibling.isOuterRadiusAutomatic() + ",\"innerAutomatic\":" + sibling.isInnerRadiusAutomatic()
+            + ",\"axialMethod\":\"" + sibling.getAxialMethod().name() + "\",\"axialOffset\":" + sibling.getAxialOffset()
+            + ",\"positionX\":" + sibling.getPosition().getX() + ",\"radialPosition\":" + sibling.getRadialPosition()
+            + ",\"radialDirection\":" + sibling.getRadialDirection() + ",\"instanceCount\":" + sibling.getInstanceCount()
+            + ",\"clusterConfiguration\":\"" + sibling.getClusterConfiguration().getXMLName() + "\",\"clusterScale\":" + sibling.getClusterScale()
+            + ",\"clusterRotation\":" + sibling.getClusterRotation() + ",\"preset\":" + (sibling.getPresetComponent() != null)
+            + ",\"listeners\":" + sibling.getConfigListeners().size()
+            + ",\"relativeStart\":" + ring.toRelative(info.openrocket.core.util.Coordinate.NUL, sibling)[0].getX()
+            + ",\"relativeEnd\":" + ring.toRelative(new info.openrocket.core.util.Coordinate(ring.getLength()), sibling)[0].getX()
+            + ",\"bounds\":[" + bounds.min.getX() + "," + bounds.max.getX() + "," + bounds.min.getY() + "," + bounds.max.getY()
+            + "," + bounds.min.getZ() + "," + bounds.max.getZ() + "]}";
+    }
+
+    private static String radiusEdit(String key, String digest, double length, double radius, double thickness,
+            boolean filled, double density, double ringLength, double ringInner, double ringDensity, double offset,
+            String configurations, double value, boolean automaticInner, double siblingLength, double siblingRadius,
+            double siblingThickness, double siblingDensity, double siblingOffset, double precedingNoseLength) {
         BodyTube tube = ImportedTubeProof.importedTube(key, digest, length, radius, thickness, filled, density);
+        if (automaticInner) {
+            if (!Double.isFinite(precedingNoseLength) || precedingNoseLength <= 0 || precedingNoseLength > 100
+                    || !Double.isFinite(siblingLength) || siblingLength <= 0 || siblingLength > length
+                    || !Double.isFinite(siblingRadius) || siblingRadius <= 0 || siblingRadius > 1
+                    || !Double.isFinite(siblingThickness) || siblingThickness < 0 || siblingThickness > siblingRadius
+                    || !Double.isFinite(siblingDensity) || siblingDensity <= 0 || siblingDensity > 50000
+                    || !Double.isFinite(siblingOffset) || siblingOffset < 0 || siblingOffset + siblingLength > length)
+                throw new IllegalArgumentException("Sibling outside proof bounds");
+            InnerTube sibling = new InnerTube(); tube.addChild(sibling);
+            sibling.setLength(siblingLength); sibling.setOuterRadius(siblingRadius); sibling.setThickness(siblingThickness);
+            sibling.setMaterial(Material.newMaterial(Material.Type.BULK, "Imported sibling bulk", siblingDensity, false));
+            sibling.setAxialMethod(AxialMethod.TOP); sibling.setAxialOffset(siblingOffset);
+        }
         if (!Double.isFinite(value) || value <= 0 || value > 1 || !Double.isFinite(ringLength) || ringLength <= 0 || ringLength > length
                 || !Double.isFinite(ringInner) || ringInner < 0 || ringInner > tube.getInnerRadius()
                 || !Double.isFinite(ringDensity) || ringDensity <= 0 || ringDensity > 50000
                 || !Double.isFinite(offset) || offset < 0 || offset + ringLength > length) {
             throw new IllegalArgumentException("Automatic ring inputs outside proof bounds");
         }
-        Rocket rocket = new Rocket(); AxialStage stage = new AxialStage(); rocket.addChild(stage); stage.addChild(tube);
+        Rocket rocket = new Rocket(); AxialStage stage = new AxialStage(); rocket.addChild(stage);
+        if (automaticInner) { NoseCone nose = new NoseCone(); nose.setLength(precedingNoseLength); stage.addChild(nose); }
+        stage.addChild(tube);
         CenteringRing ring = new CenteringRing(); tube.addChild(ring);
         ring.setLength(ringLength); ring.setMaterial(Material.newMaterial(Material.Type.BULK, "Imported ring bulk", ringDensity, false));
-        ring.setInnerRadius(ringInner); ring.setInnerRadiusAutomatic(false); ring.setOuterRadiusAutomatic(true);
+        ring.setInnerRadius(ringInner); ring.setInnerRadiusAutomatic(automaticInner); ring.setOuterRadiusAutomatic(true);
         ring.setAxialMethod(AxialMethod.TOP); ring.setAxialOffset(offset);
         String[] keys = configurations.split(";");
         if (keys.length < 1 || keys.length > 16) throw new IllegalArgumentException("Configuration count outside proof bounds");
@@ -69,6 +127,7 @@ public final class ImportedRingProof {
         rocket.enableEvents();
         // Prime the actual getters/derived geometry before applying the parent setter.
         String before = snapshot(tube);
+        if (!before.equals(snapshot(tube))) throw new IllegalStateException("Unstable primed geometry reads");
         ModID[] rootMods = ImportedDeploymentProof.modificationIds(rocket), mods = new ModID[ids.length];
         for (int i = 0; i < ids.length; i++) mods[i] = rocket.getFlightConfiguration(ids[i]).getModID();
         tube.setOuterRadius(value);

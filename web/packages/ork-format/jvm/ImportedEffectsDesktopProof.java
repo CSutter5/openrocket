@@ -32,7 +32,7 @@ public class ImportedEffectsDesktopProof {
         for (var c : doc.getRocket()) if (c instanceof BodyTube t) return t;
         throw new AssertionError("Fixture requires a body tube");
     }
-    static void generate(String source, Path output, boolean automaticRing) throws Exception {
+    static void generate(String source, Path output, boolean automaticRing, String siblingCase) throws Exception {
         List<Object> catalog = new ArrayList<>();
         for (String key : List.of("G1-A", "G1-B")) {
             var preset = ProofPresetCatalog.preset(key);
@@ -57,6 +57,34 @@ public class ImportedEffectsDesktopProof {
                 selected.setInnerRadius(key.equals("G1-A") ? 0.006 : 0.01); selected.setInnerRadiusAutomatic(false);
                 selected.setAxialMethod(info.openrocket.core.rocketcomponent.position.AxialMethod.TOP);
                 selected.setAxialOffset(key.equals("G1-A") ? 0.02 : 0.04); selected.setOuterRadiusAutomatic(true);
+            }
+            if (!siblingCase.isEmpty()) {
+                var ring = ImportedRingProof.ring(target);
+                InnerTube sibling = null;
+                for (var child : target.getChildren()) if (child instanceof InnerTube inner) {
+                    ArchiveDesktopProof.require(sibling == null, "Ambiguous sibling fixture"); sibling = inner;
+                }
+                ArchiveDesktopProof.require(sibling != null, "Need sibling");
+                boolean second = key.equals("G1-B");
+                ring.setLength(second ? 0.0078125 : 0.00390625);
+                ring.setAxialOffset(second ? 0.25 : 0.125);
+                sibling.setLength(second ? 0.09375 : 0.0625);
+                sibling.setOuterRadius(second ? 0.012 : 0.0095); sibling.setThickness(second ? 0.00075 : 0.0005);
+                sibling.setMaterial(info.openrocket.core.material.Material.newMaterial(info.openrocket.core.material.Material.Type.BULK,
+                    "G1 sibling bulk", second ? 800 : 600, false));
+                sibling.setClusterConfiguration(ClusterConfiguration.SINGLE); sibling.setClusterScale(1); sibling.setClusterRotation(0);
+                sibling.setRadialPosition(0); sibling.setRadialDirection(0);
+                sibling.setAxialMethod(info.openrocket.core.rocketcomponent.position.AxialMethod.TOP);
+                double offset = switch (siblingCase) {
+                    case "overlap" -> ring.getAxialOffset() - 0.015625;
+                    case "apart-before" -> ring.getAxialOffset() - sibling.getLength() - 0.015625;
+                    case "apart-after" -> ring.getAxialOffset() + ring.getLength() + 0.015625;
+                    case "partial" -> ring.getAxialOffset() + ring.getLength() / 2;
+                    case "contact-start" -> ring.getAxialOffset() - sibling.getLength();
+                    case "contact-end" -> ring.getAxialOffset() + ring.getLength();
+                    default -> throw new IllegalArgumentException("Unknown sibling case");
+                };
+                sibling.setAxialOffset(offset); ring.setInnerRadiusAutomatic(true);
             }
             // A no-op reset, a real override, and remaining inherited configurations.
             var device = recovery(doc); var set = device.getDeploymentConfigurations();
@@ -120,7 +148,7 @@ public class ImportedEffectsDesktopProof {
             System.out.println("JDK/portable MD5: " + lengths.size() + " vectors passed");
             return;
         }
-        if (args[0].equals("generate") || args[0].equals("generate-ring")) { generate(args[1], Path.of(args[2]), args[0].equals("generate-ring")); return; }
+        if (args[0].equals("generate") || args[0].equals("generate-ring")) { generate(args[1], Path.of(args[2]), !args[0].equals("generate"), args.length > 3 ? args[3] : ""); return; }
         if (args[0].equals("probe-ring-underfit")) { probeUnderfit(args[1], Path.of(args[2])); return; }
         // original edited type componentId value-or-configuration reportPath
         Path reportPath = Path.of(args[5]); Path output = reportPath.getParent(); Files.createDirectories(output);
@@ -140,6 +168,7 @@ public class ImportedEffectsDesktopProof {
             report.put("statusesBefore", statuses(original));
             Map<String, Object> state = new LinkedHashMap<>();
             state.put("before", json(snapshot(original, args[2], target)));
+            ArchiveDesktopProof.require(state.get("before").equals(json(snapshot(original, args[2], target))), "Unstable primed document reads");
             if (args[2].equals("setOuterRadius")) {
                 var tube = (BodyTube) target;
                 boolean automatic = automaticRing(tube);
@@ -166,6 +195,7 @@ public class ImportedEffectsDesktopProof {
                 state.put("rocketChanged", json(ImportedDeploymentProof.modificationChanges(original.getRocket(), rocketMods)));
             }
             state.put("after", json(snapshot(original, args[2], target))); report.put("state", state);
+            ArchiveDesktopProof.require(state.get("after").equals(json(snapshot(original, args[2], target))), "Unstable repeated document reads");
             ArchiveDesktopProof.require(json(snapshot(original, args[2], target)).equals(json(snapshot(edited, args[2], actual))), "Complete relevant state differs");
             report.put("statusesAfter", statuses(original)); report.put("editedStatuses", statuses(edited));
             byte[] expected = ArchiveDesktopProof.semanticXml(original), xml = ArchiveDesktopProof.semanticXml(edited);

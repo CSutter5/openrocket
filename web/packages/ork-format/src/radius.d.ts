@@ -13,18 +13,24 @@ export interface PresetTubeState extends Omit<IntrinsicTubeState, 'preset'> {
 }
 export interface RingInput {
   componentId: string; parentId: string; length: number; innerRadius: number; density: number;
+  innerAutomatic?: true; precedingNoseLength?: number; sibling?: SiblingInput;
   axialOffset: number; axialMethod: 'TOP'; radialPosition: 0; radialDirection: 0; instanceCount: 1; instanceSeparation: 0;
+}
+export interface SiblingInput {
+  componentId: string; parentId: string; length: number; outerRadius: number; thickness: number; density: number;
+  axialOffset: number; axialMethod: 'TOP'; radialPosition: 0; radialDirection: 0; instanceCount: 1;
+  clusterConfiguration: 'single'; clusterScale: 1; clusterRotation: 0;
 }
 export interface RingState {
   outerRadius: number; innerRadius: number; mass: number; cg: number; thickness: number;
-  outerAutomatic: true; innerAutomatic: false; preset: false; listeners: 0;
+  outerAutomatic: true; innerAutomatic: boolean; preset: false; listeners: 0;
   length: number; density: number; cgMass: number;
   longitudinalUnitInertia: number; rotationalUnitInertia: number;
   axialMethod: 'TOP'; axialOffset: number; positionX: number;
   radialPosition: 0; radialDirection: 0; instanceCount: 1; instanceSeparation: 0;
   bounds: [number, number, number, number, number, number];
 }
-export interface AutomaticRingTubeState extends PresetTubeState { ring: RingState }
+export interface AutomaticRingTubeState extends PresetTubeState { ring: RingState; sibling?: Record<string, unknown> }
 export function tubeRadiusInput(archive: ExpandedArchive, id: string): TubeRadiusInput;
 export function radiusSimulationEffects(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): { index: number; before: string; after: 'outdated' }[];
 export function applyTubeRadius(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): Promise<ExpandedArchive>;
