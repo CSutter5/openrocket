@@ -11,6 +11,7 @@ import info.openrocket.core.startup.Application;
 import info.openrocket.core.util.ModID;
 import proof.ImportedDeploymentProof;
 import proof.ImportedTubeProof;
+import proof.ImportedRingProof;
 
 /** Independent actual-document oracle and desktop-valid fixture generator; development JVM only. */
 public class ImportedEffectsDesktopProof {
@@ -31,7 +32,7 @@ public class ImportedEffectsDesktopProof {
         for (var c : doc.getRocket()) if (c instanceof BodyTube t) return t;
         throw new AssertionError("Fixture requires a body tube");
     }
-    static void generate(String source, Path output) throws Exception {
+    static void generate(String source, Path output, boolean automaticRing) throws Exception {
         List<Object> catalog = new ArrayList<>();
         for (String key : List.of("G1-A", "G1-B")) {
             var preset = ProofPresetCatalog.preset(key);
@@ -39,12 +40,23 @@ public class ImportedEffectsDesktopProof {
                 "partno", preset.getPartNo(), "digest", preset.getDigest()));
             var doc = new GeneralRocketLoader(new File(source)).load();
             var target = tube(doc); target.loadPreset(preset);
-            // Keep this proof's geometry dependencies explicit; automatic geometry
-            // needs a fuller imported graph projection and is rejected by the adapter.
+            // Default fixtures keep geometry explicit. The optional mode below
+            // selects exactly one supported automatic dependency.
             for (var component : doc.getRocket()) if (component instanceof RingComponent ring) {
                 double outer = ring.getOuterRadius(), inner = ring.getInnerRadius();
                 ring.setOuterRadius(outer); ring.setInnerRadius(inner);
                 if (ring instanceof CenteringRing centering) centering.setInnerRadiusAutomatic(false);
+            }
+            if (automaticRing) {
+                CenteringRing selected = null;
+                for (var child : target.getChildren()) if (child instanceof CenteringRing ring) { selected = ring; break; }
+                ArchiveDesktopProof.require(selected != null, "Fixture requires a centering ring");
+                selected.setLength(key.equals("G1-A") ? 0.004 : 0.006);
+                selected.setMaterial(info.openrocket.core.material.Material.newMaterial(info.openrocket.core.material.Material.Type.BULK,
+                    "G1 ring bulk", key.equals("G1-A") ? 500 : 750, false));
+                selected.setInnerRadius(key.equals("G1-A") ? 0.006 : 0.01); selected.setInnerRadiusAutomatic(false);
+                selected.setAxialMethod(info.openrocket.core.rocketcomponent.position.AxialMethod.TOP);
+                selected.setAxialOffset(key.equals("G1-A") ? 0.02 : 0.04); selected.setOuterRadiusAutomatic(true);
             }
             // A no-op reset, a real override, and remaining inherited configurations.
             var device = recovery(doc); var set = device.getDeploymentConfigurations();
@@ -67,8 +79,31 @@ public class ImportedEffectsDesktopProof {
     }
     static Object json(String text) { return JsonParser.parseString(text); }
     static String snapshot(OpenRocketDocument doc, String type, RocketComponent target) {
-        if (type.equals("setOuterRadius")) return ImportedTubeProof.presetSnapshot((BodyTube) target);
+        if (type.equals("setOuterRadius")) return automaticRing((BodyTube) target) ? ImportedRingProof.snapshot((BodyTube) target) : ImportedTubeProof.presetSnapshot((BodyTube) target);
         return ImportedDeploymentProof.snapshot((RecoveryDevice) target, doc.getRocket().getIds().toArray(new FlightConfigurationId[0]));
+    }
+    static boolean automaticRing(BodyTube tube) {
+        return tube.getChildren().stream().anyMatch(c -> c instanceof CenteringRing r && r.isOuterRadiusAutomatic());
+    }
+    static void probeUnderfit(String input, Path reportPath) throws Exception {
+        var doc = new GeneralRocketLoader(new File(input)).load();
+        BodyTube tube = tube(doc); CenteringRing ring = ImportedRingProof.ring(tube);
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("before", json(ImportedRingProof.snapshot(tube)));
+        tube.setOuterRadius(0.0005);
+        report.put("live", json(ImportedRingProof.snapshot(tube)));
+        var output = reportPath.getParent(); Files.createDirectories(output);
+        Files.write(output.resolve("expected.xml"), ArchiveDesktopProof.semanticXml(doc));
+        var saved = output.resolve("underfit.ork"); new GeneralRocketSaver().save(saved.toFile(), doc, ArchiveDesktopProof.options());
+        var reloaded = new GeneralRocketLoader(saved.toFile()).load();
+        var actual = (CenteringRing) reloaded.getRocket().findComponent(ring.getID());
+        report.put("reloaded", Map.of("outerRadius", actual.getOuterRadius(), "innerRadius", actual.getInnerRadius(),
+            "outerAutomatic", actual.isOuterRadiusAutomatic(), "mass", actual.getComponentMass()));
+        Files.write(output.resolve("actual.xml"), ArchiveDesktopProof.semanticXml(reloaded));
+        ArchiveDesktopProof.require(ring.isOuterRadiusAutomatic() && !actual.isOuterRadiusAutomatic(), "Underfit control changed; investigate before broadening acceptance");
+        report.put("outcome", "classified-rejection-required");
+        report.put("reason", "Desktop reload disables automatic outer radius when the explicit ring hole exceeds the parent inner radius");
+        Files.writeString(reportPath, GSON.toJson(report) + "\n");
     }
     public static void main(String[] args) throws Exception {
         setup();
@@ -85,7 +120,8 @@ public class ImportedEffectsDesktopProof {
             System.out.println("JDK/portable MD5: " + lengths.size() + " vectors passed");
             return;
         }
-        if (args[0].equals("generate")) { generate(args[1], Path.of(args[2])); return; }
+        if (args[0].equals("generate") || args[0].equals("generate-ring")) { generate(args[1], Path.of(args[2]), args[0].equals("generate-ring")); return; }
+        if (args[0].equals("probe-ring-underfit")) { probeUnderfit(args[1], Path.of(args[2])); return; }
         // original edited type componentId value-or-configuration reportPath
         Path reportPath = Path.of(args[5]); Path output = reportPath.getParent(); Files.createDirectories(output);
         Map<String, Object> report = new LinkedHashMap<>();
@@ -104,7 +140,17 @@ public class ImportedEffectsDesktopProof {
             report.put("statusesBefore", statuses(original));
             Map<String, Object> state = new LinkedHashMap<>();
             state.put("before", json(snapshot(original, args[2], target)));
-            if (args[2].equals("setOuterRadius")) ((BodyTube) target).setOuterRadius(Double.parseDouble(args[4]));
+            if (args[2].equals("setOuterRadius")) {
+                var tube = (BodyTube) target;
+                boolean automatic = automaticRing(tube);
+                tube.setOuterRadius(Double.parseDouble(args[4]));
+                if (automatic) {
+                    List<Boolean> changes = new ArrayList<>();
+                    for (int i = 0; i < ids.length; i++) changes.add(mods[i] != original.getRocket().getFlightConfiguration(ids[i]).getModID());
+                    state.put("configurationChanged", changes);
+                    state.put("rocketChanged", json(ImportedDeploymentProof.modificationChanges(original.getRocket(), rocketMods)));
+                }
+            }
             else {
                 // Execute the desktop reset action independently of the reducer wrapper.
                 var selected = new FlightConfigurationId(args[4]);

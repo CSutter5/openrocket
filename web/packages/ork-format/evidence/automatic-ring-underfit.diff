@@ -1,0 +1,9 @@
+--- live-core-saver.xml
++++ desktop-reloaded-saver.xml
+@@ -191,5 +191,5 @@
+                 <radialposition>0.0</radialposition>
+                 <radialdirection>0.0</radialdirection>
+-                <outerradius>auto</outerradius>
++                <outerradius>0.006</outerradius>
+                 <innerradius>0.006</innerradius>
+               </centeringring>

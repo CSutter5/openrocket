@@ -33,20 +33,30 @@ public final class ImportedTubeProof {
     public static String presetRadiusEdit(String key, String digest, double length, double radius,
                                            double thickness, boolean filled, double density, double value) {
         validate(length, radius, thickness, filled, density, value);
-        var preset = info.openrocket.core.preset.ProofPresetCatalog.preset(key);
-        if (!preset.getDigest().equals(digest)) throw new IllegalArgumentException("Preset digest mismatch");
+        BodyTube tube = importedTube(key, digest, length, radius, thickness, filled, density);
+        String before = presetSnapshot(tube);
+        tube.setOuterRadius(value);
+        return "{\"before\":" + before + ",\"after\":" + presetSnapshot(tube) + "}";
+    }
+
+    static BodyTube importedTube(String key, String digest, double length, double radius,
+                                 double thickness, boolean filled, double density) {
+        validate(length, radius, thickness, filled, density, radius);
+
         BodyTube tube = new BodyTube();
         tube.setIgnorePresetClearing(true);
-        tube.loadPreset(preset);
+        if (!key.isEmpty()) {
+            var preset = info.openrocket.core.preset.ProofPresetCatalog.preset(key);
+            if (!preset.getDigest().equals(digest)) throw new IllegalArgumentException("Preset digest mismatch");
+            tube.loadPreset(preset);
+        }
         tube.setMaterial(Material.newMaterial(Material.Type.BULK, "Imported proof bulk", density, false));
         tube.setLength(length);
         if (filled) tube.setFilled(true);
         else tube.setThickness(thickness, false);
         tube.setOuterRadius(radius);
         tube.setIgnorePresetClearing(false);
-        String before = presetSnapshot(tube);
-        tube.setOuterRadius(value);
-        return "{\"before\":" + before + ",\"after\":" + presetSnapshot(tube) + "}";
+        return tube;
     }
 
     public static String presetSnapshot(BodyTube tube) {

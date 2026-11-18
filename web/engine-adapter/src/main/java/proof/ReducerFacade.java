@@ -9,6 +9,10 @@ public final class ReducerFacade {
     @JSExport public static String presetRadiusEdit(String key, String digest, double length, double radius, double thickness, boolean filled, double density, double value) {
         return ImportedTubeProof.presetRadiusEdit(key, digest, length, radius, thickness, filled, density, value);
     }
+    @JSExport public static String automaticRingRadiusEdit(String key, String digest, double length, double radius, double thickness,
+            boolean filled, double density, double ringLength, double ringInner, double ringDensity, double offset, String configurations, double value) {
+        return ImportedRingProof.radiusEdit(key, digest, length, radius, thickness, filled, density, ringLength, ringInner, ringDensity, offset, configurations, value);
+    }
     @JSExport public static String resetDeployment(String event, double altitude, double delay, String overrides, String configurations, String selected) {
         return ImportedDeploymentProof.resetDeployment(event, altitude, delay, overrides, configurations, selected);
     }
