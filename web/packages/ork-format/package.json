@@ -5,7 +5,7 @@
   "type": "module",
   "exports": "./src/index.js",
   "scripts": {
-    "test": "node --test test/archive.test.js test/radius.test.js",
+    "test": "node --test test/archive.test.js test/radius.test.js test/imported-effects.test.js",
     "test:browser": "node test/browser-proof.mjs",
     "test:desktop": "node test/desktop-proof.mjs"
   },

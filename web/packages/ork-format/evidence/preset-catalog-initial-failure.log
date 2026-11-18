@@ -1,0 +1,4 @@
+Exception in thread "main" java.lang.AssertionError: Catalog bridge differs from validated factory
+	at ArchiveDesktopProof.require(ArchiveDesktopProof.java:31)
+	at ImportedEffectsDesktopProof.setup(ImportedEffectsDesktopProof.java:22)
+	at ImportedEffectsDesktopProof.main(ImportedEffectsDesktopProof.java:67)

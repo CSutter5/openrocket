@@ -11,6 +11,7 @@ export interface WorkspaceRef {
 export type Edit =
   | { type: 'setName'; componentId: string; value: string }
   | { type: 'setOuterRadius'; componentId: string; value: number }
+  | { type: 'resetDeploymentConfiguration'; componentId: string; configurationId: string }
   | { type: 'move'; componentId: string; parentId: string; index: number }
   | { type: 'selectConfiguration'; configurationId: string };
 export interface Command extends WorkspaceRef {

@@ -1,0 +1,92 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+Project : => no module-info.java found
+Project :core => 'info.openrocket.core' Java module
+Project :swing => 'info.openrocket.swing' Java module
+
+> Configure project :core
+The Configuration.setVisible(boolean) method has been deprecated. This is scheduled to be removed in Gradle 11. Consult the upgrading guide for further information: https://docs.gradle.org/9.8.2/userguide/upgrading_version_9.html#deprecate-visible-property
+
+> Task :core:compileJava
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :core:g1EngineClasspath
+
+[Incubating] Problems report is available at: file:///tmp/openrocket-g1-preset-validation/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 16s
+2 actionable tasks: 2 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.2/userguide/configuration_cache_enabling.html
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :adaptCore
+
+> Task :compileJava
+warning: Supported source version 'RELEASE_11' from annotation processor 'org.gradle.api.internal.tasks.compile.processing.TimeTrackingProcessor' less than -source '17'
+1 warning
+
+> Task :processResources NO-SOURCE
+> Task :classes
+> Task :compileTeavmJava NO-SOURCE
+> Task :processTeavmResources NO-SOURCE
+> Task :teavmClasses UP-TO-DATE
+> Task :generateJavaScript
+> Task :reference
+> Task :adaptedReference
+
+[Incubating] Problems report is available at: file:///tmp/openrocket-g1-preset-validation/web/engine-adapter/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 14s
+5 actionable tasks: 5 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.2/userguide/configuration_cache_enabling.html
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :adaptCore UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :compileTeavmJava NO-SOURCE
+> Task :processTeavmResources NO-SOURCE
+> Task :teavmClasses UP-TO-DATE
+
+> Task :generateJavaScript FAILED
+Class java.security.MessageDigest was not found
+    at info.openrocket.core.preset.ComponentPreset.computeDigest(ComponentPreset.java:466)
+    at info.openrocket.core.preset.ProofPresetCatalog.preset
+    at proof.ImportedTubeProof.presetRadiusEdit
+    at proof.ReducerFacade.presetRadiusEdit
+    at proof.ReducerFacade.presetRadiusEdit$exported$1
+
+[Incubating] Problems report is available at: file:///tmp/openrocket-g1-preset-validation/web/engine-adapter/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':generateJavaScript' (registered by plugin 'org.teavm').
+> Errors occurred during TeaVM build
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 6s
+3 actionable tasks: 1 executed, 2 up-to-date

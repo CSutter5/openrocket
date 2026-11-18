@@ -42,6 +42,7 @@ tasks.register('adaptCore') {
             def reader = new org.objectweb.asm.ClassReader(source.bytes)
             def writer = new org.objectweb.asm.ClassWriter(0)
             def remapper = new org.objectweb.asm.commons.SimpleRemapper([
+                'java/security/MessageDigest': 'proof/PortableDigest',
                 'java/util/UUID': 'info/openrocket/core/util/LongUUID',
                 'java/util/concurrent/ConcurrentLinkedQueue': 'java/util/ArrayDeque',
                 'java/util/concurrent/ConcurrentHashMap': 'java/util/LinkedHashMap',
