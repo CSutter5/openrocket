@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "stage": "Initial codec-only desktop comparison; not the final authenticated workflow",
+  "cause": "Radius/thickness-only XML edits omitted document simulation invalidation. Both current simulations reloaded as loaded instead of outdated.",
+  "cases": [
+    {
+      "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+      "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+      "requestedRadius": 0.03,
+      "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+      "editedSha256": "dbcfda204057ab18536dd1378a1bb224049acdae8e55d6b8beb0dac1fabd82d3",
+      "catalogSha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f",
+      "originalWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "editedWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "input": {
+        "schema": 1,
+        "componentId": "86efa171-d8e6-453e-9541-a3163df01931",
+        "length": 0.7619999999999998,
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "filled": false,
+        "density": 1850.0
+      },
+      "before": {
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.2824792661923881,
+        "cg": 0.3809999999999999
+      },
+      "after": {
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.29793458815144097,
+        "cg": 0.3809999999999999
+      },
+      "editedProjection": {
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.29793458815144097,
+        "cg": 0.3809999999999999
+      },
+      "outcome": "failed",
+      "error": "java.lang.AssertionError: Actual document Java setter differs from edited archive; see expected.xml and actual.xml",
+      "expectedXmlSha256": "c3e9bc4b97c4ddeba6d4890a5a3492fdd299a7040667b7470be1aaa0fb778e9d",
+      "actualXmlSha256": "bc0af38f1bfd7ab8d6b2935f863813ee824b456a7184bdc1e6e2a7b5673c732b"
+    },
+    {
+      "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+      "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+      "requestedRadius": 0.0005,
+      "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+      "editedSha256": "54e215c5c8c880ae0485ffa4161e7c984ba29ef884985ca453a9228111a8a75c",
+      "catalogSha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f",
+      "originalWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "editedWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "input": {
+        "schema": 1,
+        "componentId": "86efa171-d8e6-453e-9541-a3163df01931",
+        "length": 0.7619999999999998,
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "filled": false,
+        "density": 1850.0
+      },
+      "before": {
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.2824792661923881,
+        "cg": 0.3809999999999999
+      },
+      "after": {
+        "radius": 0.0005,
+        "thickness": 0.0005,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.0011071757909413827,
+        "cg": 0.3809999999999999
+      },
+      "editedProjection": {
+        "radius": 0.0005,
+        "thickness": 0.0005,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.0011071757909413827,
+        "cg": 0.3809999999999999
+      },
+      "outcome": "failed",
+      "error": "java.lang.AssertionError: Actual document Java setter differs from edited archive; see expected.xml and actual.xml",
+      "expectedXmlSha256": "3541e19e685c3e1e58ed6b4aead53bd11d9ee549c946177cfafedfa6de37fee8",
+      "actualXmlSha256": "0d4580dbc4f0696f642a7e9cafde352e1ef12a4b5af63012b562053e8898deaa"
+    }
+  ],
+  "evictionHarnessFailure": {
+    "message": "Timed out waiting to evict Durable Object: it still has active references.",
+    "cause": "Test retained unread HTTP RPC response streams.",
+    "fix": "Drain every radius response before requesting eviction. Final forced reconstruction and persisted retry pass.",
+    "rawLog": "/tmp/g1-radius-active-reference-failure.log"
+  },
+  "simultaneousRetryFailure": {
+    "actualStatuses": [
+      200,
+      409
+    ],
+    "expectedStatuses": [
+      200,
+      200
+    ],
+    "cause": "Two identical requests passed pre-async deduplication before either published; CAS rejected the second.",
+    "fix": "Recheck author/request and stored acknowledgment inside the SQLite transaction before the source revision check.",
+    "regression": "Test-only barrier holds both requests at storeBlob; fixed workerd run returns one duplicate acknowledgment and increments sequence once.",
+    "rawLog": "/tmp/g1-radius-duplicate-race-before.log"
+  }
+}

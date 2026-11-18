@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "recordedDate": "2026-11-17",
+  "outcome": "passed",
+  "sourceCheckpoint": "a5285824a",
+  "checks": [
+    {
+      "command": "npm run build --workspace @openrocket/engine-proof",
+      "outcome": "passed",
+      "originalAndAdaptedJvmExact": true,
+      "sourcePin": "baseline plus exact two reviewed I/O fixes"
+    },
+    {
+      "command": "npm test (from web)",
+      "outcome": "passed",
+      "contracts": 2,
+      "fixtureManifests": 7,
+      "codec": 36,
+      "platformWorkerd": 12
+    },
+    {
+      "command": "ORK_PROOF_INPUT=/absolute/path/to/example.ork npm test --workspace @openrocket/ork-format",
+      "outcome": "passed",
+      "tests": 37
+    },
+    {
+      "command": "npm run typecheck --workspace @openrocket/platform-proof",
+      "outcome": "passed"
+    },
+    {
+      "command": "npm run test:workerd --workspace @openrocket/engine-proof",
+      "outcome": "passed",
+      "invalidInputs": 9,
+      "projects": 2,
+      "acceptedCommands": 3,
+      "duplicateRetries": 1
+    },
+    {
+      "command": "npx wrangler deploy --dry-run --config wrangler.radius.jsonc --outdir build/radius-bundle (from web/platform-proof)",
+      "outcome": "passed",
+      "uploadKiB": 3760.97,
+      "gzipKiB": 665.75,
+      "deployed": false
+    },
+    {
+      "command": "ORK_RADIUS_INPUT=/absolute/path/to/example.ork ORK_PROOF_MOTOR_CATALOG=/absolute/path/to/initial_motors.db ORK_PROOF_CLASSPATH=<core test runtime> ORK_RADIUS_OUTPUT=/tmp/g1-radius-user-integrated npm run proof:radius --workspace @openrocket/platform-proof",
+      "outcome": "passed",
+      "workerdAndDesktopCases": 2,
+      "rejectedRequests": 26,
+      "evidence": "radius-user-example.json"
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=<core test runtime> ORK_RADIUS_OUTPUT=/tmp/g1-radius-generated-integrated npm run proof:radius --workspace @openrocket/platform-proof",
+      "outcome": "passed",
+      "privateFixtureOrCatalogRequired": false,
+      "generatedInputSha256": "d56cd289b926abca4c6f56202444abed2aef8d3d4600a2e0a9ed317923f3dc14",
+      "workerdAndDesktopCases": 2,
+      "components": 3,
+      "rejectedRequests": 26,
+      "concurrentIdenticalRetry": true
+    },
+    {
+      "command": "npx vitest run --config vitest.radius.config.ts (with transaction duplicate recheck absent)",
+      "outcome": "expected regression failure",
+      "actualStatuses": [
+        200,
+        409
+      ],
+      "expectedStatuses": [
+        200,
+        200
+      ],
+      "rawLog": "/tmp/g1-radius-duplicate-race-before.log"
+    },
+    {
+      "command": "Final radius proof with SQL transaction duplicate recheck",
+      "outcome": "passed",
+      "simultaneousIdenticalRetryStatuses": [
+        200,
+        200
+      ],
+      "acceptedSequenceIncrements": 1
+    }
+  ],
+  "unchangedBrowserArtifact": {
+    "sha256": "64aebc15f1c7178e563bd037856054a36709a4fd140b8a80d89cc92778340421",
+    "bytes": 2580479,
+    "browserRerunThisFollowup": false,
+    "reason": "No browser-reachable code changed; rebuilt artifact is byte-identical to previously executed Chromium proof."
+  },
+  "originalFile": {
+    "path": "example rocket.ork",
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "unchanged": true,
+    "addedToGit": false
+  },
+  "limitations": [
+    "No hosted domain-reducer CPU or isolate heap measurement",
+    "No full imported rocket/preset/configuration/preference projection",
+    "No browser editor UI, Swing interaction or simulation rerun in this follow-up",
+    "Original rounded curves still need the matching motor catalog in the desktop oracle",
+    "Existing component-preset warning and dependency advisories remain"
+  ],
+  "g1": "hold",
+  "rawLogs": [
+    "/tmp/g1-radius-engine-build.log",
+    "/tmp/g1-radius-codec-tests.log",
+    "/tmp/g1-radius-web-tests.log",
+    "/tmp/g1-radius-existing-reducer.log",
+    "/tmp/g1-radius-bundle.log",
+    "/tmp/g1-radius-user-integrated"
+  ]
+}

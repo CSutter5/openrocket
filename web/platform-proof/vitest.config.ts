@@ -10,5 +10,5 @@ export default defineConfig({
       AUTH_SECRET: 'local-test-only-secret-longer-than-thirty-two-bytes',
     } },
   })],
-  test: { testTimeout: 30000, hookTimeout: 30000 },
+  test: { include: ['test/**/*.test.{ts,js}'], testTimeout: 30000, hookTimeout: 30000 },
 });

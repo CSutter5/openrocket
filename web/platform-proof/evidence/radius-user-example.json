@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "outcome": "passed",
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "reducerBytes": 1439596,
+  "originalHash": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+  "sourceHashes": {
+    "src/radius-room.ts": "efa887ce47c14b67a811b2fc2f1d369a5c4f9d44f5edf8049bcad79168598269",
+    "src/radius-index.ts": "dd9516f2df3c1c4aca756815ef50e105ecea78e10108f915e898e33618ddedde",
+    "radius-proof/integration.ts": "99c294180b5272164dc619086a7591b62babc158681b0a5ae2e4182c19ec73ba",
+    "vitest.radius.config.ts": "719aa416d3725eee4a645142e5b3e2790584bbced59629786af012e5e91857c2",
+    "wrangler.radius.jsonc": "778ade2b95bfa3d2f32a8ea0da75c07dca4bf96501c9aa0c8374c66ea1724c8b",
+    "scripts/radius-proof.mjs": "3aea4b552cde778f52104aca8678d9bfff097cccc9ed7fbe605b55ff61222201",
+    "../packages/ork-format/src/radius.js": "08b3cf63d3890320ff3d6fc7fc32b868f066e3c4e54575cd23744d4e3be0eb4f",
+    "../packages/ork-format/jvm/RadiusDesktopProof.java": "e7184ea2e978b3672e4b3182e27f1eb3ab016646b7234fcceeafac5dbf80f3a5",
+    "../engine-adapter/src/main/java/proof/ImportedTubeProof.java": "be30c5af644ff793cda653cca71d999cef510c425f637b9681c189ca868f5382",
+    "../engine-adapter/build/generated/teavm/js/reducer.js": "3fcc9977b0eb18406d42e4685262ed810f2a549ed9189b59a1c3ae077e2eb9b6"
+  },
+  "worker": {
+    "schema": 1,
+    "runtime": "Vitest Cloudflare plugin/workerd",
+    "fixture": "external-input",
+    "originalHash": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "compressedBytes": 824408,
+    "components": 17,
+    "simulations": 6,
+    "entries": [
+      {
+        "path": "rocket.ork",
+        "sha256": "534056d6c9ca1a79efd0e63e1d39eac52e63a765db756d5629a8ee0a45639f73",
+        "bytes": 3261148
+      },
+      {
+        "path": "preview.png",
+        "sha256": "adb6a381e5bf16d4d23ebb016a7145089bbb63deb3470a7af86b1a58ad31f0e4",
+        "bytes": 28472
+      },
+      {
+        "path": "thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse",
+        "sha256": "19ebc489b3d4a41a516dba88715d80c79cda6100f71ee1661ec3815bd95f6f15",
+        "bytes": 1974
+      },
+      {
+        "path": "thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse",
+        "sha256": "f9e4ddb73ec53c0998899afa7d1ba31db28b08c9d18887a9deb59ae21dcb18ed",
+        "bytes": 1988
+      },
+      {
+        "path": "thrustcurves/77ae2d2ca1c91023a59c2c09cf4746a3.rse",
+        "sha256": "473f84aa837770624a4a71225a7fdfa71cd745415a319dd24f9d9f252137b8ba",
+        "bytes": 1928
+      },
+      {
+        "path": "thrustcurves/a6489608710e3e47e4795efc421e8571.rse",
+        "sha256": "ab4c16799e8f509797db761357e4175899b9ee846561afd8200c8e266509f38b",
+        "bytes": 1986
+      },
+      {
+        "path": "thrustcurves/90f749d42119cb8a081a354353524f92.rse",
+        "sha256": "fbe01c564e589db9e5c1ec4c35b337b5c988bfaaac69bf4d999b23dafe642120",
+        "bytes": 2572
+      }
+    ],
+    "totalWallMs": 12223,
+    "normalWallMs": 745,
+    "normal": {
+      "protocol": 1,
+      "projectId": "radius-a",
+      "branchId": "main",
+      "epoch": 1,
+      "operationId": "radius-normal",
+      "sequence": 1,
+      "authorId": "hasICYhDi4nDqKHuJbOkcXT4PZHv4Hi4",
+      "effects": [
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "radius",
+          "before": 0.0284734,
+          "after": 0.03
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "thickness",
+          "before": 0.0011429999999999982,
+          "after": 0.0011429999999999982
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "automatic",
+          "before": false,
+          "after": false
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "preset",
+          "before": false,
+          "after": false
+        },
+        {
+          "entityId": "86d484f0-67cc-44ba-b2cd-ec78b0b34b10",
+          "field": "status",
+          "before": "uptodate",
+          "after": "outdated"
+        },
+        {
+          "entityId": "7ebc3c8f-5c70-4ff5-b4d6-334a4b4d3345",
+          "field": "status",
+          "before": "uptodate",
+          "after": "outdated"
+        }
+      ],
+      "archiveHash": "670d6c15bbf9149f57965a7f545750ae7da33b8562089864bb20a7d7fcac7438",
+      "blobKey": "radius-a/radius/670d6c15bbf9149f57965a7f545750ae7da33b8562089864bb20a7d7fcac7438.ork",
+      "intrinsic": {
+        "before": {
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.2824792661923881,
+          "cg": 0.3809999999999999
+        },
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.29793458815144097,
+          "cg": 0.3809999999999999
+        }
+      },
+      "duplicate": false
+    },
+    "shrink": {
+      "protocol": 1,
+      "projectId": "radius-a",
+      "branchId": "main",
+      "epoch": 1,
+      "operationId": "radius-shrink",
+      "sequence": 2,
+      "authorId": "hasICYhDi4nDqKHuJbOkcXT4PZHv4Hi4",
+      "effects": [
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "radius",
+          "before": 0.03,
+          "after": 0.0005
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "thickness",
+          "before": 0.0011429999999999982,
+          "after": 0.0005
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "automatic",
+          "before": false,
+          "after": false
+        },
+        {
+          "entityId": "86efa171-d8e6-453e-9541-a3163df01931",
+          "field": "preset",
+          "before": false,
+          "after": false
+        }
+      ],
+      "archiveHash": "94e3b21f65fe713b65b23f971d58ee92d4275ec4ffe27a65e3f5b08d02828705",
+      "blobKey": "radius-a/radius/94e3b21f65fe713b65b23f971d58ee92d4275ec4ffe27a65e3f5b08d02828705.ork",
+      "intrinsic": {
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.29793458815144097,
+          "cg": 0.3809999999999999
+        },
+        "after": {
+          "radius": 0.0005,
+          "thickness": 0.0005,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.0011071757909413827,
+          "cg": 0.3809999999999999
+        }
+      },
+      "duplicate": false
+    },
+    "rejectedRequests": 26,
+    "authenticatedProjects": 2,
+    "reconstruction": true,
+    "exactRetry": true,
+    "concurrentIdenticalRetry": true,
+    "concurrentRevisionConflict": true,
+    "storedFlightDataPreserved": true
+  },
+  "desktop": {
+    "normal": {
+      "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+      "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+      "requestedRadius": 0.03,
+      "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+      "editedSha256": "670d6c15bbf9149f57965a7f545750ae7da33b8562089864bb20a7d7fcac7438",
+      "catalogSha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f",
+      "originalWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "editedWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "input": {
+        "schema": 1,
+        "componentId": "86efa171-d8e6-453e-9541-a3163df01931",
+        "length": 0.7619999999999998,
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "filled": false,
+        "density": 1850
+      },
+      "before": {
+        "radius": 0.0284734,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.2824792661923881,
+        "cg": 0.3809999999999999
+      },
+      "after": {
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.29793458815144097,
+        "cg": 0.3809999999999999
+      },
+      "editedProjection": {
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.29793458815144097,
+        "cg": 0.3809999999999999
+      },
+      "setterSemanticXmlEqual": true,
+      "semanticSha256": "c3e9bc4b97c4ddeba6d4890a5a3492fdd299a7040667b7470be1aaa0fb778e9d",
+      "motorCurvesEqual": true,
+      "counts": {
+        "decals": 0,
+        "components": 17,
+        "simulations": 6,
+        "motorAssignments": 5,
+        "resultPoints": 5540
+      },
+      "desktopReloadSemanticXmlEqual": true,
+      "desktopReloadMotorCurvesEqual": true,
+      "desktopExportSha256": "ced340c0c3b0034f643feb6a081cacdce533e2d29842ec1f769afaa3948252db",
+      "outcome": "passed"
+    },
+    "shrink": {
+      "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+      "targetId": "86efa171-d8e6-453e-9541-a3163df01931",
+      "requestedRadius": 0.0005,
+      "inputSha256": "670d6c15bbf9149f57965a7f545750ae7da33b8562089864bb20a7d7fcac7438",
+      "editedSha256": "94e3b21f65fe713b65b23f971d58ee92d4275ec4ffe27a65e3f5b08d02828705",
+      "catalogSha256": "57beb82800a7cb4fbe372bc931a1d9e36d5fb0f1988f464775aafbf9a8e8c96f",
+      "originalWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "editedWarnings": "Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36]",
+      "input": {
+        "schema": 1,
+        "componentId": "86efa171-d8e6-453e-9541-a3163df01931",
+        "length": 0.7619999999999998,
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "filled": false,
+        "density": 1850
+      },
+      "before": {
+        "radius": 0.03,
+        "thickness": 0.0011429999999999982,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.29793458815144097,
+        "cg": 0.3809999999999999
+      },
+      "after": {
+        "radius": 0.0005,
+        "thickness": 0.0005,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.0011071757909413827,
+        "cg": 0.3809999999999999
+      },
+      "editedProjection": {
+        "radius": 0.0005,
+        "thickness": 0.0005,
+        "automatic": false,
+        "preset": false,
+        "mass": 0.0011071757909413827,
+        "cg": 0.3809999999999999
+      },
+      "setterSemanticXmlEqual": true,
+      "semanticSha256": "3541e19e685c3e1e58ed6b4aead53bd11d9ee549c946177cfafedfa6de37fee8",
+      "motorCurvesEqual": true,
+      "counts": {
+        "decals": 0,
+        "resultPoints": 5540,
+        "motorAssignments": 5,
+        "simulations": 6,
+        "components": 17
+      },
+      "desktopReloadSemanticXmlEqual": true,
+      "desktopReloadMotorCurvesEqual": true,
+      "desktopExportSha256": "703457762a200a054e026b16be256d2206636b3247f8ab232f3e249450337831",
+      "outcome": "passed"
+    }
+  },
+  "limitation": "Bounded explicit-radius import proof; no editor UI, full rocket projection, simulation rerun or hosted domain-reducer budget measurement"
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "openrocket-g1-radius-local-proof",
+  "main": "src/radius-index.ts",
+  "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "vars": { "AUTH_BASE_URL": "https://proof.openrocket.test" },
+  "assets": { "directory": "public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "openrocket-g1-radius-local", "database_id": "00000000-0000-0000-0000-000000000002", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "openrocket-g1-radius-local-private" }],
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "ProofRoom" }, { "name": "RADIUS_ROOMS", "class_name": "RadiusRoom" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ProofRoom", "RadiusRoom"] }]
+}

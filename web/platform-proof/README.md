@@ -1,6 +1,6 @@
 # Workers feasibility proof (T03)
 
-This isolated proof executes Hono, Better Auth with its Drizzle SQLite adapter, D1, a private R2 binding, static assets, and SQLite-backed Durable Objects in local `workerd`. It is not the production foundation or an editing engine. The `increment` command is a bounded transport/persistence probe; it cannot validate a rocket graph or establish the T01 trusted-edit gate.
+This isolated proof executes Hono, Better Auth with its Drizzle SQLite adapter, D1, a private R2 binding, static assets, and SQLite-backed Durable Objects in local `workerd`. It is not the production foundation. The original `increment` command is a bounded transport/persistence probe; it cannot validate a rocket graph. The separately configured [imported radius proof](#authenticated-imported-radius-proof) connects authentication and durable archives to the actual Java setter.
 
 From the repository root after the coordinator's workspace integration:
 
@@ -63,3 +63,32 @@ This command **creates and then deletes isolated remote resources**; use it only
 Platform G1 has successful local and hosted evidence for the covered stack; release still requires admin bootstrap/recovery/audit/last-admin safeguards, full revocation race semantics, hosted heap/budget analysis and broader recovery/load evidence. Later delivery phases remain outside this proof.
 
 Coordinator integration additionally passed 12 tests across three files, including malformed/oversized socket commands and a GZIP/XML edit/export with opaque XML in workerd. The shared workspace audit reports six high findings (five with `--omit=dev` through Better Auth’s optional Vitest peer); the dry-run Worker bundle contains none of the Vitest/picomatch/tinyglobby module paths.
+
+## Authenticated imported radius proof
+
+`src/radius-index.ts`, `RadiusRoom` and `wrangler.radius.jsonc` form a separate local integration proof. The regular transport Worker and remote harness remain separate. The only domain command is `setOuterRadius` on an explicitly sized BodyTube without a preset. The server imports preserved bytes, derives the bounded projection itself, and invokes the generated `ImportedTubeProof` Java export. Client snapshots, XML replacements and effects are rejected; client author IDs have no authority. The API uses the shared protocol/model/project/branch/epoch/operation/precondition envelope, with `main`, epoch 1, exact sequence and complete intrinsic inputs plus automatic/preset expectations and the whole source archive hash. This conservative conflict rule also protects unknown document content and simulation statuses; independent-field concurrency remains unproved.
+
+The original import and accepted revisions are immutable private R2 blobs. After asynchronous parsing, Java execution, ZIP encoding, R2 writes and D1 session revalidation, the DO rechecks membership and the exact source sequence/hash. A synchronous SQLite transaction stores the authoritative archive bytes, identity sidecar, sequence and original acknowledgment before returning it. A conflict can leave an unreachable private blob, but cannot publish partial state. There is one import, one branch, and a 32-operation retry window; this is not the T07 history/compaction implementation. No public setup route exists: test setup uses trusted DO bindings. Export authorization is independent of knowing the hash. The imported result data has no verified web provenance; the state labels it unverified, then stale after edits. No server simulation runs.
+
+The actual local workerd test passed two owner sessions/projects, 26 denied requests, exact retry after forced object eviction, simultaneous identical retries, persisted XML/sidecar/acknowledgment, R2 export bytes, client-author forgery, both directions of isolation and competing asynchronous commands (one acceptance, one conflict). Whole XML comparisons mask only radius/thickness and simulation status spans; attachments, component UUIDs, sidecar identities and raw `flightdata` remain exact. An independent annular-cylinder mass calculation also passes. TypeScript, the existing 12 platform tests, 36 codec tests (37 with the supplied file), both contract tests and all seven fixture manifests pass. The existing Java workerd transcript still passes. The radius Worker bundle dry-run reports 3760.97 KiB / gzip 665.75 KiB, without deploying.
+
+With the supplied `example rocket.ork`, normal radius `0.03` m and stress radius `0.0005` m pass actual desktop document-setter comparisons, desktop save/reload and motor-curve checks. Shrinking clamps thickness to `0.0005` m. All 17 components, five motor assignments, six simulations and 5,540 stored points survive. Two current simulation statuses become outdated; their stored results remain unchanged. Intrinsic masses are respectively `0.29793458815144097` and `0.0011071757909413827` kg; the document's mass/CG overrides remain intact. The original rounded motor curves still require the exact bundled catalog for this desktop oracle. Its empty component-preset database still reports missing Top Flight PAR-36. No Swing interaction or flight rerun is claimed.
+
+The first codec-only comparison failed because it changed two numeric fields without invalidating results. [Failure evidence](evidence/radius-initial-failures.json) and its [status diff](evidence/radius-status-failure.diff) preserve that finding. An initial eviction test also failed because unread RPC response streams retained the DO; draining responses fixed the harness. Final review also exposed simultaneous identical requests returning `[200,409]`: both passed the initial duplicate lookup before either committed. A workerd barrier regression reproduced this; rechecking the operation inside the SQL publication transaction now returns the same acknowledgment twice (`[200,200]`), with one sequence increment. The final [integrated result](evidence/radius-user-example.json) contains source/artifact hashes and both desktop reports. Raw archives/logs remain in `/tmp/g1-radius-user-integrated`; `normal.ork` is the ordinary test edit and `shrink.ork` is the thickness stress case. The original upload remains untouched. Local wall times in the report are not hosted CPU or heap measurements.
+
+From a checkout with installed workspace dependencies, Java 17 and local socket permission (use a `/tmp` worktree if this filesystem rejects workspace symlinks):
+
+```sh
+./gradlew -I web/packages/ork-format/jvm/classpath.gradle :core:orkProofClasspath -Dork.proof.classpath=/tmp/ork-radius-classpath.txt --no-daemon
+cd web
+npm run build --workspace @openrocket/engine-proof
+ORK_RADIUS_INPUT='/home/colin/rocketry/openrocket/example rocket.ork' \
+ORK_RADIUS_OUTPUT=/tmp/openrocket-radius-proof \
+ORK_PROOF_CLASSPATH="$(cat /tmp/ork-radius-classpath.txt)" \
+ORK_PROOF_MOTOR_CATALOG="$PWD/../core/src/main/resources/datafiles/thrustcurves/initial_motors.db" \
+npm run proof:radius --workspace @openrocket/platform-proof
+```
+
+Omit `ORK_RADIUS_INPUT` and `ORK_PROOF_MOTOR_CATALOG` for the generated three-component fixture; that complete workerd/JVM path also passes without the user's file. The runner checks the reducer and facade against the engine build manifest, writes exported archives and reports through a Node test reporter, and compiles the desktop oracle with the supplied test-runtime classpath. Node/JVM are development tools only. The Worker imports neither filesystem APIs nor a JVM service. The user's archive is not added to Git.
+
+G1 remains held: this proves one imported numerical command, not full imported-model construction, presets/configuration listeners, mutable preference isolation, arbitrary graphs/extensions, full provenance/upload/sharing, or hosted domain-reducer CPU/heap bounds. The next investigation is an actual preset-backed/configuration-dependent import with the same full-document comparison and runtime budgets. No new remote resource, production deployment, or later delivery phase was started.

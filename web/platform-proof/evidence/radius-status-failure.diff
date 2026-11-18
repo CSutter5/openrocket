@@ -1,0 +1,8 @@
+--- expected: actual document Java radius setter
++++ actual: initial two-field web edit
+@@ -545 +545 @@
+-    <simulation status="outdated">
++    <simulation status="loaded">
+@@ -1524 +1524 @@
+-    <simulation status="outdated">
++    <simulation status="loaded">
