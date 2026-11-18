@@ -2,7 +2,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { importArchive, exportArchive, sha256, LIMITS } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects } from '../../packages/ork-format/src/radius.js';
 import { deploymentInput, applyDeploymentReset, deploymentSimulationEffects } from '../../packages/ork-format/src/deployment.js';
-import { radiusEdit, presetRadiusEdit, resetDeployment } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, resetDeployment } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { authentication } from './auth';
 import type { Bindings } from './index';
 import type { Command, AcceptedCommand, IdentitySidecar } from '@openrocket/contracts';
@@ -150,14 +150,18 @@ export class RadiusRoom extends DurableObject<RadiusBindings> {
       const domainEffects: AcceptedCommand['effects'] = [];
       if (radiusCommand) {
         const tube = tubeRadiusInput(archive, input.edit.componentId);
-        effects = JSON.parse(tube.preset
+        effects = JSON.parse(tube.ring
+          ? automaticRingRadiusEdit(tube.preset?.key ?? '', tube.preset?.digest ?? '', tube.length, tube.radius, tube.thickness,
+            tube.filled, tube.density, tube.ring.length, tube.ring.innerRadius, tube.ring.density, tube.ring.axialOffset, tube.configurationIds!.join(';'), input.edit.value)
+          : tube.preset
           ? presetRadiusEdit(tube.preset.key, tube.preset.digest, tube.length, tube.radius, tube.thickness, tube.filled, tube.density, input.edit.value)
           : radiusEdit(tube.length, tube.radius, tube.thickness, tube.filled, tube.density, input.edit.value));
         simulationEffects = radiusSimulationEffects(archive, tube, effects.after);
         changed = await applyTubeRadius(archive, tube, effects.after);
-        for (const field of ['radius', 'thickness', 'automatic', 'preset', ...(tube.preset ? ['presetDigest'] : [])]) {
+        for (const field of ['radius', 'thickness', 'automatic', 'preset', ...(tube.preset || tube.ring ? ['presetDigest'] : [])]) {
           domainEffects.push({ entityId: tube.componentId, field, before: effects.before[field], after: effects.after[field] });
         }
+        if (tube.ring) domainEffects.push({ entityId: tube.ring.componentId, field: 'derivedGeometry', before: effects.before.ring, after: effects.after.ring });
       } else {
         const recovery = deploymentInput(archive, input.edit.componentId);
         effects = JSON.parse(resetDeployment(recovery.default.event, recovery.default.altitude, recovery.default.delay,

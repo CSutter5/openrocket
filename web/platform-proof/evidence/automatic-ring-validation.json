@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "recordedDate": "2026-11-18",
+  "outcome": "passed",
+  "reducerCodecCheckpoint": "15cc000ed",
+  "checks": [
+    {
+      "command": "node web/engine-adapter/scripts/build.mjs",
+      "outcome": "passed",
+      "originalAndAdaptedJvmExact": true,
+      "sourcePin": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9 plus only the two exact reviewed I/O fixes"
+    },
+    {
+      "command": "npm test (from web)",
+      "outcome": "passed",
+      "contracts": 2,
+      "fixtureManifests": 7,
+      "codec": 45,
+      "platformWorkerd": 12
+    },
+    {
+      "command": "npm run typecheck --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed"
+    },
+    {
+      "command": "npm run test:workerd --workspace @openrocket/engine-proof (from web)",
+      "outcome": "passed",
+      "invalidInputs": 9,
+      "projects": 2,
+      "acceptedCommands": 3,
+      "duplicateRetries": 1,
+      "localProcessStartupWallMs": 258.60796,
+      "firstCommandLocalWallMs": 5.091588999999999
+    },
+    {
+      "command": "./gradlew :core:test --tests 'info.openrocket.core.file.openrocket.OpenRocketSaverTest' --tests 'info.openrocket.core.file.motor.TestMotorLoader' --tests 'info.openrocket.core.file.openrocket.importt.MotorHandlerTest' --tests 'info.openrocket.core.motor.MotorDigestTest' --tests 'info.openrocket.core.preset.BodyTubeComponentTests' --tests 'info.openrocket.core.preset.BodyTubePresetTests' --tests 'info.openrocket.core.preset.CenteringRingComponentTests' --tests 'info.openrocket.core.preset.CenteringRingPresetTests' --no-daemon",
+      "outcome": "passed",
+      "tests": 83,
+      "classes": 8,
+      "failures": 0
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_EFFECTS_AUTOMATIC_RING=1 ORK_EFFECTS_OUTPUT=/tmp/g1-automatic-ring-final python3 web/platform-proof/scripts/measure-imported-effects.py",
+      "outcome": "passed",
+      "acceptedActionDesktopComparisons": 11,
+      "rejectedRequests": 36,
+      "digestVectors": 136,
+      "evidence": "automatic-ring.json",
+      "localProcessEvidence": "automatic-ring-local-process.json"
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_EFFECTS_OUTPUT=/tmp/g1-ring-explicit-regression npm run proof:effects --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed",
+      "originalExplicitDesktopComparisons": 10,
+      "rejectedRequests": 28
+    },
+    {
+      "command": "ORK_RADIUS_INPUT='/home/colin/rocketry/openrocket/example rocket.ork' ORK_RADIUS_OUTPUT=/tmp/g1-ring-user-regression ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_PROOF_MOTOR_CATALOG=<checkout>/core/src/main/resources/datafiles/thrustcurves/initial_motors.db npm run proof:radius --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed",
+      "desktopCases": 2,
+      "components": 17,
+      "motorAssignments": 5,
+      "simulations": 6,
+      "storedPoints": 5540
+    },
+    {
+      "command": "npx wrangler deploy --dry-run --config platform-proof/wrangler.radius.jsonc --outdir /tmp/g1-ring-bundle (from web)",
+      "outcome": "passed",
+      "uploadKiB": 4172.94,
+      "gzipKiB": 739.08,
+      "deployed": false
+    },
+    {
+      "command": "ImportedEffectsDesktopProof probe-ring-underfit <G1-A.ork> <report.json> (automatically run in the ring proof)",
+      "outcome": "classified-rejection-required",
+      "liveOuterRadius": 0.0,
+      "reloadedOuterRadius": 0.006,
+      "liveAutomatic": true,
+      "reloadedAutomatic": false,
+      "evidence": "../packages/ork-format/evidence/automatic-ring-underfit.json"
+    }
+  ],
+  "measurementWrapperSha256": "06bb74ba013722533e70111a85fc02e4ba975dcf41813deff743afd1db8dafbe",
+  "failedProof": "Pinned desktop underfit automatic-ring reload drift is preserved, not fixed or accepted.",
+  "unmeasured": [
+    "Hosted domain-command CPU",
+    "Worker isolate heap",
+    "Worst-case input budgets",
+    "Production latency"
+  ],
+  "skipped": [
+    "Full desktop JUnit suite",
+    "Swing/OpenGL UI",
+    "Chromium rerun (browser artifact byte-identical)",
+    "Simulation rerun",
+    "Hosted deployment/domain proof"
+  ],
+  "originalFile": {
+    "path": "example rocket.ork",
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "unchanged": true,
+    "addedToGit": false
+  },
+  "g1": "hold"
+}

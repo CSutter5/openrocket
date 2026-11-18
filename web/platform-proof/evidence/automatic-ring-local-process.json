@@ -1,0 +1,12 @@
+{
+  "kind": "OS RUSAGE_CHILDREN for the local development runner process tree, including javac/JVM/Vitest/workerd; not request CPU or isolate heap",
+  "platform": "Linux",
+  "wallSeconds": 107.11163166898768,
+  "userCpuSeconds": 185.36568,
+  "systemCpuSeconds": 12.239695,
+  "maximumProcessRss": 1297776,
+  "maximumProcessRssUnit": "KiB",
+  "exitCode": 0,
+  "hostedCpu": null,
+  "isolateHeap": null
+}

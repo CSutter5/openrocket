@@ -9,8 +9,9 @@ import type { Command } from '@openrocket/contracts';
 
 const bindings = env as unknown as RadiusBindings & {
   TEST_MIGRATIONS: import('@cloudflare/vitest-plugin').D1Migration[];
-  EFFECTS_FIXTURES: string[]; EFFECTS_DIGESTS: { length: number; digest: string }[];
+  EFFECTS_AUTOMATIC_RING: boolean; EFFECTS_FIXTURES: string[]; EFFECTS_DIGESTS: { length: number; digest: string }[];
 };
+const automaticRing = bindings.EFFECTS_AUTOMATIC_RING;
 const origin = 'https://proof.openrocket.test';
 const password = 'a-long-radius-proof-password-only';
 const fromBase64 = (text: string) => Uint8Array.from(atob(text), character => character.charCodeAt(0));
@@ -76,6 +77,10 @@ it('proves preset clearing and configuration-dependent reset through the authent
   const initial = [await state(0), await state(1)];
   expect(initial[0].tubes[0].preset.digest).not.toBe(initial[1].tubes[0].preset.digest);
   expect(initial[0].recovery[0].default.altitude).not.toBe(initial[1].recovery[0].default.altitude);
+  if (automaticRing) {
+    expect(initial[0].tubes[0].ring.density).not.toBe(initial[1].tubes[0].ring.density);
+    expect(initial[0].tubes[0].ring.innerRadius).not.toBe(initial[1].tubes[0].ring.innerRadius);
+  }
   const exports: { name: string; base64: string }[] = [], cases: any[] = [], timings: any[] = [];
   const source = ['G1-A.ork', 'G1-B.ork'];
   let rejectedRequests = 0;
@@ -97,6 +102,24 @@ it('proves preset clearing and configuration-dependent reset through the authent
       const expectedMass = tube.density * Math.PI * (after.radius ** 2 - inner ** 2) * tube.length;
       expect(Math.abs(after.mass - expectedMass)).toBeLessThan(1e-12);
       expect(after.cg).toBe(tube.length / 2);
+      if (automaticRing) {
+        const r = tube.ring, actual = after.ring;
+        expect(actual.outerRadius).toBe(inner);
+        expect(actual.innerRadius).toBe(r.innerRadius);
+        expect(actual.outerAutomatic).toBe(true); expect(actual.innerAutomatic).toBe(false);
+        const ringMass = Math.PI * Math.max(inner ** 2 - r.innerRadius ** 2, 0) * r.length * r.density;
+        expect(Math.abs(actual.mass - ringMass)).toBeLessThan(1e-12);
+        expect(actual.cg).toBe(r.length / 2); expect(actual.cgMass).toBe(actual.mass);
+        expect(actual.bounds).toEqual([0, r.length, -inner, inner, -inner, inner]);
+        expect(actual.positionX).toBe(r.axialOffset);
+        expect(actual.thickness).toBe(Math.max(inner - r.innerRadius, 0));
+        expect(Math.abs(actual.longitudinalUnitInertia - (3 * (inner ** 2 + r.innerRadius ** 2) + r.length ** 2) / 12)).toBeLessThan(1e-12);
+        expect(Math.abs(actual.rotationalUnitInertia - (inner ** 2 + r.innerRadius ** 2) / 2)).toBeLessThan(1e-12);
+        const changed = after.radius !== tube.radius;
+        expect(ack.intrinsic.configurationChanged).toEqual(tube.configurationIds.map(() => changed));
+        expect(ack.intrinsic.rocketChanged).toEqual({ document: changed, mass: changed, aerodynamic: changed, tree: false, functional: changed });
+        expect(ack.effects.find((e: any) => e.entityId === r.componentId && e.field === 'derivedGeometry').after).toEqual(actual);
+      }
     }
     const bytes = await archiveBytes(i), after = await state(i), archive = await importArchive(bytes, after.identity);
     expect(await sha256(bytes)).toBe(ack.archiveHash);
@@ -167,6 +190,31 @@ it('proves preset clearing and configuration-dependent reset through the authent
     expect(exported.headers.get('x-workspace-sequence')).toBe('0');
     expect(new Uint8Array(await exported.arrayBuffer())).toEqual(bytes);
   }
+  if (automaticRing) {
+    const ring = originals[0].parsed.components.find(n => n.id === initial[0].tubes[0].ring.componentId)!;
+    const replaceField = (name: string, text: string) => {
+      const n = ring.children.find(n => n.name === name)!;
+      return originals[0].xml.slice(0, n.contentStart) + text + originals[0].xml.slice(n.contentEnd);
+    };
+    for (const [i, xml] of [replaceField('innerradius', 'auto'), replaceField('instancecount', '2'), replaceField('radialposition', '0.1'),
+      replaceField('position', '0.021'), replaceField('outerradius', 'auto 0.029')].entries()) {
+      const project = `ring-unsupported-${i}`, bytes = new TextEncoder().encode(xml);
+      await bindings.RADIUS_ROOMS.getByName(project).initialize(project, users[0].id);
+      expect((await request(project, 'import', users[0].cookie, bytes)).status).toBe(200);
+      expect((await request(project, 'commands', users[0].cookie, { ...sample, projectId: project, preconditions: [] })).status).toBe(422);
+      expect(new Uint8Array(await (await request(project, 'export', users[0].cookie)).arrayBuffer())).toEqual(bytes);
+      rejectedRequests++;
+    }
+    const underfit = command(initial[0], 'ring-underfit', radius(0, 0.0005));
+    const response = await request(projects[0], 'commands', users[0].cookie, underfit);
+    expect(response.status, await response.clone().text()).toBe(422); rejectedRequests++;
+    expect(new Uint8Array(await (await request(projects[0], 'export', users[0].cookie)).arrayBuffer())).toEqual(fromBase64(bindings.EFFECTS_FIXTURES[0]));
+    for (const preconditions of [sample.preconditions.filter(p => p.field !== 'ring'), sample.preconditions.map(p => p.field === 'ring'
+      ? { ...p, expected: { ...(p.expected as any), density: (p.expected as any).density + 1 } } : p)]) {
+      expect((await request(projects[0], 'commands', users[0].cookie, { ...sample, preconditions })).status).toBe(409); rejectedRequests++;
+    }
+    expect((await state()).sequence).toBe(0);
+  }
   const same = await accepted(0, 'preset-equal', radius(0, initial[0].tubes[0].radius));
   expect(same.ack.intrinsic.before.preset).toBe(true); expect(same.ack.intrinsic.after.preset).toBe(true);
   expect(same.after.archiveHash).toBe(initial[0].archiveHash);
@@ -195,8 +243,10 @@ it('proves preset clearing and configuration-dependent reset through the authent
   for (const body of [{ ...changedReset.body, operationId: 'stale' }, { ...changedReset.body, edit: reset(0, 1) }]) {
     expect((await request(projects[0], 'commands', users[0].cookie, body)).status).toBe(409); rejectedRequests++;
   }
-  const shrink = await accepted(0, 'preset-shrink', radius(0, 0.0005));
-  expect(shrink.ack.intrinsic).toMatchObject({ before: { preset: true }, after: { preset: false, presetDigest: null, thickness: 0.0005 } });
+  if (automaticRing) await accepted(0, 'ring-grow', radius(0, 0.035));
+  const shrink = await accepted(0, 'preset-shrink', radius(0, automaticRing ? 0.012 : 0.0005));
+  expect(shrink.ack.intrinsic).toMatchObject({ before: { preset: !automaticRing }, after: { preset: false, presetDigest: null,
+    thickness: automaticRing ? initial[0].tubes[0].thickness : 0.0005 } });
   const bEqual = await accepted(1, 'b-preset-equal', radius(1, initial[1].tubes[0].radius));
   expect(bEqual.ack.intrinsic.after.presetDigest).toBe(initial[1].tubes[0].preset.digest);
   await accepted(1, 'b-preset-clear', radius(1, 0.041));
@@ -213,16 +263,16 @@ it('proves preset clearing and configuration-dependent reset through the authent
   async function restore() { await runInDurableObject(otherStub, (room: RadiusRoom) => { (room as any).storeBlob = Object.getPrototypeOf(room).storeBlob; }); }
   await barrier();
   let current = await state(1);
-  const competing = await Promise.all([request(projects[1], 'commands', users[1].cookie, command(current, 'compete-one', reset(1, 1))),
-    request(projects[1], 'commands', users[1].cookie, command(current, 'compete-two', reset(1, 2)))]);
+  const competing = await Promise.all([request(projects[1], 'commands', users[1].cookie, command(current, 'compete-one', automaticRing ? radius(1, 0.042) : reset(1, 1))),
+    request(projects[1], 'commands', users[1].cookie, command(current, 'compete-two', automaticRing ? radius(1, 0.043) : reset(1, 2)))]);
   expect(competing.map(r => r.status).sort()).toEqual([200, 409]); rejectedRequests++;
   const winner = competing.find(r => r.status === 200)!; const won = await winner.json() as any;
-  const winningEdit = won.operationId === 'compete-one' ? reset(1, 1) : reset(1, 2);
+  const winningEdit = won.operationId === 'compete-one' ? (automaticRing ? radius(1, 0.042) : reset(1, 1)) : (automaticRing ? radius(1, 0.043) : reset(1, 2));
   let filename = 'competing-winner.ork';
   exports.push({ name: filename, base64: toBase64(await archiveBytes(1)) });
   cases.push({ name: 'competing-winner', source: source[1], export: filename, edit: winningEdit, ack: won }); source[1] = filename;
   await restore(); await barrier(); current = await state(1);
-  const retry = command(current, 'same-inflight', reset(1, 2));
+  const retry = command(current, 'same-inflight', automaticRing ? radius(1, 0.044) : reset(1, 2));
   const simultaneous = await Promise.all([request(projects[1], 'commands', users[1].cookie, retry), request(projects[1], 'commands', users[1].cookie, retry)]);
   expect(simultaneous.map(r => r.status)).toEqual([200, 200]);
   const acks = await Promise.all(simultaneous.map(r => r.json())) as any[];
@@ -235,7 +285,7 @@ it('proves preset clearing and configuration-dependent reset through the authent
   await runInDurableObject(otherStub, (_room: RadiusRoom, ctx) => {
     expect(ctx.storage.sql.exec('SELECT COUNT(*) AS count FROM radius_operations').one().count).toBe(current.sequence + 1);
   });
-  await context.annotate(JSON.stringify({ schema: 1, runtime: 'actual local workerd', cases, exports, rejectedRequests,
+  await context.annotate(JSON.stringify({ schema: 1, automaticRing, runtime: 'actual local workerd', cases, exports, rejectedRequests,
     presetCatalog: initial.map(s => s.tubes[0].preset), digestVectors: bindings.EFFECTS_DIGESTS.length,
     preservation: { lexical: true, attachments: true, ids: true, sidecar: true, flightdata: true, scriptsUnexecuted: true },
     durability: { evictionRetry: true, concurrentIdenticalRetry: true, competingCommands: true, interleavedDifferentProjects: true },
