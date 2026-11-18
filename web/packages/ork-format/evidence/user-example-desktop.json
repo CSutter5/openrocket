@@ -1,0 +1,40 @@
+{
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "fixture": "example rocket.ork",
+  "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+  "outcome": "failed",
+  "model": "MODEL components=17 decals=0 motorAssignments=3 simulations=6 resultPoints=5540",
+  "error": "Exception in thread \"main\" java.lang.AssertionError: Desktop re-export semantic drift; see expected.xml and actual.xml\n\tat ArchiveDesktopProof.requireSameXml(ArchiveDesktopProof.java:32)\n\tat ArchiveDesktopProof.main(ArchiveDesktopProof.java:89)",
+  "loadWarnings": "LOAD_WARNINGS original=Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36,Embedded motor attachment 'thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse' contains no motor matching digest 'acee08976425e0ddc8b9bfc014a91770'.,No motor with designation 'J135W' for manufacturer 'AeroTech' found.,Embedded motor attachment 'thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse' contains no motor matching digest '812abf1e0e2e60f6ec54538ffbf2b8e4'.,No motor with designation 'J800T' for manufacturer 'AeroTech' found.] edited=Messages[No matching ComponentPreset for component Parachute, 36 in., nylon, 8 lines found matching Top Flight Recovery PAR-36,Embedded motor attachment 'thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse' contains no motor matching digest 'acee08976425e0ddc8b9bfc014a91770'.,No motor with designation 'J135W' for manufacturer 'AeroTech' found.,Embedded motor attachment 'thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse' contains no motor matching digest '812abf1e0e2e60f6ec54538ffbf2b8e4'.,No motor with designation 'J800T' for manufacturer 'AeroTech' found.]",
+  "diagnostics": [
+    "desktop.log",
+    "expected.xml",
+    "actual.xml"
+  ],
+  "webEditedModelMatchesJavaRename": true,
+  "desktopOnlyControl": {
+    "outcome": "failed",
+    "assertion": "Desktop re-export semantic drift",
+    "sameWarningDowngrade": true,
+    "expectedXmlSha256": "eb93cc1984fbe86e267892d39a4e6efe8a8f94e68906ee48b4e75588f30aaac5",
+    "actualXmlSha256": "4e8db26c43589ed712be56907e5cefe6f36b1c089120f11482bf76f7688c97dc"
+  },
+  "xmlDifference": {
+    "expectedSha256": "c6fd566325c6b83327e8fc5c4af257c1b1730c71b00ee7817933717229ab419d",
+    "actualSha256": "ca8fd5019e7406f2303b1c63d3f0d037154780c3dba8b7189995c8e89a19ac4b",
+    "warningId": "a4337125-9785-4991-8ea8-6969b9487305",
+    "beforeType": "RecoveryHighSpeedDeployment",
+    "afterType": "Other",
+    "lostSpeedMPerS": 25.638137572014113
+  },
+  "motorResolution": {
+    "embeddedCurvesInSource": 5,
+    "resolvedAssignmentsInTestDatabase": 3,
+    "unresolved": [
+      "AeroTech J135W",
+      "AeroTech J800T"
+    ],
+    "limitation": "Bridge uses OpenRocketSaverTest.setup() test catalogs, not the full desktop user catalogs; embedded motor digest mismatches were reported."
+  },
+  "interpretation": "Browser/Node loss-aware name edit preserves all bytes outside the edited name. The pinned headless desktop path fails save/reload preservation, including a warning-type mismatch reproduced without a web edit. No desktop code was changed."
+}

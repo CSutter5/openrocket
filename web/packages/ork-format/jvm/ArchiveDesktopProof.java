@@ -25,6 +25,12 @@ public class ArchiveDesktopProof {
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
     }
     static void require(boolean value, String message) { if (!value) throw new AssertionError(message); }
+    static void requireSameXml(byte[] expected, byte[] actual, String message, Path output) throws Exception {
+        if (Arrays.equals(expected, actual)) return;
+        Files.write(output.resolve("expected.xml"), expected);
+        Files.write(output.resolve("actual.xml"), actual);
+        throw new AssertionError(message + "; see expected.xml and actual.xml");
+    }
     public static void main(String[] args) throws Exception {
         OpenRocketSaverTest.setup();
         if (args.length == 3 && args[0].equals("generate-format111")) {
@@ -44,6 +50,7 @@ public class ArchiveDesktopProof {
         var originalLoader = new GeneralRocketLoader(new File(args[0]));
         var editedLoader = new GeneralRocketLoader(new File(args[1]));
         var original = originalLoader.load(); var edited = editedLoader.load();
+        System.out.println("LOAD_WARNINGS original=" + originalLoader.getWarnings() + " edited=" + editedLoader.getWarnings());
         RocketComponent target = null;
         int componentCount = 0, decals = 0, motors = 0, resultPoints = 0;
         Set<String> motorDigests = new TreeSet<>();
@@ -68,15 +75,18 @@ public class ArchiveDesktopProof {
         }
         require(target != null, "Target ID not found");
         target.setName(args[4]);
-        require(Arrays.equals(semanticXml(original), semanticXml(edited)),
-            "JVM model serialization differs beyond the requested name (includes IDs/settings/results)");
+        Path output = Path.of(args[2]).toAbsolutePath().getParent();
+        requireSameXml(semanticXml(original), semanticXml(edited),
+            "JVM model serialization differs beyond the requested name (includes IDs/settings/results)", output);
         for (var simulation : edited.getSimulations()) {
             var data = simulation.getSimulatedData();
             if (data != null) for (int i = 0; i < data.getBranchCount(); ++i) resultPoints += data.getBranch(i).getLength();
         }
+        System.out.printf("MODEL components=%d decals=%d motorAssignments=%d simulations=%d resultPoints=%d%n",
+            componentCount, decals, motors, edited.getSimulations().size(), resultPoints);
         new GeneralRocketSaver().save(new File(args[2]), edited, options());
         var desktopExport = new GeneralRocketLoader(new File(args[2])).load();
-        require(Arrays.equals(semanticXml(edited), semanticXml(desktopExport)), "Desktop re-export semantic drift");
+        requireSameXml(semanticXml(edited), semanticXml(desktopExport), "Desktop re-export semantic drift", output);
         System.out.printf(Locale.ROOT,
             "PROOF components=%d decals=%d motorAssignments=%d motorDigests=%s simulations=%d resultPoints=%d semanticSha256=%s originalWarnings=%s editedWarnings=%s%n",
             componentCount, decals, motors, motorDigests, edited.getSimulations().size(), resultPoints,

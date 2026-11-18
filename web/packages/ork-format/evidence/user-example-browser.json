@@ -1,0 +1,41 @@
+{
+  "fixture": "example rocket.ork",
+  "runtime": "149.0.7827.55",
+  "bundleBytes": 109149,
+  "durationMs": 1590.8999999761581,
+  "inputBytes": 824408,
+  "exportBytes": 880597,
+  "inputSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+  "components": 17,
+  "simulations": 6,
+  "entryHashes": [
+    {
+      "path": "rocket.ork",
+      "sha256": "77409bb47be9bba76317e37cf848086171bdf9d88142c9af61750eb027d3a9c7"
+    },
+    {
+      "path": "preview.png",
+      "sha256": "adb6a381e5bf16d4d23ebb016a7145089bbb63deb3470a7af86b1a58ad31f0e4"
+    },
+    {
+      "path": "thrustcurves/acee08976425e0ddc8b9bfc014a91770.rse",
+      "sha256": "19ebc489b3d4a41a516dba88715d80c79cda6100f71ee1661ec3815bd95f6f15"
+    },
+    {
+      "path": "thrustcurves/812abf1e0e2e60f6ec54538ffbf2b8e4.rse",
+      "sha256": "f9e4ddb73ec53c0998899afa7d1ba31db28b08c9d18887a9deb59ae21dcb18ed"
+    },
+    {
+      "path": "thrustcurves/77ae2d2ca1c91023a59c2c09cf4746a3.rse",
+      "sha256": "473f84aa837770624a4a71225a7fdfa71cd745415a319dd24f9d9f252137b8ba"
+    },
+    {
+      "path": "thrustcurves/a6489608710e3e47e4795efc421e8571.rse",
+      "sha256": "ab4c16799e8f509797db761357e4175899b9ee846561afd8200c8e266509f38b"
+    },
+    {
+      "path": "thrustcurves/90f749d42119cb8a081a354353524f92.rse",
+      "sha256": "fbe01c564e589db9e5c1ec4c35b337b5c988bfaaac69bf4d999b23dafe642120"
+    }
+  ]
+}

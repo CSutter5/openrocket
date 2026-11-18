@@ -1,0 +1,16 @@
+--- expected.xml
++++ actual.xml
+@@ -553,12 +553,11 @@
+         <recoverydroguemainlowspeedwarning>15.24</recoverydroguemainlowspeedwarning>
+       </conditions>
+       <flightdata>
+-        <warning type="RecoveryHighSpeedDeployment">
++        <warning type="Other">
+           <id>a4337125-9785-4991-8ea8-6969b9487305</id>
+           <description>[Warning.Warning.RECOVERY_HIGH_SPEED] (25.6 m/s)</description>
+           <priority>NORMAL</priority>
+           <source>3a0365f9-f048-40fd-89bb-99f3680960d2</source>
+-          <parameter>25.638137572014113</parameter>
+           [Warning.Warning.RECOVERY_HIGH_SPEED] (25.6 m/s):  &quot;Parachute, 15 in., nylon, 6 lines&quot;
+         </warning>
+         <databranch name="Sustainer" optimumAltitude="3216.93297788182" timeToOptimumAltitude="24.142000000000227" types="Damping ratio,Corrective moment coefficient,Time,Altitude,Altitude above sea level,Vertical velocity,Total velocity,Vertical acceleration,Acceleration to the East,Acceleration to the North,X body acceleration,Y body acceleration,Z body acceleration,Total acceleration,Position East of launch,Position North of launch,Lateral distance,Lateral direction,Lateral velocity,Lateral acceleration,Latitude,Longitude,Angle of attack,Roll rate (Z),Pitch rate (Y),Yaw rate (X),Vertical orientation (zenith),Lateral orientation (azimuth),Mass,Motor mass,Longitudinal moment of inertia,Rotational moment of inertia,Gravitational acceleration,CP location,CG location,Stability margin calibers,Natural frequency,Thrust,Thrust-to-weight ratio,Drag force,Drag coefficient (CD),Friction drag coefficient (CD_friction),Pressure drag coefficient (CD_pressure),Base drag coefficient (CD_base),Axial drag coefficient (CA),Normal force coefficient (CN),Normal force coefficient derivative (CNα),Pitch moment coefficient (Cm),Yaw moment coefficient,Side force coefficient,Roll moment coefficient,Roll forcing coefficient,Roll damping coefficient,Pitch damping coefficient,Damping moment coefficient,Damping moment coefficient (aerodynamic),Damping moment coefficient (propulsive),Wind velocity,Wind direction,Air temperature,Air pressure,Air density,Speed of sound,Mach number,Reynolds number,Reference length,Reference area,Simulation time step,Computation time,Coriolis acceleration,Kinetic Energy,Gravitational potential energy,Chemical potential energy,Momentum,Angular momentum,Mass ratio,Specific impulse,Effective exhaust velocity,Tsiolkovsky delta-V,Gamma,Dynamic pressure,Stagnation Temperature,Filtered acceleration,Radio path loss,Heating rate,Total heating,Lorentz factor,Relativistic mass,Relativistic energy">

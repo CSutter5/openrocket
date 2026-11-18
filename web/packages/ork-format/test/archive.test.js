@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
+import { basename, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { gzipSync, zipSync } from 'fflate';
 import { componentNames, exportArchive, importArchive, renameComponent, LIMITS } from '../src/index.js';
 const examples = new URL('../../../../core/src/main/resources/datafiles/examples/', import.meta.url);
@@ -10,11 +12,16 @@ const minimal = `<openrocket version="1.11"><rocket><name>A</name><id>${id}</id>
 const xml = text => encode.encode(text);
 const zip = entries => zipSync(entries, { level: 6, mtime: new Date(1980, 0, 1) });
 
-for (const filename of await readdir(examples)) {
-  if (!filename.endsWith('.ork')) continue;
+const corpus = (await readdir(examples)).filter(name => name.endsWith('.ork')).map(filename => ({
+  filename, source: new URL(filename, examples), rejectPath: filename === 'Parallel booster staging.ork',
+}));
+if (process.env.ORK_PROOF_INPUT) corpus.push({
+  filename: 'supplied: ' + basename(process.env.ORK_PROOF_INPUT), source: pathToFileURL(resolve(process.env.ORK_PROOF_INPUT)),
+});
+for (const { filename, source, rejectPath } of corpus) {
   test(`corpus lexical/asset preservation: ${filename}`, async () => {
-    const bytes = new Uint8Array(await readFile(new URL(filename, examples)));
-    if (filename === 'Parallel booster staging.ork') {
+    const bytes = new Uint8Array(await readFile(source));
+    if (rejectPath) {
       await assert.rejects(importArchive(bytes), { code: 'UNSAFE_PATH' });
       return;
     }

@@ -37,4 +37,25 @@ The [generated format-1.11 report](evidence/format111.json) repeats the JVM/web 
 
 The file proof establishes this bounded edit path, not full T02 or desktop parity. Next investigations are archive-safe absolute-resource handling, historical ID allocation/reconciliation, model-command effect application into XML, and codec memory/CPU measurements in workerd. Full G1 assessment belongs to the coordinator's combined evidence record.
 
+## User-supplied example
+
+`ORK_PROOF_INPUT` optionally selects a local `.ork` for the Node corpus, browser runner and desktop runner. The original remains untouched; generated copies go to the output directory argument. Custom inputs are no longer mistaken for the internally generated RK6/fixed-seed fixture, and browser expectations derive from the imported fixture rather than assuming five simulations. For example, after installing dependencies and generating the test classpath as above, run from the repository root:
+
+```sh
+export ORK_PROOF_INPUT='/home/colin/rocketry/openrocket/example rocket.ork'
+npm test --prefix web/packages/ork-format
+PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers node web/packages/ork-format/test/browser-proof.mjs /tmp/openrocket-user-example-browser-proof
+ORK_PROOF_CLASSPATH="$(cat /tmp/ork-proof-classpath.txt)" node web/packages/ork-format/test/desktop-proof.mjs /tmp/openrocket-user-example-desktop-proof
+```
+
+The supplied file has SHA-256 `e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc`, format 1.11, 17 components, six stored simulations with 5,540 points, five embedded motor curves and 23 expressions. Its XML is 3,261,148 bytes, larger than the bundled corpus maximum but within the existing limits. It has no decal entries. The source file is user-owned and was not added to the commit.
+
+The optional Node run passed **29 tests**. Actual Chromium 149 import/name-edit/export/reimport passed with exact unchanged download, deterministic edited output, all IDs, simulation count, sidecar and attachment hashes preserved, plus exact XML preservation outside the name span. See [browser evidence](evidence/user-example-browser.json).
+
+The headless desktop proof **fails**, with diagnostics retained in [desktop evidence](evidence/user-example-desktop.json) and the [warning diff](evidence/user-example-warning.diff). The loaded web edit matches applying the Java name setter to the original, but desktop save/reload changes `RecoveryHighSpeedDeployment` into `Other` and drops speed `25.638137572014113`. An unchanged desktop-only control reproduces this downgrade. `OpenRocketSaver` writes the warning's class simple name, while `importt/WarningHandler` recognizes `HighSpeedDeployment`; this is a concrete pinned-desktop mismatch, not a passing compatibility result. The next fix needs a focused warning save/load regression accepting both historical and current names.
+
+The test catalogs also report no matching parachute preset, and the embedded J135W/J800T curves fail digest matching; only three motor assignments resolve and the desktop resave keeps three curves. This does not establish the behavior of a fully populated desktop installation. The next motor investigation is to compare the embedded builders' current/historical digests with the saved references. Web export retains all five original curves and references exactly. No simulation was rerun, and Swing GUI interaction remains untested.
+
+On desktop comparison failure the runner writes `report.json`, `desktop.log`, `expected.xml` and `actual.xml` under its output directory and exits nonzero. The full XML/logs remain local; the committed evidence contains the concise failure and relevant diff. The original bundled desktop test, generated RK6/fixed-seed test and bundled browser test still pass.
+
 AI assistance: Codex using GPT-6 (runtime-supplied family; exact variant unavailable) implemented this proof and reviewed its source; executable Node, Chromium and JVM checks supplied the evidence above.
