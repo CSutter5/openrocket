@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "recordedDate": "2026-11-17",
+  "failures": [
+    {
+      "stage": "Initial TeaVM preset build",
+      "outcome": "failed",
+      "message": "Class java.security.MessageDigest was not found",
+      "cause": "The real preset computeDigest method became reachable for the first time.",
+      "resolution": "Add an MD5-only API bridge in the classfile adapter; compare 136 vectors against JDK and Node and execute them plus both real preset digests in workerd.",
+      "evidence": "../../engine-adapter/evidence/imported-preset-digest-failure.log"
+    },
+    {
+      "stage": "Initial desktop catalog factory validation",
+      "outcome": "failed",
+      "message": "Catalog bridge differs from validated factory",
+      "cause": "ComponentPresetFactory also inserts the computed thickness property before hashing; the initial explicit records omitted it.",
+      "resolution": "Include the exact computed thickness and continue requiring factory digest equality for both records.",
+      "evidence": "../../packages/ork-format/evidence/preset-catalog-initial-failure.log"
+    },
+    {
+      "stage": "Initial complete preset-shrink state report comparison",
+      "outcome": "failed",
+      "message": "Workers reported presetDigest null while the JVM JSON report omitted that key.",
+      "cause": "Gson's default report serialization omitted null fields. The actual full desktop serialization and direct state comparisons had passed.",
+      "resolution": "Use serializeNulls in the development-only JVM report; retain strict complete-state comparison.",
+      "observedDiff": { "workersAfterPresetDigest": null, "jvmReportAfterPresetDigest": "key missing" }
+    }
+  ],
+  "environment": [
+    "The old /tmp/openrocket-g1-validation worktree was based on f3227a363 and dirty; it was left untouched. A fresh detached /tmp/openrocket-g1-preset-validation worktree started at 54f183b88.",
+    "Sandbox-only Gradle cache access and local socket listeners failed; authorized builds and workerd checks were rerun with access. No remote resources were created."
+  ],
+  "finalOutcome": "All ten complete relevant-state/full-serialization/desktop-reload comparisons passed. See imported-effects.json."
+}

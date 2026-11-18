@@ -42,6 +42,22 @@ public final class ImportedDeploymentProof {
         return json.append("]}").toString();
     }
 
+    public static ModID[] modificationIds(Rocket rocket) {
+        return new ModID[] { rocket.getModID(), rocket.getMassModID(), rocket.getAerodynamicModID(),
+            rocket.getTreeModID(), rocket.getFunctionalModID() };
+    }
+
+    public static String modificationChanges(Rocket rocket, ModID[] before) {
+        ModID[] after = modificationIds(rocket);
+        String[] names = { "document", "mass", "aerodynamic", "tree", "functional" };
+        StringBuilder json = new StringBuilder("{");
+        for (int i = 0; i < names.length; i++) {
+            if (i > 0) json.append(',');
+            json.append('"').append(names[i]).append("\":").append(before[i] != after[i]);
+        }
+        return json.append('}').toString();
+    }
+
     /** Mirrors RecoveryConfigurationPanel.resetDeployment, including its targeted functional event. */
     public static boolean reset(Rocket rocket, RecoveryDevice device, FlightConfigurationId id) {
         var set = device.getDeploymentConfigurations();
@@ -83,6 +99,7 @@ public final class ImportedDeploymentProof {
         String before = snapshot(device, ids);
         ModID[] mods = new ModID[ids.length];
         for (int i = 0; i < ids.length; i++) mods[i] = rocket.getFlightConfiguration(ids[i]).getModID();
+        ModID[] rocketMods = modificationIds(rocket);
         boolean changed = reset(rocket, device, target);
         StringBuilder changes = new StringBuilder("[");
         for (int i = 0; i < ids.length; i++) {
@@ -90,6 +107,7 @@ public final class ImportedDeploymentProof {
             changes.append(mods[i] != rocket.getFlightConfiguration(ids[i]).getModID());
         }
         return "{\"before\":" + before + ",\"after\":" + snapshot(device, ids)
-            + ",\"functionalChange\":" + changed + ",\"configurationChanged\":" + changes.append(']') + "}";
+            + ",\"functionalChange\":" + changed + ",\"configurationChanged\":" + changes.append(']')
+            + ",\"rocketChanged\":" + modificationChanges(rocket, rocketMods) + "}";
     }
 }

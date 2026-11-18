@@ -1,7 +1,8 @@
 import { DurableObject } from 'cloudflare:workers';
 import { importArchive, exportArchive, sha256, LIMITS } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects } from '../../packages/ork-format/src/radius.js';
-import { radiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { deploymentInput, applyDeploymentReset, deploymentSimulationEffects } from '../../packages/ork-format/src/deployment.js';
+import { radiusEdit, presetRadiusEdit, resetDeployment } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { authentication } from './auth';
 import type { Bindings } from './index';
 import type { Command, AcceptedCommand, IdentitySidecar } from '@openrocket/contracts';
@@ -100,39 +101,72 @@ export class RadiusRoom extends DurableObject<RadiusBindings> {
       }
       if (request.method === 'GET' && path === `/radius/${state.project}/state`) {
         const archive = await this.archive(state);
+        const functionalEdit = this.ctx.storage.sql.exec<{ acknowledgment: string }>('SELECT acknowledgment FROM radius_operations').toArray().some(row => {
+          const effect = JSON.parse(row.acknowledgment).intrinsic;
+          return effect.functionalChange === true || effect.before.radius !== effect.after.radius || effect.before.thickness !== effect.after.thickness;
+        });
         return Response.json({ projectId: state.project, branchId: 'main', epoch: 1, sequence: state.sequence,
           archiveHash: state.hash, identity: archive.identity, instance: this.instance,
-          importedResults: state.sequence ? 'stale-after-edit' : 'unverified-import',
-          tubes: archive.parsed.components.filter(n => n.name === 'bodytube').map(n => tubeRadiusInput(archive, n.id ?? '')) });
+          importedResults: functionalEdit ? 'stale-after-edit' : 'unverified-import',
+          simulationStatuses: archive.parsed.simulations.map((node, i) => ({ id: archive.identity.simulations[i].id, status: node.attributes.status?.value })),
+          tubes: archive.parsed.components.filter(n => n.name === 'bodytube').map(n => {
+            try { return tubeRadiusInput(archive, n.id ?? ''); } catch (error) { return { componentId: n.id, unsupported: String(error) }; }
+          }),
+          recovery: archive.parsed.components.filter(n => n.name === 'parachute').map(n => {
+            try { return deploymentInput(archive, n.id ?? ''); } catch (error) { return { componentId: n.id, unsupported: String(error) }; }
+          }) });
       }
       if (request.method !== 'POST' || path !== `/radius/${state.project}/commands`) return responseError('invalid', 'Unknown proof endpoint', 404);
       const input = JSON.parse(new TextDecoder().decode(await boundedBody(request, 8192)));
       if (!keys(input, ['protocol', 'modelSchema', 'projectId', 'branchId', 'epoch', 'operationId', 'observedSequence', 'preconditions', 'edit', ...(Object.hasOwn(input ?? {}, 'authorId') ? ['authorId'] : [])])) return responseError('invalid', 'Typed command required');
       if (input.protocol !== 1 || input.modelSchema !== 1) return responseError('version', 'Protocol/model schema 1 required');
       if (input.projectId !== state.project || input.branchId !== 'main' || input.epoch !== 1) return responseError('resync', 'Workspace mismatch', 409);
+      const radiusCommand = input.edit?.type === 'setOuterRadius';
+      const deploymentCommand = input.edit?.type === 'resetDeploymentConfiguration';
       if (typeof input.operationId !== 'string' || !/^[a-zA-Z0-9-]{1,64}$/.test(input.operationId) || !Number.isSafeInteger(input.observedSequence) || input.observedSequence < 0 ||
-          !keys(input.edit, ['type', 'componentId', 'value']) || input.edit.type !== 'setOuterRadius' || typeof input.edit.componentId !== 'string' ||
-          !Number.isFinite(input.edit.value) || input.edit.value <= 0 || input.edit.value > 1 || !Array.isArray(input.preconditions)) return responseError('invalid', 'Invalid bounded radius command');
+          typeof input.edit?.componentId !== 'string' || !Array.isArray(input.preconditions) ||
+          !(radiusCommand && keys(input.edit, ['type', 'componentId', 'value']) && Number.isFinite(input.edit.value) && input.edit.value > 0 && input.edit.value <= 1 ||
+            deploymentCommand && keys(input.edit, ['type', 'componentId', 'configurationId']) && typeof input.edit.configurationId === 'string')) return responseError('invalid', 'Invalid bounded imported command');
       if (!input.preconditions.every((p: unknown) => keys(p, ['entityId', 'field', 'expected']))) return responseError('invalid', 'Invalid preconditions');
       const command: Command = { protocol: 1, modelSchema: 1, projectId: state.project, branchId: 'main', epoch: 1,
         operationId: input.operationId, observedSequence: input.observedSequence,
-        edit: { type: 'setOuterRadius', componentId: input.edit.componentId, value: input.edit.value },
+        edit: radiusCommand ? { type: 'setOuterRadius', componentId: input.edit.componentId, value: input.edit.value } :
+          { type: 'resetDeploymentConfiguration', componentId: input.edit.componentId, configurationId: input.edit.configurationId },
         preconditions: input.preconditions.map((p: Command['preconditions'][number]) => ({ entityId: p.entityId, field: p.field, expected: p.expected })).sort((a: Command['preconditions'][number], b: Command['preconditions'][number]) => String(a.field).localeCompare(String(b.field))) };
       const requestText = JSON.stringify(command);
       const duplicate = this.retry(command.operationId, session.user.id, requestText);
       if (duplicate) return duplicate;
       if (command.observedSequence !== state.sequence) return responseError('conflict', 'Sequence conflict', 409);
       const archive = await this.archive(state);
-      const tube = tubeRadiusInput(archive, input.edit.componentId);
+      const target = radiusCommand ? tubeRadiusInput(archive, input.edit.componentId) : deploymentInput(archive, input.edit.componentId);
       const expected = [
         { entityId: state.project, field: 'archiveHash', expected: state.hash },
-        ...Object.entries(tube).filter(([field]) => field !== 'schema' && field !== 'componentId').map(([field, value]) => ({ entityId: tube.componentId, field, expected: value })),
-        { entityId: tube.componentId, field: 'automatic', expected: false }, { entityId: tube.componentId, field: 'preset', expected: false },
+        ...Object.entries(target).filter(([field]) => field !== 'schema' && field !== 'componentId').map(([field, value]) => ({ entityId: target.componentId, field, expected: value })),
+        ...(radiusCommand ? [{ entityId: target.componentId, field: 'automatic', expected: false },
+          ...('preset' in target ? [] : [{ entityId: target.componentId, field: 'preset', expected: false }])] : []),
       ].sort((a, b) => a.field.localeCompare(b.field));
-      if (JSON.stringify(command.preconditions) !== JSON.stringify(expected)) return responseError('conflict', 'Complete radius read/effect preconditions required', 409);
-      const effects = JSON.parse(radiusEdit(tube.length, tube.radius, tube.thickness, tube.filled, tube.density, input.edit.value));
-      const simulationEffects = radiusSimulationEffects(archive, tube, effects.after);
-      const changed = await applyTubeRadius(archive, tube, effects.after);
+      if (JSON.stringify(command.preconditions) !== JSON.stringify(expected)) return responseError('conflict', 'Complete imported read/effect preconditions required', 409);
+      let effects: any, simulationEffects: { index: number; before: string; after: string }[], changed;
+      const domainEffects: AcceptedCommand['effects'] = [];
+      if (radiusCommand) {
+        const tube = tubeRadiusInput(archive, input.edit.componentId);
+        effects = JSON.parse(tube.preset
+          ? presetRadiusEdit(tube.preset.key, tube.preset.digest, tube.length, tube.radius, tube.thickness, tube.filled, tube.density, input.edit.value)
+          : radiusEdit(tube.length, tube.radius, tube.thickness, tube.filled, tube.density, input.edit.value));
+        simulationEffects = radiusSimulationEffects(archive, tube, effects.after);
+        changed = await applyTubeRadius(archive, tube, effects.after);
+        for (const field of ['radius', 'thickness', 'automatic', 'preset', ...(tube.preset ? ['presetDigest'] : [])]) {
+          domainEffects.push({ entityId: tube.componentId, field, before: effects.before[field], after: effects.after[field] });
+        }
+      } else {
+        const recovery = deploymentInput(archive, input.edit.componentId);
+        effects = JSON.parse(resetDeployment(recovery.default.event, recovery.default.altitude, recovery.default.delay,
+          recovery.overrides.map(o => [o.id, o.parameters.event, o.parameters.altitude, o.parameters.delay].join(',')).join(';'),
+          recovery.configurationIds.join(';'), input.edit.configurationId));
+        simulationEffects = deploymentSimulationEffects(archive, recovery, input.edit.configurationId, effects);
+        changed = await applyDeploymentReset(archive, recovery, input.edit.configurationId, effects);
+        domainEffects.push({ entityId: recovery.componentId, field: `deployment:${input.edit.configurationId}`, before: effects.before, after: effects.after });
+      }
       const output = await exportArchive(changed);
       const archiveHash = await sha256(output.bytes);
       const blobKey = await this.storeBlob(state.project, archiveHash, output.bytes);
@@ -152,7 +186,7 @@ export class RadiusRoom extends DurableObject<RadiusBindings> {
         const acknowledgment: AcceptedCommand & { archiveHash: string; blobKey: string; intrinsic: unknown } = {
           protocol: 1, projectId: state.project, branchId: 'main', epoch: 1, operationId: command.operationId, sequence, authorId: session.user.id,
           effects: [
-            ...Object.keys(effects.after).filter(field => ['radius', 'thickness', 'automatic', 'preset'].includes(field)).map(field => ({ entityId: tube.componentId, field, before: effects.before[field], after: effects.after[field] })),
+            ...domainEffects,
             ...simulationEffects.map(effect => ({ entityId: archive.identity.simulations[effect.index].id, field: 'status', before: effect.before, after: effect.after })),
           ],
           archiveHash, blobKey, intrinsic: effects,

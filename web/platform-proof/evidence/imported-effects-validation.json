@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "recordedDate": "2026-11-17",
+  "outcome": "passed",
+  "reducerCodecCheckpoint": "4889ac8bf",
+  "checks": [
+    {
+      "command": "npm ci (from isolated /tmp/openrocket-g1-preset-validation/web)",
+      "outcome": "passed",
+      "dependencyVersionsChanged": false
+    },
+    {
+      "command": "node web/engine-adapter/scripts/build.mjs",
+      "outcome": "passed",
+      "originalAndAdaptedJvmExact": true,
+      "sourcePin": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9 plus only the two exact reviewed I/O files"
+    },
+    {
+      "command": "npm test (from web)",
+      "outcome": "passed",
+      "contracts": 2,
+      "fixtureManifests": 7,
+      "codec": 41,
+      "originalPlatformWorkerd": 12
+    },
+    {
+      "command": "npm run typecheck --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed"
+    },
+    {
+      "command": "npm run test:workerd --workspace @openrocket/engine-proof (from web)",
+      "outcome": "passed",
+      "invalidInputs": 9,
+      "projects": 2,
+      "acceptedCommands": 3,
+      "duplicateRetries": 1,
+      "localProcessStartupWallMs": 141.508939,
+      "firstCommandLocalWallMs": 14.956511
+    },
+    {
+      "command": "./gradlew :core:test --tests 'info.openrocket.core.file.openrocket.OpenRocketSaverTest' --tests 'info.openrocket.core.file.motor.TestMotorLoader' --tests 'info.openrocket.core.file.openrocket.importt.MotorHandlerTest' --tests 'info.openrocket.core.motor.MotorDigestTest' --tests 'info.openrocket.core.preset.BodyTubeComponentTests' --tests 'info.openrocket.core.preset.BodyTubePresetTests' --no-daemon",
+      "outcome": "passed",
+      "classes": 6,
+      "tests": 66,
+      "failures": 0
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_EFFECTS_OUTPUT=/tmp/g1-imported-effects-final npm run proof:effects --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed",
+      "acceptedActionDesktopComparisons": 10,
+      "rejectedRequests": 28,
+      "jdkNodeWorkerdDigestVectors": 136,
+      "evidence": "imported-effects.json"
+    },
+    {
+      "command": "ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_RADIUS_OUTPUT=/tmp/g1-effects-radius-regression npm run proof:radius --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed",
+      "fixture": "existing generated three-component input",
+      "desktopCases": 2,
+      "rejectedRequests": 26
+    },
+    {
+      "command": "ORK_RADIUS_INPUT='/home/colin/rocketry/openrocket/example rocket.ork' ORK_RADIUS_OUTPUT=/tmp/g1-effects-user-radius-regression ORK_PROOF_CLASSPATH=<documented core test runtime> ORK_PROOF_MOTOR_CATALOG=<checkout>/core/src/main/resources/datafiles/thrustcurves/initial_motors.db npm run proof:radius --workspace @openrocket/platform-proof (from web)",
+      "outcome": "passed",
+      "desktopCases": 2,
+      "components": 17,
+      "motorAssignments": 5,
+      "simulations": 6,
+      "storedPoints": 5540,
+      "sourceReadOnly": true
+    },
+    {
+      "command": "npx wrangler deploy --dry-run --config platform-proof/wrangler.radius.jsonc --outdir /tmp/g1-effects-final-bundle (from web)",
+      "outcome": "passed",
+      "uploadKiB": 4130.35,
+      "gzipKiB": 732.34,
+      "deployed": false
+    }
+  ],
+  "unmeasured": ["Hosted domain-command CPU", "Worker isolate heap", "Process CPU/RSS in this follow-up", "Worst-case input budgets", "Production latency"],
+  "skipped": ["Full desktop JUnit suite", "Swing/OpenGL UI", "Chromium rerun (browser artifact byte-identical)", "Simulation rerun", "Hosted deployment/domain proof"],
+  "originalFile": {
+    "path": "example rocket.ork",
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "unchanged": true,
+    "addedToGit": false
+  },
+  "g1": "hold"
+}

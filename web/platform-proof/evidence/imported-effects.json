@@ -1,0 +1,1196 @@
+{
+  "schema": 1,
+  "outcome": "passed",
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "artifacts": {
+    "build/generated/teavm/js/openrocket-g1-engine.js": {
+      "sha256": "64aebc15f1c7178e563bd037856054a36709a4fd140b8a80d89cc92778340421",
+      "bytes": 2580479
+    },
+    "build/generated/teavm/js/reducer.js": {
+      "sha256": "55f72cb21b58d80e876d8b7b1d08a64ae0b347f63f8738749b4d8f6f6066eb4d",
+      "bytes": 1775189
+    }
+  },
+  "sourceHashes": {
+    "src/radius-room.ts": "a250b0b677208eaf1350f830360edde6fa3827a1255983da99107992e115aa30",
+    "effects-proof/integration.ts": "2e4ab7a8af2939dae7454089e8d51ab6ecf62eb2b6abe0eb2b167af5f4e3e09d",
+    "scripts/imported-effects-proof.mjs": "86a5f19bc700c76491e97cfb6fb25b05cc69ccebfd0337644a2b5be1d3ea2491",
+    "vitest.effects.config.ts": "c7d288a0954a815a1a98a54360c714715bfead30938ab297ed5d2bfb4a45f250",
+    "../packages/ork-format/src/radius.js": "d11ec4e65b092539102f17aad47e49348bcfe75a38c25761a91c0ffcf11a9bbc",
+    "../packages/ork-format/src/deployment.js": "d64553773a9a7851caac37848337959d730f6151f86263d42a54c83644b5fef6",
+    "../packages/ork-format/jvm/ImportedEffectsDesktopProof.java": "6b81ee72b92c0aa5606649e8ffa7985c3b9744e3a835d11b23c9bfcc203dd7c3"
+  },
+  "fixtures": {
+    "G1-A": {
+      "sha256": "eeda3c8f625b8d4df20ced57950868d89e50467139f36ba83f6520b68ee45d11",
+      "bytes": 581898,
+      "xmlBytes": 1832361,
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "sha256": "9c008deb60b36088da6a77b11e3050ee996ce60c0a28ecb7f5554fff17f49d5c",
+          "bytes": 1832361
+        },
+        {
+          "path": "decals/BodyStripe.png",
+          "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454",
+          "bytes": 257
+        },
+        {
+          "path": "decals/TailStripe.png",
+          "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb",
+          "bytes": 267
+        },
+        {
+          "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+          "sha256": "e70f8394675566eaf28c08fa512598499131ca4306e81be66454754d6294b6e0",
+          "bytes": 1633
+        },
+        {
+          "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+          "sha256": "f761f7636854374e5c7278f6fa6ab8eda5cc8a6e5baec36fc489d8559c1ecc58",
+          "bytes": 1725
+        },
+        {
+          "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+          "sha256": "23a10513892552a1b19184e0f018152c10b92f04995b16e8c2636b962cb17efd",
+          "bytes": 1686
+        },
+        {
+          "path": "opaque/effects.bin",
+          "sha256": "6d8078aab704bcde0a8729864248feceb230eb79774f06179547ded9af7c96b2",
+          "bytes": 5
+        }
+      ]
+    },
+    "G1-B": {
+      "sha256": "dfce9e4a1f0622727d2ea907498f7ba79df618a71b154e5323347872dba87c0c",
+      "bytes": 581903,
+      "xmlBytes": 1832362,
+      "entries": [
+        {
+          "path": "rocket.ork",
+          "sha256": "b1e07589d5ab5044141e1ee03c8cfddba2fe88264cbc738f14b78bafd88a30f8",
+          "bytes": 1832362
+        },
+        {
+          "path": "decals/BodyStripe.png",
+          "sha256": "b755502e959e675ce40e4c9ae4e9edb3b49e26cc9c3b67c73c3f9ea69e3d8454",
+          "bytes": 257
+        },
+        {
+          "path": "decals/TailStripe.png",
+          "sha256": "10214b018ce1847af91ebf0da073f9f5659586daf905bd1a68a7c5e59418b5eb",
+          "bytes": 267
+        },
+        {
+          "path": "thrustcurves/c049499ca03fd69115352e5d4be72de7.rse",
+          "sha256": "e70f8394675566eaf28c08fa512598499131ca4306e81be66454754d6294b6e0",
+          "bytes": 1633
+        },
+        {
+          "path": "thrustcurves/be11a726b56813c4b1aea0574c8302b2.rse",
+          "sha256": "f761f7636854374e5c7278f6fa6ab8eda5cc8a6e5baec36fc489d8559c1ecc58",
+          "bytes": 1725
+        },
+        {
+          "path": "thrustcurves/2967cd7a160b396ef96f09695429d8e9.rse",
+          "sha256": "23a10513892552a1b19184e0f018152c10b92f04995b16e8c2636b962cb17efd",
+          "bytes": 1686
+        },
+        {
+          "path": "opaque/effects.bin",
+          "sha256": "6d8078aab704bcde0a8729864248feceb230eb79774f06179547ded9af7c96b2",
+          "bytes": 5
+        }
+      ]
+    }
+  },
+  "catalog": [
+    {
+      "key": "G1-A",
+      "type": "BODY_TUBE",
+      "manufacturer": "G1 proof",
+      "partno": "G1-A",
+      "digest": "726e26d7f3618af491f94460622c5110"
+    },
+    {
+      "key": "G1-B",
+      "type": "BODY_TUBE",
+      "manufacturer": "G1 proof",
+      "partno": "G1-B",
+      "digest": "878cd7a8940521985be965ad48933d20"
+    }
+  ],
+  "stateSnapshots": {
+    "5af19d4648e5a127885cddee00f7ed146a7a9707d15f56d2c371ca27abe39a17": {
+      "radius": 0.03,
+      "thickness": 0.0009999999999999974,
+      "automatic": false,
+      "preset": true,
+      "mass": 0.03781220917860666,
+      "cg": 0.15,
+      "presetDigest": "726e26d7f3618af491f94460622c5110",
+      "length": 0.3,
+      "density": 680,
+      "filled": false,
+      "innerRadius": 0.029,
+      "volume": 0.0000556061899685392,
+      "listeners": 0
+    },
+    "ff2c2bfc8a62000ce0d218ec84318525beeb0ec88dc35846ed2ea36c4a08073c": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 300,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 180,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": false,
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 180,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": false,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    },
+    "38fcc58864ba2fcbd348e77415151b8bfcd425ed5db6f7d484e5fd25f66268e4": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 300,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": false,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    },
+    "89cd8e5dd5abfc9eb80e2328d4ad214978d6ff3b3c796b3cf5fd8d4158c3f4e7": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 200,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 120,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": false,
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 120,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": false,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    },
+    "c52d8797e44a3dcb38cb23d9c6608ca22c25f442fcca3f7284040559fc49b56b": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 200,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 120,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        }
+      ],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": false,
+          "parameters": {
+            "event": "ALTITUDE",
+            "altitude": 120,
+            "delay": 1.5,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    },
+    "3c6a0fcc05673336440ab339e709516b308d4db5954fcc108432e4d83b6659f9": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 200,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 200,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    },
+    "c6a924769fc597aea18e6e922ebfc09aded69a5389cdf20a960507169f2f3739": {
+      "radius": 0.0005,
+      "thickness": 0.0005,
+      "automatic": false,
+      "preset": false,
+      "mass": 0.00016022122533307945,
+      "cg": 0.15,
+      "presetDigest": null,
+      "length": 0.3,
+      "density": 680,
+      "filled": false,
+      "innerRadius": 0,
+      "volume": 2.3561944901923448e-7,
+      "listeners": 0
+    },
+    "113f5e848ce8e0b9d80a6c568c2f81e510239d4159c6db5f25c17b3b8ccce3b2": {
+      "radius": 0.04,
+      "thickness": 0.0020000000000000018,
+      "automatic": false,
+      "preset": true,
+      "mass": 0.22053980428200404,
+      "cg": 0.25,
+      "presetDigest": "878cd7a8940521985be965ad48933d20",
+      "length": 0.5,
+      "density": 900,
+      "filled": false,
+      "innerRadius": 0.038,
+      "volume": 0.0002450442269800045,
+      "listeners": 0
+    },
+    "b41c8791e781ad2db88243d82e2a314273e8b2c43d9071371de98b9a1312b0bc": {
+      "radius": 0.041,
+      "thickness": 0.0020000000000000018,
+      "automatic": false,
+      "preset": false,
+      "mass": 0.2261946710584652,
+      "cg": 0.25,
+      "presetDigest": null,
+      "length": 0.5,
+      "density": 900,
+      "filled": false,
+      "innerRadius": 0.039,
+      "volume": 0.00025132741228718353,
+      "listeners": 0
+    },
+    "af0b2a30b449a653ccc154ef2b93d920c04a838e1ae2982810e02c570034e6dd": {
+      "default": {
+        "event": "APOGEE",
+        "altitude": 300,
+        "delay": 0,
+        "listeners": 0
+      },
+      "overrides": [],
+      "effective": [
+        {
+          "id": "da326836-0959-4c94-bcd5-49dee07235a4",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "05896b5a-71a7-48ac-b7ae-eadeb267975b",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "e1dc7488-77c0-403a-b54f-c01db07aba2f",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        },
+        {
+          "id": "5d9a2765-395d-4d9c-9678-38eed0988c72",
+          "inherited": true,
+          "parameters": {
+            "event": "APOGEE",
+            "altitude": 300,
+            "delay": 0,
+            "listeners": 0
+          }
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "name": "preset-equal",
+      "edit": {
+        "type": "setOuterRadius",
+        "componentId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "value": 0.03
+      },
+      "sequence": 1,
+      "inputSha256": "eeda3c8f625b8d4df20ced57950868d89e50467139f36ba83f6520b68ee45d11",
+      "exportedSha256": "eeda3c8f625b8d4df20ced57950868d89e50467139f36ba83f6520b68ee45d11",
+      "semanticSha256": "5d7b63d77deeae49ef2b7160531393f37827170fe35182948138a6ac08d7a7c5",
+      "stateHashes": {
+        "before": "5af19d4648e5a127885cddee00f7ed146a7a9707d15f56d2c371ca27abe39a17",
+        "after": "5af19d4648e5a127885cddee00f7ed146a7a9707d15f56d2c371ca27abe39a17"
+      },
+      "statusesBefore": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "components": 13,
+        "simulations": 6,
+        "motorAssignments": 5,
+        "resultPoints": 3014,
+        "decals": 2
+      }
+    },
+    {
+      "name": "b-reset",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "da326836-0959-4c94-bcd5-49dee07235a4"
+      },
+      "sequence": 1,
+      "inputSha256": "dfce9e4a1f0622727d2ea907498f7ba79df618a71b154e5323347872dba87c0c",
+      "exportedSha256": "eb72572384c49d3bf6b813db10b4934e185bf31e225fb28747944f1864bb01d9",
+      "semanticSha256": "09f274c781d141588f176307532bd40335398e7817d815b58952ed2d8929a839",
+      "stateHashes": {
+        "before": "ff2c2bfc8a62000ce0d218ec84318525beeb0ec88dc35846ed2ea36c4a08073c",
+        "after": "38fcc58864ba2fcbd348e77415151b8bfcd425ed5db6f7d484e5fd25f66268e4"
+      },
+      "functionalChange": true,
+      "configurationChanged": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": true,
+        "mass": false,
+        "aerodynamic": true,
+        "tree": false,
+        "functional": true
+      },
+      "statusesBefore": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "components": 13,
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5,
+        "simulations": 6
+      }
+    },
+    {
+      "name": "reset-equal-default",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "05896b5a-71a7-48ac-b7ae-eadeb267975b"
+      },
+      "sequence": 2,
+      "inputSha256": "eeda3c8f625b8d4df20ced57950868d89e50467139f36ba83f6520b68ee45d11",
+      "exportedSha256": "7519252c0a3374efa535a2c1857543dc2b94071e0608e5fcaeb28f6360e36988",
+      "semanticSha256": "4ceda5f45a7daefe502ee34fb58d34239a5d3a68247fad50195a065b57c21bbf",
+      "stateHashes": {
+        "before": "89cd8e5dd5abfc9eb80e2328d4ad214978d6ff3b3c796b3cf5fd8d4158c3f4e7",
+        "after": "c52d8797e44a3dcb38cb23d9c6608ca22c25f442fcca3f7284040559fc49b56b"
+      },
+      "functionalChange": false,
+      "configurationChanged": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": false,
+        "mass": false,
+        "aerodynamic": false,
+        "tree": false,
+        "functional": false
+      },
+      "statusesBefore": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5,
+        "simulations": 6,
+        "components": 13
+      }
+    },
+    {
+      "name": "reset-inherited",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a"
+      },
+      "sequence": 3,
+      "inputSha256": "7519252c0a3374efa535a2c1857543dc2b94071e0608e5fcaeb28f6360e36988",
+      "exportedSha256": "7519252c0a3374efa535a2c1857543dc2b94071e0608e5fcaeb28f6360e36988",
+      "semanticSha256": "4ceda5f45a7daefe502ee34fb58d34239a5d3a68247fad50195a065b57c21bbf",
+      "stateHashes": {
+        "before": "c52d8797e44a3dcb38cb23d9c6608ca22c25f442fcca3f7284040559fc49b56b",
+        "after": "c52d8797e44a3dcb38cb23d9c6608ca22c25f442fcca3f7284040559fc49b56b"
+      },
+      "functionalChange": false,
+      "configurationChanged": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": false,
+        "mass": false,
+        "aerodynamic": false,
+        "tree": false,
+        "functional": false
+      },
+      "statusesBefore": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5,
+        "simulations": 6,
+        "components": 13
+      }
+    },
+    {
+      "name": "reset-changed",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "da326836-0959-4c94-bcd5-49dee07235a4"
+      },
+      "sequence": 4,
+      "inputSha256": "7519252c0a3374efa535a2c1857543dc2b94071e0608e5fcaeb28f6360e36988",
+      "exportedSha256": "5343db7f6a59df92bbe5ed95a01c9a9d78027c8a4b23d68d4a0c57d4f5d9ee58",
+      "semanticSha256": "98edeb68d5bac4907d81acdb1bfd55d54b5c07e834984d3ce422681012198848",
+      "stateHashes": {
+        "before": "c52d8797e44a3dcb38cb23d9c6608ca22c25f442fcca3f7284040559fc49b56b",
+        "after": "3c6a0fcc05673336440ab339e709516b308d4db5954fcc108432e4d83b6659f9"
+      },
+      "functionalChange": true,
+      "configurationChanged": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": true,
+        "mass": false,
+        "aerodynamic": true,
+        "tree": false,
+        "functional": true
+      },
+      "statusesBefore": [
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "simulations": 6,
+        "components": 13,
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5
+      }
+    },
+    {
+      "name": "preset-shrink",
+      "edit": {
+        "type": "setOuterRadius",
+        "componentId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "value": 0.0005
+      },
+      "sequence": 5,
+      "inputSha256": "5343db7f6a59df92bbe5ed95a01c9a9d78027c8a4b23d68d4a0c57d4f5d9ee58",
+      "exportedSha256": "51391e388536e01aee9067d04b3e14f504f2f49a393a4e6d0a9c56e38d73c4dc",
+      "semanticSha256": "5df69a7155b26b42defbf5cbbc1242a0fcc161a7d00cb4cf70a6d2c2c8126df8",
+      "stateHashes": {
+        "before": "5af19d4648e5a127885cddee00f7ed146a7a9707d15f56d2c371ca27abe39a17",
+        "after": "c6a924769fc597aea18e6e922ebfc09aded69a5389cdf20a960507169f2f3739"
+      },
+      "statusesBefore": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "components": 13,
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5,
+        "simulations": 6
+      }
+    },
+    {
+      "name": "b-preset-equal",
+      "edit": {
+        "type": "setOuterRadius",
+        "componentId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "value": 0.04
+      },
+      "sequence": 2,
+      "inputSha256": "eb72572384c49d3bf6b813db10b4934e185bf31e225fb28747944f1864bb01d9",
+      "exportedSha256": "eb72572384c49d3bf6b813db10b4934e185bf31e225fb28747944f1864bb01d9",
+      "semanticSha256": "09f274c781d141588f176307532bd40335398e7817d815b58952ed2d8929a839",
+      "stateHashes": {
+        "before": "113f5e848ce8e0b9d80a6c568c2f81e510239d4159c6db5f25c17b3b8ccce3b2",
+        "after": "113f5e848ce8e0b9d80a6c568c2f81e510239d4159c6db5f25c17b3b8ccce3b2"
+      },
+      "statusesBefore": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "simulations": 6,
+        "motorAssignments": 5,
+        "resultPoints": 3014,
+        "decals": 2,
+        "components": 13
+      }
+    },
+    {
+      "name": "b-preset-clear",
+      "edit": {
+        "type": "setOuterRadius",
+        "componentId": "23676342-cab1-4180-bdc3-645af8cec2ca",
+        "value": 0.041
+      },
+      "sequence": 3,
+      "inputSha256": "eb72572384c49d3bf6b813db10b4934e185bf31e225fb28747944f1864bb01d9",
+      "exportedSha256": "e0341051a22d21d9d882ed0e043d1bcb8f558fccee3bdde440801e738cf3edd7",
+      "semanticSha256": "dfd341dad6e3e22105a0ad00dfa528ae2e093e49cda2f1b0994482fc3c61171c",
+      "stateHashes": {
+        "before": "113f5e848ce8e0b9d80a6c568c2f81e510239d4159c6db5f25c17b3b8ccce3b2",
+        "after": "b41c8791e781ad2db88243d82e2a314273e8b2c43d9071371de98b9a1312b0bc"
+      },
+      "statusesBefore": [
+        "outdated",
+        "outdated",
+        "loaded",
+        "loaded",
+        "loaded",
+        "loaded"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "components": 13,
+        "simulations": 6,
+        "motorAssignments": 5,
+        "resultPoints": 3014,
+        "decals": 2
+      }
+    },
+    {
+      "name": "competing-winner",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "05896b5a-71a7-48ac-b7ae-eadeb267975b"
+      },
+      "sequence": 4,
+      "inputSha256": "e0341051a22d21d9d882ed0e043d1bcb8f558fccee3bdde440801e738cf3edd7",
+      "exportedSha256": "2df35bef5c9939644a6980e5e9da409a99aff178645cb51b8e658764763a377c",
+      "semanticSha256": "a8aadc750f72dba47f60972e2a0b4c704817b74441b717a68ad14ed7d8efb079",
+      "stateHashes": {
+        "before": "38fcc58864ba2fcbd348e77415151b8bfcd425ed5db6f7d484e5fd25f66268e4",
+        "after": "af0b2a30b449a653ccc154ef2b93d920c04a838e1ae2982810e02c570034e6dd"
+      },
+      "functionalChange": false,
+      "configurationChanged": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": false,
+        "mass": false,
+        "aerodynamic": false,
+        "tree": false,
+        "functional": false
+      },
+      "statusesBefore": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "decals": 2,
+        "components": 13,
+        "simulations": 6,
+        "motorAssignments": 5,
+        "resultPoints": 3014
+      }
+    },
+    {
+      "name": "simultaneous-retry",
+      "edit": {
+        "type": "resetDeploymentConfiguration",
+        "componentId": "99a9ba6b-15ea-4c14-8ddc-a2b95453ff5c",
+        "configurationId": "b13e8ca2-f54d-4ca8-9b23-06c6c9eb237a"
+      },
+      "sequence": 5,
+      "inputSha256": "2df35bef5c9939644a6980e5e9da409a99aff178645cb51b8e658764763a377c",
+      "exportedSha256": "2df35bef5c9939644a6980e5e9da409a99aff178645cb51b8e658764763a377c",
+      "semanticSha256": "a8aadc750f72dba47f60972e2a0b4c704817b74441b717a68ad14ed7d8efb079",
+      "stateHashes": {
+        "before": "af0b2a30b449a653ccc154ef2b93d920c04a838e1ae2982810e02c570034e6dd",
+        "after": "af0b2a30b449a653ccc154ef2b93d920c04a838e1ae2982810e02c570034e6dd"
+      },
+      "functionalChange": false,
+      "configurationChanged": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "rocketChanged": {
+        "document": false,
+        "mass": false,
+        "aerodynamic": false,
+        "tree": false,
+        "functional": false
+      },
+      "statusesBefore": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "statusesAfter": [
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated",
+        "outdated"
+      ],
+      "fullSerializationEqual": true,
+      "desktopReloadEqual": true,
+      "counts": {
+        "components": 13,
+        "decals": 2,
+        "resultPoints": 3014,
+        "motorAssignments": 5,
+        "simulations": 6
+      }
+    }
+  ],
+  "digestVectors": 136,
+  "rejectedRequests": 28,
+  "preservation": {
+    "lexical": true,
+    "attachments": true,
+    "ids": true,
+    "sidecar": true,
+    "flightdata": true,
+    "scriptsUnexecuted": true
+  },
+  "durability": {
+    "evictionRetry": true,
+    "concurrentIdenticalRetry": true,
+    "competingCommands": true,
+    "interleavedDifferentProjects": true
+  },
+  "measurements": {
+    "totalLocalWallMs": 28258,
+    "commands": [
+      {
+        "name": "preset-equal",
+        "localRequestWallMs": 131
+      },
+      {
+        "name": "b-reset",
+        "localRequestWallMs": 348
+      },
+      {
+        "name": "reset-equal-default",
+        "localRequestWallMs": 316
+      },
+      {
+        "name": "reset-inherited",
+        "localRequestWallMs": 108
+      },
+      {
+        "name": "reset-changed",
+        "localRequestWallMs": 317
+      },
+      {
+        "name": "preset-shrink",
+        "localRequestWallMs": 330
+      },
+      {
+        "name": "b-preset-equal",
+        "localRequestWallMs": 108
+      },
+      {
+        "name": "b-preset-clear",
+        "localRequestWallMs": 333
+      }
+    ],
+    "hostedCpu": null,
+    "isolateHeap": null
+  },
+  "g1": "hold",
+  "rawEvidence": "/tmp/g1-imported-effects-final",
+  "runtime": {
+    "node": "26.13.1",
+    "java": "17",
+    "teavm": "0.15.0",
+    "workers": "actual local workerd"
+  },
+  "limitations": [
+    "Bounded two-record preset catalog and explicit geometry",
+    "One parachute configuration reset, at most 16 configurations",
+    "No mutable preference isolation policy",
+    "No hosted reducer CPU, isolate heap or budget-limit proof",
+    "No simulation rerun or GUI exercise"
+  ]
+}

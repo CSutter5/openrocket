@@ -100,6 +100,7 @@ public class ImportedEffectsDesktopProof {
             report.put("originalWarnings", originalLoader.getWarnings().toString()); report.put("editedWarnings", editedLoader.getWarnings().toString());
             var ids = original.getRocket().getIds().toArray(new FlightConfigurationId[0]);
             ModID[] mods = Arrays.stream(ids).map(id -> original.getRocket().getFlightConfiguration(id).getModID()).toArray(ModID[]::new);
+            ModID[] rocketMods = ImportedDeploymentProof.modificationIds(original.getRocket());
             report.put("statusesBefore", statuses(original));
             Map<String, Object> state = new LinkedHashMap<>();
             state.put("before", json(snapshot(original, args[2], target)));
@@ -116,6 +117,7 @@ public class ImportedEffectsDesktopProof {
                 List<Boolean> changes = new ArrayList<>();
                 for (int i = 0; i < ids.length; i++) changes.add(mods[i] != original.getRocket().getFlightConfiguration(ids[i]).getModID());
                 state.put("configurationChanged", changes);
+                state.put("rocketChanged", json(ImportedDeploymentProof.modificationChanges(original.getRocket(), rocketMods)));
             }
             state.put("after", json(snapshot(original, args[2], target))); report.put("state", state);
             ArchiveDesktopProof.require(json(snapshot(original, args[2], target)).equals(json(snapshot(edited, args[2], actual))), "Complete relevant state differs");

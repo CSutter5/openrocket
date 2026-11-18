@@ -8,6 +8,7 @@ export interface DeploymentState {
 export interface DeploymentEffects {
   before: DeploymentState; after: DeploymentState;
   functionalChange: boolean; configurationChanged: boolean[];
+  rocketChanged: Record<'document' | 'mass' | 'aerodynamic' | 'tree' | 'functional', boolean>;
 }
 export interface DeploymentInput {
   schema: 1; componentId: string; configurationIds: string[];
