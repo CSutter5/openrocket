@@ -1,21 +1,64 @@
 # Local editor POC
 
-P01 supplies real archive import, a selectable component tree and read-only properties. P02 adds name/radius edits through a dedicated Java Web Worker and a labeled local SVG. Work continues sequentially through P03–P04 in [the authoritative POC plan](../../docs/web-app/poc-plan.md). No backend or credentials are used.
+This is the bounded P01–P04 editor from [the POC plan](../../docs/web-app/poc-plan.md). It runs in one browser with one in-memory archive, without login, credentials or a backend. React/TypeScript/Vite supplies the UI; the pinned Java reducer and archive codec run in a dedicated browser Web Worker. Java and Node are development/build tools, not physics services.
 
-Install and run only in an isolated `/tmp` worktree on this filesystem:
+## Start locally
+
+Use Java 17 and Node 22.12+ with npm. On the main checkout's filesystem, npm workspace symlinks are unsupported: install, build and test in an isolated `/tmp` worktree. From the repository root, choose a new worktree path:
 
 ```sh
+git worktree add --detach /tmp/openrocket-poc-demo HEAD
+cd /tmp/openrocket-poc-demo
+git submodule update --init core/resources-src/datafiles/openrocket-database
 npm ci --prefix web
 node web/engine-adapter/scripts/build.mjs
 npm run dev:app --prefix web
-npm run build:app --prefix web
-PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers node web/app/test/p02.mjs
 ```
 
-The last command expects the development server on port 5173 and an installed Playwright Chromium. Chromium opened the actual bundled three-component explicit-tube archive, selected the tube and checked its imported radius. The production build passed. The bundled sample reuses the explicit fixture in `platform-proof/vitest.radius.config.ts`; desktop round-trip acceptance follows in P03.
+Open the printed loopback URL, normally `http://127.0.0.1:5173`. The app's predev/prebuild check refuses missing or stale engine artifacts, adapter sources, catalog hashes or pinned core sources. Rebuild the engine after an adapter change. The build retains the two exact reviewed I/O corrections and immutable preference policy.
 
-AI assistance: Codex using GPT-6 (runtime identity; exact variant unavailable), without subagents, implemented and inspected this increment. TypeScript/Vite and actual Chromium supplied the verification above.
+For a production build and local preview:
 
-P02 validation: the pinned engine build and adapted-JVM comparison, TypeScript/Vite build, and Chromium edit workflow passed. Chromium checked a dedicated Worker, escaped rename, radius growth and thickness clamping, updated intrinsic mass/local CG and SVG, no-op, empty/NaN/zero/negative/oversized numbers, keyboard component selection, read-only stage and malformed replacement recovery. Codec regressions remain passing. Export/reimport and explicit-hole underfit browser acceptance follow in P03/P04.
+```sh
+npm run build:app --prefix web
+npm run preview --prefix web --workspace @openrocket/local-editor
+```
 
-P03 validation: `ORK_PROOF_CLASSPATH="$(cat /tmp/openrocket-poc-classpath.txt)" PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers node web/app/test/roundtrip.mjs` passed against the running local app. This downloads files through the UI and passes those exact paths to the existing name/radius desktop oracles. The sample and rich explicit/preset and automatic-ring fixtures passed complete relevant state, full desktop serialization, save/reload and browser reimport. Each rich case retained 13 components, two decals, five motor assignments, six simulations and 3,014 stored points. Lexical checks protect all XML outside the allowed spans, unknown/script content, attachments, IDs/references and every stored series. Loaded results became outdated on the radius edit. Chromium refused the explicit-hole underfit and downloaded the unchanged prior archive; the existing desktop control still reproduces reload drift. Evidence and screenshots are generated under `web/app/build/gp/` in the isolated worktree. GP awaits the P04 clean-checkout acceptance run.
+Vite serves static files; neither start command starts a JVM, API, storage service or simulation. Runtime assets and the bundled sample are included in `web/app/dist/`.
+
+## Demo
+
+1. Choose **Open explicit tube sample**, then select **Tube** in the component tree. Tab/Enter also selects tree buttons and submits labeled forms.
+2. Rename it, for example to `Local & desktop <tube>`, and apply the name. Change outer radius to `0.03` m. Observe the intrinsic radius, wall, mass/local CG and labeled SVG. These exclude overrides/motors and are not whole-rocket properties.
+3. Enter `NaN`, `0` or a negative value. The accepted measurements and downloadable archive remain unchanged. A valid radius of `0.0005` m demonstrates Java's thickness clamp in this sample.
+4. Choose **Download .ork**, then open the downloaded file with **Open local .ork**. Export feedback means a download was prepared; check browser downloads for the actual file. It does not confirm durable disk/cloud saving.
+
+Opening another file or reloading discards the session. Changes since import/export are labeled in text. The original upload stays in memory for unchanged export and preservation; it is never overwritten on disk. Rejected replacement imports and rejected edits retain the last accepted archive. Imported scripts are data and never run. No cloud autosave, structural edits, undo, simulation, stability, 3D, account or collaboration feature is provided.
+
+## Supported inputs
+
+The bundled `public/explicit-tube.ork` is the simplest existing three-component explicit-tube proof fixture, stored as desktop-supported XML. Local imports reuse the existing bounded XML/GZIP/ZIP codec (4 MiB upload, 16 MiB expanded total, 8 MiB per entry, 64 entries). Unsafe/ambiguous archives reject explicitly. Preservation-only versions/identities can be inspected and downloaded unchanged; their controls are read-only.
+
+Names use the codec's supported component/identity projection. Radius editing uses `tubeRadiusInput`, `applyTubeRadius`, the existing Java facade and existing stored-result invalidation. BodyTube length must be `(0,100]` m, radius/new radius `(0,1]` m, wall `[0,radius]` and bulk density `(0,50000]` kg/m³. Filled tubes retain their filled token. Only the exact `G1 proof` G1-A/G1-B preset records and digests are known; a changed radius clears their preset. Unknown presets and automatic BodyTube radii are read-only.
+
+The existing one-ring subset is retained: one direct centered TOP single-instance automatic-outer CenteringRing, with explicit hole or the already-proven single explicit InnerTube sibling and required nose/configuration prefix. Unknown or ambiguous dependencies/positioning refuse editing. An explicit ring hole that would exceed its parent's inner radius rejects, because desktop reload would disable automation. This POC does not broaden those proofs. Other component properties are read-only, and unsupported shapes are omitted with an explanation. The SVG depicts only the selected supported tube and optional ring in local coordinates; it is not a whole-rocket side view.
+
+Stored series and opaque XML/attachments remain preserved. Physical edits mark supported stored-result statuses outdated; no-op edits retain original bytes/statuses. Imported series remain unverified. Full desktop/component compatibility and the broader G1 gate remain deferred/held.
+
+## Reproduce GP
+
+After the setup above, stop the development server if it is not needed. Generate the existing desktop test classpath and install Playwright Chromium (or set `CHROMIUM_EXECUTABLE` to an existing Chromium executable):
+
+```sh
+./gradlew -I web/packages/ork-format/jvm/classpath.gradle :core:orkProofClasspath -Dork.proof.classpath=/tmp/openrocket-poc-classpath.txt --no-daemon
+PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers npm exec --prefix web -- playwright install chromium
+ORK_PROOF_CLASSPATH="$(cat /tmp/openrocket-poc-classpath.txt)" PLAYWRIGHT_BROWSERS_PATH=/tmp/openrocket-g1-browsers npm run test:app --prefix web
+```
+
+`test:app` builds/typechecks, starts the production preview on loopback port 4173, drives actual Chromium interactions/downloads, runs the existing JVM fixture generators and name/radius oracles against those downloads, and stops its preview. It tests the bundled explicit fixture plus rich explicit/preset and automatic-ring fixtures derived from the desktop simple rocket. Each rich case has 13 components, two decals, five motor assignments, six historical simulations and 3,014 stored points. Independent annular-cylinder mass and centroid expectations supplement the JVM comparisons. The existing explicit-hole desktop-only reload failure is retained as an expected rejection control.
+
+Evidence goes to ignored `web/app/build/gp/` (override with `ORK_POC_OUTPUT`): `gp.json`, `interactions.json`, `roundtrip.json`, downloaded `.ork` files, desktop re-saves/reports/logs and `explicit-editor.png`, `ring-editor.png`, `underfit-rejected.png`, `read-only.png`. Lexical checks cover all XML except permitted name/radius/wall/preset/status spans, all attachment hashes, IDs/references and every stored series; desktop checks cover complete relevant state, full serialization and save/reload. Reopening those desktop re-saves is also exercised in the browser. No user archive is required.
+
+The existing workspace regressions run separately with `npm test --prefix web`; focused desktop I/O/digest regressions are listed in [the acceptance evidence](../../docs/web-app/poc-acceptance.md). Broader simulation/browser/platform certification and hosted benchmarks are outside GP.
+
+AI assistance: Codex using GPT-6 (runtime-supplied family; exact variant unavailable), without subagents, implemented and reviewed the POC. TypeScript/Vite, actual Chromium interactions/downloads, lexical preservation checks and existing pinned desktop oracles provide verification. The human contributor remains responsible for reviewing all changes.

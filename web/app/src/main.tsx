@@ -135,7 +135,7 @@ function App() {
         </details>
       </>}
     </main>
-    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, its two digest-checked presets and bounded one-ring dependency. Other properties and shapes are read-only. Simulations, accounts, collaboration and full compatibility are deferred.</footer>
+    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Simulations, accounts, collaboration and full compatibility are deferred.</footer>
   </>;
 }
 createRoot(document.getElementById('root')!).render(<App/>);

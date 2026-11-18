@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "predev": "node scripts/check-engine.mjs",
-    "prebuild": "node scripts/check-engine.mjs"
+    "prebuild": "node scripts/check-engine.mjs",
+    "test": "npm run build && node test/acceptance.mjs"
   },
   "dependencies": {
     "@openrocket/ork-format": "0.0.0",
