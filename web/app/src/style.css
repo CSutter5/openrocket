@@ -22,3 +22,10 @@ dl { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr); ga
 dt { color: #485e6c; } dd { margin: 0; overflow-wrap: anywhere; }
 footer { padding: 1rem 3rem; border-top: 1px solid #ccd8e0; font-size: .875rem; }
 @media (max-width: 800px) { header, main, footer { padding: 1rem; } .workspace { grid-template-columns: 1fr; } }
+form { margin: 1.25rem 0; } form label { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .6rem; }
+form input { padding: .5rem; border: 1px solid #7690a1; border-radius: .3rem; min-width: 0; }
+input:disabled { background: #edf2f6; color: #485e6c; }
+.document-status { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; padding: 1rem; border: 1px solid #9aafbd; background: #e2ebf2; }
+.preview { margin: 1.25rem 0; padding: 1.25rem; background: white; border: 1px solid #ccd8e0; border-radius: .5rem; }
+svg { display: block; width: 100%; max-height: 340px; } svg text { font: 14px system-ui, sans-serif; fill: #172b3a; }
+summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
