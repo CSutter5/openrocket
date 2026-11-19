@@ -9,7 +9,10 @@
     "preview": "vite preview --host 127.0.0.1",
     "predev": "node scripts/check-engine.mjs",
     "prebuild": "node scripts/check-engine.mjs",
-    "test": "npm run build && node --experimental-strip-types test/acceptance.mjs"
+    "test": "npm run build && node --experimental-strip-types test/acceptance.mjs",
+    "check:cloudflare": "npm run build && wrangler deploy --dry-run --outdir build/cloudflare",
+    "preview:cloudflare": "wrangler dev --local --ip 127.0.0.1 --port 8787",
+    "test:cloudflare": "npm run check:cloudflare && node test/cloudflare.mjs"
   },
   "dependencies": {
     "@openrocket/contracts": "0.0.0",
@@ -22,6 +25,7 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "typescript": "5.9.3",
-    "vite": "8.3.8"
+    "vite": "8.3.8",
+    "wrangler": "4.164.0"
   }
 }

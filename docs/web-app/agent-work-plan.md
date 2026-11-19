@@ -96,6 +96,8 @@ Exit: G1 has repeatable local runtime checks and, when deployment access exists,
 
 ### T04 — Integration/platform agent: deployable foundation
 
+The November 19 user request authorizes the bounded [static hosting preparation](cloudflare-deployment.md) in ADR-19 before broader G1 closure, with an explicit stop before deployment. It serves the existing browser app and adds no backend integration, storage or accounts. The full packet below remains deferred.
+
 Depends on G1. Own future `web/package.json`, lockfile, Wrangler configuration, CI integration, migrations, and deployment/runbook sections. Integrate proofs into the agreed layout, including engine build artifacts and public source/license notices. Add separate local/staging/production bindings, secret setup, fresh-install migrations, health checks, version manifests, and documented build/deploy commands. Preserve the existing desktop build.
 
 Exit: a clean checkout can build desktop and browser outputs independently; local integration passes; staging deployment is reproducible when credentials are available. Show no production dependency on Containers, external compute, native libraries, or a background JVM. Deployment work must report exactly which environments were actually exercised.

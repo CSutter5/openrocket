@@ -11,7 +11,10 @@
     "check:fixtures": "python3 scripts/fixture-inventory.py --check",
     "dev:app": "npm run dev --workspace @openrocket/local-editor",
     "build:app": "npm run build --workspace @openrocket/local-editor",
-    "test:app": "npm test --workspace @openrocket/local-editor"
+    "test:app": "npm test --workspace @openrocket/local-editor",
+    "prepare:cloudflare": "npm run build --workspace @openrocket/engine-proof && npm run check:cloudflare --workspace @openrocket/local-editor",
+    "preview:cloudflare": "npm run preview:cloudflare --workspace @openrocket/local-editor",
+    "test:cloudflare": "npm run test:cloudflare --workspace @openrocket/local-editor"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

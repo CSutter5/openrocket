@@ -26,6 +26,8 @@ npm run preview --prefix web --workspace @openrocket/local-editor
 
 Vite serves static files; neither start command starts a JVM, API or storage service. Flights run only after **Run flight**, in a separate browser Worker. Runtime assets and the bundled sample are included in `web/app/dist/`.
 
+For Cloudflare hosting preparation, use the [build, dry-run and local Workers preview guide](../../docs/web-app/cloudflare-deployment.md). `npm run prepare:cloudflare --prefix web` builds the engine and app and validates the hosting config without deploying. Deployment is a separate manual step.
+
 ## Demo
 
 1. The app opens a desktop-valid rocket sample with a nose, body and three fins. Click a part in the drawing or component tree to select it. **Open explicit tube sample** retains the original minimal fixture. Tab/Enter also selects tree buttons and submits labeled forms.
