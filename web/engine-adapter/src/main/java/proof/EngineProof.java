@@ -13,7 +13,7 @@ public final class EngineProof {
         System.out.println(flight(false)); System.out.println(flight(true));
     }
     @JSExport
-    public static String simulateArchive(String input, boolean rk6) throws Exception { return ImportedFlight.run(input, rk6); }
+    public static String simulateArchive(String input, boolean rk6) throws Exception { return input.startsWith("imported-flight-v1\n") ? ImportedRocketFlight.run(input,rk6) : ImportedFlight.run(input, rk6); }
     @JSExport
     public static String flight(boolean rk6) throws Exception { return FlightProof.run(rk6); }
     @JSExport

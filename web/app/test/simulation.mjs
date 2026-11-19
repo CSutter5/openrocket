@@ -159,17 +159,16 @@ try {
   report.checks.push('startup failure recovery, active-run restart with different settings, superseded/older worker late results cannot overwrite newer result');
   const xml=strFromU8(bundled['rocket.ork']);
   const cases=[
-    ['mass-override',xml.replace('<finish>normal</finish>','<overridemass>0.1</overridemass><finish>normal</finish>')],
-    ['cg-override',xml.replace('<finish>normal</finish>','<overridecg>0.1</overridecg><finish>normal</finish>')],
     ['document-settings',xml.replace('<docprefs>','<docprefs unknown="refuse">')],
     ['numeric-lexeme',xml.replace('<length>0.3</length>','<length>0x1</length>')],
-    ['material',xml.replace('density="950.0"','density="951.0"')],
-    ['fin',xml.replace('<height>0.03</height>','<height>0.04</height>')],
     ['position',xml.replace('<axialoffset method="bottom">0.0','<axialoffset method="bottom">0.01')],
-    ['recovery',xml.replace('<deployevent>ejection','<deployevent>apogee')],
     ['extension',xml.replace('<simulations>','<simulations><simulation status="not_simulated"><name>Untrusted</name><extension extensionid="ScriptingExtension"><script>throw new Error("must not run")</script></extension></simulation>')],
     ['unknown-component-field',xml.replace('<finish>normal</finish>','<future:physics xmlns:future="urn:test"/><finish>normal</finish>')],
   ];
+  for(const [field,value] of [['overridemass','0.1'],['overridecg','0.02']]) {
+    const bytes=zipSync({...bundled,'rocket.ork':strToU8(xml.replace('<finish>normal</finish>',`<${field}>${value}</${field}><finish>normal</finish>`))});
+    assert.equal(flightSupport(await importArchive(bytes)).supported,true,field+' imported support');
+  }
   for(const [name,modified] of cases) {
     const bytes=zipSync({...bundled,'rocket.ork':strToU8(modified)});
     assert.equal(flightSupport(await importArchive(bytes)).supported,false,name);
@@ -192,7 +191,7 @@ try {
   await run();await status.filter({hasText:'Running Java'}).waitFor();await panel.getByRole('button',{name:'Cancel flight',exact:true}).click();
   await status.filter({hasText:'Flight cancelled'}).waitFor();assert.deepEqual(await download(),Buffer.from(opaque));
   report.checks.push('supported flight with inert XML comment and opaque binary attachment preserves exact archive after run and cancel');
-  report.checks.push('overrides, materials, fin geometry, positioning, recovery, imported extensions, unknown fields and unresolved/changed motors refuse simulation without blocking file preservation');
+  report.checks.push('ambiguous positioning, imported extensions, unknown fields and unresolved/changed motors refuse; mass/CG override inputs now supported');
   await open();await run();await complete();await page.screenshot({path:resolve(output,'flight-workflow.png'),fullPage:true});
   assert.deepEqual(errors,[]);report.outcome='passed';
   console.log('Production Chromium archive simulation workflow passed: both steppers, edited inputs/JVM, responsive cancel, stale/race/failure recovery, unsupported refusals, archive preservation.');

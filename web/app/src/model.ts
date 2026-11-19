@@ -11,7 +11,7 @@ export interface DocumentView {
   flightSupport: import('./simulation/input').Support;
   drawing: import('./drawing').Drawing;
   filename: string; mode: 'editable' | 'preservation'; diagnostics: string[];
-  hash: string; dirty: boolean; components: ComponentView[];
+  identitySidecarHash: string; hash: string; dirty: boolean; components: ComponentView[];
   simulations: { name: string; status: string }[];
 }
 export type Action =

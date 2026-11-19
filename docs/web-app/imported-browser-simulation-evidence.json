@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "engine": {
+    "sha256": "ebf9eb49286e164708a4b5dc119d91fa3c34a7198116925ecf17c157a3fc33f8",
+    "bytes": 2997211
+  },
+  "coreBaseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "motorSupplementSha256": "2e76094a25dab706b6cd2c89b4f7b64ab00b456e743e073c5f49cccde82826a7",
+  "userArchiveSha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+  "userArchiveDiagnostics": [
+    {
+      "stepper": "RK4",
+      "browserSummarySI": [
+        3255.0253027103663,
+        294.9458351814723,
+        24.29200000000023,
+        204.7195833100814
+      ],
+      "jvmSummarySI": [
+        3255.025302710084,
+        294.9458351814701,
+        24.29200000000023,
+        204.71958331007508
+      ],
+      "summaryAbsoluteErrorsSI": [
+        2.823981049004942e-10,
+        2.2168933355715126e-12,
+        0.0,
+        6.30961949354969e-12
+      ],
+      "rowsBrowserJvm": [
+        929,
+        929
+      ],
+      "events": 11,
+      "maxEventTimeErrorSeconds": 1.3443468560581096e-11,
+      "warningsBrowserJvm": [
+        0,
+        0
+      ],
+      "commonTimeDiagnosticStepSeconds": 0.05,
+      "commonTimeInterpolatedMaxErrorsAltitudeSpeedAcceleration": [
+        2.842170943040401e-10,
+        7.587459549540654e-10,
+        5.374673150981835e-09
+      ],
+      "completeRocketConfigurationSerializationMatches": true,
+      "regressionGate": false,
+      "limitation": "Separate read-only diagnostic; acceptance has no user-file dependency."
+    },
+    {
+      "stepper": "RK6",
+      "browserSummarySI": [
+        3255.0152195144015,
+        294.94585445482085,
+        24.275633155749553,
+        204.4875100654393
+      ],
+      "jvmSummarySI": [
+        3255.0134290190817,
+        294.9458587320833,
+        24.274382255077654,
+        204.4956703591324
+      ],
+      "summaryAbsoluteErrorsSI": [
+        0.0017904953197103168,
+        4.277262462437648e-06,
+        0.0012509006718985916,
+        0.0081602936930949
+      ],
+      "rowsBrowserJvm": [
+        976,
+        968
+      ],
+      "events": 11,
+      "maxEventTimeErrorSeconds": 0.0081602936930949,
+      "warningsBrowserJvm": [
+        0,
+        0
+      ],
+      "commonTimeDiagnosticStepSeconds": 0.05,
+      "commonTimeInterpolatedMaxErrorsAltitudeSpeedAcceleration": [
+        0.05711908421508838,
+        0.27336127050315895,
+        1.8592044343483423
+      ],
+      "completeRocketConfigurationSerializationMatches": true,
+      "regressionGate": false,
+      "limitation": "RK6 does not satisfy the original fixture row-count/summary limits; this is separate read-only diagnostic evidence."
+    }
+  ],
+  "g1": "held",
+  "g5": "held",
+  "browser": "149.0.7827.55",
+  "reviewedCoreExceptions": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "importedFixture": {
+    "outcome": "passed",
+    "comparisons": [
+      {
+        "integrator": "RK4",
+        "rows": [
+          566,
+          566
+        ],
+        "summaryErrors": [
+          7.73070496506989e-12,
+          1.9895196601282805e-13,
+          0,
+          3.666400516522117e-12
+        ],
+        "summaryLimits": [
+          0.001,
+          1e-06,
+          0.001,
+          0.001
+        ],
+        "maxSeriesErrors": [
+          3.666400516522117e-12,
+          3.637978807091713e-11,
+          1.4797052472204086e-12,
+          2.4278234977970214e-10
+        ],
+        "columnLimits": [
+          0.001,
+          0.12,
+          0.25,
+          3
+        ],
+        "completeInputsAndSerialization": true,
+        "maximumEventTimeErrorSeconds": 3.666400516522117e-12
+      },
+      {
+        "integrator": "RK6",
+        "rows": [
+          566,
+          566
+        ],
+        "summaryErrors": [
+          9.094947017729282e-12,
+          3.979039320256561e-13,
+          0,
+          1.5063505998114124e-12
+        ],
+        "summaryLimits": [
+          0.001,
+          1e-06,
+          0.001,
+          0.001
+        ],
+        "maxSeriesErrors": [
+          1.5063505998114124e-12,
+          1.3869794202037156e-11,
+          1.645794611704332e-12,
+          2.2931878618237533e-10
+        ],
+        "columnLimits": [
+          0.001,
+          0.12,
+          0.25,
+          3
+        ],
+        "completeInputsAndSerialization": true,
+        "maximumEventTimeErrorSeconds": 1.5063505998114124e-12
+      },
+      {
+        "integrator": "RK6 edited",
+        "rows": [
+          566,
+          566
+        ],
+        "summaryErrors": [
+          2.6830093702301383e-11,
+          3.410605131648481e-13,
+          0,
+          4.973799150320701e-13
+        ],
+        "summaryLimits": [
+          0.001,
+          1e-06,
+          0.001,
+          0.001
+        ],
+        "maxSeriesErrors": [
+          5.044853423896711e-13,
+          2.8421709430404007e-11,
+          5.3939075428388605e-11,
+          4.843292433776014e-10
+        ],
+        "columnLimits": [
+          0.001,
+          0.12,
+          0.25,
+          3
+        ],
+        "completeInputsAndSerialization": true,
+        "maximumEventTimeErrorSeconds": 4.973799150320701e-13
+      }
+    ],
+    "checks": [
+      "actual UI import with saved conditions, default configuration, exact catalog motor source, two recoveries, mass/CG overrides, transition and internals; RK4/RK6 against JVM",
+      "responsive Java worker, cancellation, stable stored-simulation sidecar binding, edited rerun/staleness, exact original and edited archive preservation"
+    ]
+  },
+  "checks": {
+    "engineBuildOriginalAdaptedJvmExact": true,
+    "productionAppAcceptance": "passed",
+    "workspaceContracts": 2,
+    "fixtureManifests": 7,
+    "archiveCodecTests": 49,
+    "authenticatedPlatformTests": 12,
+    "originalBrowserProof": "passed",
+    "originalWorkerdProof": "passed",
+    "noNumericalLimitsWidened": true
+  },
+  "productionAssets": {
+    "assets/document.worker-DEgHVSQz.js": "66d99b018f59b058bce5cdc8989590153219022444513f308557513aa6ef673b",
+    "assets/index-8ac5wNb3.js": "a259ddeca18e64959d17a50778db177cb5e96ed13cafdd8308962167685ce57d",
+    "assets/index-CbolCnyW.css": "4b2d6d0607ff6c1e625d7d4497a849344b7d44320238b6479a97562b6c3a7d0e",
+    "assets/simulation.worker-saEOF7YE.js": "06a89e6d199e13e4249abb18d681c63fc92e66c9f01c017079c420e1a99b99a7"
+  }
+}

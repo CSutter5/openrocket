@@ -9,7 +9,9 @@ This file is the starting handoff for OpenRocket web application work. It collec
 3. Inspect the current branch, working tree, recent local commits, and relevant implementation. Preserve existing changes and identify which work belongs to you. The checkout's current state takes precedence over an old handoff's progress claims.
 4. Choose the next authorized work packet whose prerequisites are satisfied. Identify its owned paths, expected behavior, checks, and handoff before editing. Do not start every packet at once.
 
-The next user follow-up explicitly authorizes a bounded archive-bound browser simulation slice of T10. Earlier simulation/GP deferrals do not block it. Read [the simulation record](browser-simulation.md) and ADR-17; keep broader G1/G5 held.
+The user-reported refusal for `example rocket.ork` is addressed by the bounded [imported-flight follow-up](imported-browser-simulation.md). Preserve the user archive; regression fixtures are independently generated.
+
+The preceding user follow-up explicitly authorizes a bounded archive-bound browser simulation slice of T10. Earlier simulation/GP deferrals do not block it. Read [the simulation record](browser-simulation.md) and ADR-17; keep broader G1/G5 held.
 
 Previous user follow-up: the [rocket drawing and length/wall extension](editor-extension.md) builds on the completed POC. The user explicitly requested these additions after GP review; earlier stop-at-GP wording does not block this bounded extension. Other deferred work still needs separate prioritization.
 

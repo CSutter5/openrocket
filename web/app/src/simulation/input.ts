@@ -1,13 +1,14 @@
 import { sha256, type ExpandedArchive, type XmlNode } from '@openrocket/ork-format';
 import { numeric } from '../../../packages/ork-format/src/radius.js';
+import { importedInput, resolvedImportedInput } from './imported.ts';
 import profile from './profile.json' with { type: 'json' };
 
 // An explicit desktop-generated capability profile. Every node, attribute and fixed
 // field is checked, including fields the exterior drawing deliberately omits.
 const body = 'rocket/subcomponents/stage/subcomponents/bodytube';
 const variable = new Map([['length', [0, 100]], ['radius', [0, 1]], ['thickness', [0, 1]]]);
-export interface FlightInput { model: string; configurationId: string; motorHash: string; materialsHash: string }
-export type Support = { supported: true; configurationId: string; motor: string } | { supported: false; reason: string };
+export interface FlightInput { model: string; configurationId: string; motorHash: string; materialsHash: string; maxTime: number; kind: 'sample' | 'imported' }
+export type Support = { supported: true; configurationId: string; motor: string; kind: 'sample' | 'imported'; recovery: string; maxTime: number; catalogReferences: string[] } | { supported: false; reason: string };
 function fail(reason: string): never { throw new Error(`Simulation unsupported: ${reason}. The archive can still be viewed, edited where supported, and downloaded.`); }
 function records(archive: ExpandedArchive) {
   if (archive.mode !== 'editable' || archive.parsed.version !== '1.11') fail('requires an editable format 1.11 document');
@@ -52,11 +53,15 @@ export function flightSupport(archive: ExpandedArchive): Support {
     records(archive);
     const motor = archive.entries.find(e => e.path === profile.motor.path);
     if (!motor || motor.sha256 !== profile.motor.sha256) fail('missing or changed synthetic motor curve; digest must resolve exactly');
-    return { supported: true, configurationId: profile.configurationId, motor: 'C6 synthetic browser proof · synthetic curve, not certified motor data' };
-  } catch (error) { return { supported: false, reason: error instanceof Error ? error.message : String(error) }; }
+    return { supported: true, kind: 'sample', recovery: 'One 0.30 m parachute; automatic drag/line length; ejection deployment, no extra delay', maxTime: 120, catalogReferences: [], configurationId: profile.configurationId, motor: 'C6 synthetic browser proof · synthetic curve, not certified motor data' };
+  } catch {
+    try { const input = importedInput(archive); return {supported:true,kind:'imported',configurationId:input.configurationId,motor:input.motor,recovery:input.recovery,maxTime:input.maxTime,catalogReferences:input.catalogReferences}; }
+    catch (error) { return { supported: false, reason: `Simulation unsupported: ${error instanceof Error ? error.message : String(error)}. Archive viewing, supported edits and download remain available.` }; }
+  }
 }
 export async function flightInput(archive: ExpandedArchive): Promise<FlightInput> {
   const support = flightSupport(archive); if (!support.supported) throw new Error(support.reason);
+  if (support.kind === 'imported') return resolvedImportedInput(archive);
   const fields = records(archive);
   const encode = (text: string) => text.replace(/\\/g, '\\\\').replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
   const rows: string[] = [];
@@ -65,6 +70,6 @@ export async function flightInput(archive: ExpandedArchive): Promise<FlightInput
     for (const [key, text] of Object.entries(value.attributes)) rows.push(`${path}/@${key}\t${encode(text)}`);
   }
   profile.motor.rows.forEach((row, i) => rows.push(`motor/${i}\t${row.join(',')}`));
-  return { model: rows.join('\n'), configurationId: profile.configurationId, motorHash: profile.motor.sha256,
+  return { model: rows.join('\n'), kind: 'sample', maxTime: 120, configurationId: profile.configurationId, motorHash: profile.motor.sha256,
     materialsHash: await sha256(new TextEncoder().encode(JSON.stringify(Object.entries(fields).filter(([key]) => /material(\/|$)/.test(key))))) };
 }

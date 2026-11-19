@@ -4,7 +4,7 @@ import { bindFlight, type FlightSnapshot, type SessionResult } from './provenanc
 self.onmessage = async ({ data }: MessageEvent<FlightSnapshot & { jobId: number }>) => {
   const { jobId } = data;
   try {
-    const archive = await importArchive(data.bytes);
+    const archive = await importArchive(data.bytes, data.identity);
     const bound = await bindFlight(archive, data.provenance.integrator);
     if (bound.inputHash !== data.inputHash) throw new Error('Simulation snapshot/provenance mismatch');
     // The synchronous Java call cannot provide a truthful fractional progress value.

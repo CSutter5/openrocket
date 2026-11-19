@@ -26,7 +26,7 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
   useEffect(() => () => job.current?.dispose(), []);
   const running = ['starting', 'running'].includes(state.status), support = document.flightSupport;
   const result = state.result;
-  const current = result && result.provenance.archiveTreeHash === document.hash && result.provenance.integrator === integrator;
+  const current = result && result.provenance.archiveTreeHash === document.hash && result.provenance.identitySidecarHash === document.identitySidecarHash && result.provenance.integrator === integrator;
   async function run() {
     const controller = job.current!, token = controller.prepare();
     try {
@@ -38,9 +38,11 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
     <h2>Local flight simulation</h2>
     <p>Session-only browser results. New flights are not written to .ork downloads or imported stored results.</p>
     {support.supported ? <>
-      <p><strong>Supported flight configuration</strong>: one active sustainer · <code>{support.configurationId}</code></p>
-      <p><strong>Motor</strong>: {support.motor}. One motor; automatic ignition at launch, 5 s ejection delay.</p>
-      <p><strong>Recovery</strong>: one {lengthLabel(0.30, unit)} parachute, automatic drag/line length, ejection deployment with no extra delay.</p>
+      <p><strong>Supported flight configuration</strong>: archived default, one active stage · <code>{support.configurationId}</code></p>
+      <p><strong>Motor</strong>: {support.motor}. One motor; ignition and ejection use the archived configuration.</p>
+      <p><strong>Recovery</strong>: {support.recovery}.</p>
+      {support.kind === 'imported' && <p>New session run with the bounded settings below. Saved desktop simulations and custom expression columns are preserved separately and are not evaluated or overwritten.</p>}
+      {!!support.catalogReferences.length && <p>Motor data resolved by exact digest from the pinned public catalog. Older embedded curve bytes are preserved. Catalog references: {support.catalogReferences.join(', ')}.</p>}
     </> : <p className="error" data-testid="flight-unsupported">{support.reason}</p>}
     <label htmlFor="flight-stepper">Flight integrator</label>
     <select id="flight-stepper" value={integrator} onChange={event => setIntegrator(event.target.value as Integrator)}>
@@ -48,7 +50,7 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
     </select>
     <details><summary>Run settings · bounded and read-only</summary>
       <dl><dt>Random seed</dt><dd>{settings.seed} (deterministic)</dd>
-        <dt>Requested time step / maximum duration</dt><dd>{settings.timeStep} s / {settings.maxTime} s</dd>
+        <dt>Requested time step / maximum duration</dt><dd>{settings.timeStep} s / {support.supported ? support.maxTime : settings.maxTime} s</dd>
         <dt>Launch rod</dt><dd>{lengthLabel(settings.rodLength, unit)} · vertical · direction 90°</dd>
         <dt>Launch site</dt><dd>{settings.latitude}°, {settings.longitude}°, elevation {lengthLabel(settings.elevation, unit)}</dd>
         <dt>Atmosphere / gravity / geodesy</dt><dd>Extended ISA / WGS / spherical</dd>

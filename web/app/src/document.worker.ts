@@ -1,4 +1,4 @@
-import { componentNames, renameComponent, importArchive, exportArchive, type ExpandedArchive } from '@openrocket/ork-format';
+import { sha256, componentNames, renameComponent, importArchive, exportArchive, type ExpandedArchive } from '@openrocket/ork-format';
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
 import { tubePropertyInput, applyTubeProperty } from '../../packages/ork-format/src/tube-properties.js';
 import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
@@ -22,10 +22,11 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
     ? presetRadiusEdit(tube.preset.key, tube.preset.digest, tube.length, tube.radius, tube.thickness, tube.filled, tube.density, value)
     : radiusEdit(tube.length, tube.radius, tube.thickness, tube.filled, tube.density, value));
 }
-function describe(current: ExpandedArchive, name: string, lastExport: string): DocumentView {
+async function describe(current: ExpandedArchive, name: string, lastExport: string): Promise<DocumentView> {
   const nodes = current.parsed.components;
   return {
     flightSupport: flightSupport(current), drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
+    identitySidecarHash: await sha256(new TextEncoder().encode(JSON.stringify(current.identity))),
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
     components: componentNames(current).map((component, index) => {
       const node = nodes[index];
@@ -55,7 +56,7 @@ async function execute(action: Action): Promise<Reply> {
   if (action.type === 'import') {
     const candidate = await importArchive(action.bytes);
     // Build the view before publication, so a failed replacement retains the accepted archive.
-    const view = describe(candidate, action.filename, candidate.identity.archiveHash);
+    const view = await describe(candidate, action.filename, candidate.identity.archiveHash);
     archive = candidate; filename = action.filename; exportHash = candidate.identity.archiveHash;
     return { view, notice: 'Archive opened. Original upload retained in memory.' };
   }
@@ -64,12 +65,12 @@ async function execute(action: Action): Promise<Reply> {
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before simulation snapshot; run again');
     const bound = await bindFlight(archive, action.integrator);
     const exported = await exportArchive(archive);
-    return { view: describe(archive, filename, exportHash), notice: 'Exact accepted archive captured for simulation.',
-      snapshot: { bytes: exported.bytes, provenance: bound.provenance, inputHash: bound.inputHash } };
+    return { view: await describe(archive, filename, exportHash), notice: 'Exact accepted archive captured for simulation.',
+      snapshot: { bytes: exported.bytes, identity: exported.identity, provenance: bound.provenance, inputHash: bound.inputHash } };
   }
   if (action.type === 'export') {
     const exported = await exportArchive(archive);
-    const view = describe(archive, filename, exported.identity.archiveHash);
+    const view = await describe(archive, filename, exported.identity.archiveHash);
     exportHash = exported.identity.archiveHash;
     return { view, bytes: exported.bytes, notice: 'Download prepared locally. Check your browser downloads; this is not cloud or durable save confirmation.' };
   }
@@ -99,7 +100,7 @@ async function execute(action: Action): Promise<Reply> {
     candidate = await applyTubeRadius(archive, input, effects.after);
     if (candidate !== archive) notice = `Java radius edit accepted. ${invalidations.length} stored result(s) marked outdated; series retained.`;
   }
-  const view = describe(candidate, filename, exportHash);
+  const view = await describe(candidate, filename, exportHash);
   archive = candidate;
   return { view, notice };
 }

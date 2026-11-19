@@ -1,5 +1,7 @@
 # Bounded local browser simulation
 
+This records checkpoint `3230c6367`. The subsequent user-reported import limitation is addressed by [the imported-flight follow-up](imported-browser-simulation.md), which extends the supported model while retaining this checkpoint’s fixture-specific evidence.
+
 The November 18, 2026 user request authorizes one local browser simulation workflow after `83be8bf50`. It does not close G1/G5 or authorize hosted/backend compute, general catalogs/configuration editing, extensions or broad compatibility. [ADR-17](architecture.md#adr-17-add-one-archive-bound-browser-flight-profile-in-a-separate-worker) records the runtime boundary. The [app guide](../../web/app/README.md#bounded-local-flight-simulation) gives controls and precise supported inputs.
 
 The source fixture generator is `web/app/test/SimulationDesktopProof.java`. It uses the actual desktop model/saver and the proven `FlightProof` geometry, with explicit 950 kg/m³ bulk materials, 0.067 kg/m² canopy and 0.0005 kg/m cord. The embedded eight-point synthetic C6 curve has core motor digest `7488ddc81508bcd347794b6c6bb01caf` and RSE SHA-256 `eb12c5e9867ad085f65dbff49ae7bad400f1ac8fd982ef49072203a8be897a86`. It is synthetic, not a certified measurement. The runtime requires the exact curve bytes and independently recomputes the pinned Java functional digest before flight. No catalog lookup substitution occurs.

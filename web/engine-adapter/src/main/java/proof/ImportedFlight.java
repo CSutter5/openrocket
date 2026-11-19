@@ -96,6 +96,9 @@ public final class ImportedFlight {
         return simulate(rocket,model.motor(),simulation,rk6);
     }
     public static String simulate(Rocket rocket, ThrustCurveMotor motor, Simulation simulation, boolean rk6) throws Exception {
+        return simulate(rocket,motor,simulation,rk6,120);
+    }
+    public static String simulate(Rocket rocket, ThrustCurveMotor motor, Simulation simulation, boolean rk6, double maxTime) throws Exception {
         simulation.getOptions().setSimulationStepperMethodChoice(rk6 ? SimulationStepperMethod.RK6 : SimulationStepperMethod.RK4);
         SimulationConditions conditions = new SimulationConditions(); conditions.setSimulation(simulation);
         conditions.setLaunchRodLength(1); conditions.setLaunchRodAngle(0); conditions.setLaunchRodDirection(Math.PI/2);
@@ -105,7 +108,7 @@ public final class ImportedFlight {
         PinkNoiseWindModel wind = new PinkNoiseWindModel(42); wind.setAverage(1); wind.setStandardDeviation(0.1);
         conditions.setWindModel(wind); conditions.setAerodynamicCalculator(new BarrowmanCalculator());
         conditions.setMassCalculator(new MassCalculator()); conditions.setTimeStep(0.05);
-        conditions.setMaxSimulationTime(120); conditions.setRandomSeed(42);
+        conditions.setMaxSimulationTime(maxTime); conditions.setRandomSeed(42);
         RigidBody mass = MassCalculator.calculateStructure(rocket.getSelectedConfiguration());
         CoordinateIF cp = new BarrowmanCalculator().getCP(rocket.getSelectedConfiguration(),new FlightConditions(rocket.getSelectedConfiguration()),new WarningSet());
         BasicEventSimulationEngine engine = new BasicEventSimulationEngine(); engine.simulate(conditions);

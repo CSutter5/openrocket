@@ -13,8 +13,8 @@ export async function bindFlight(archive: ExpandedArchive, integrator: Integrato
     engineHash: manifest.hashes['build/generated/teavm/js/openrocket-g1-engine.js'].sha256,
     motorCatalogHash: projection.motorHash, materialCatalogHash: projection.materialsHash,
     archiveTreeHash: archive.identity.archiveHash, identitySidecarHash: await hash(archive.identity),
-    simulationId: 'local-flight-profile-v1', configurationId: projection.configurationId,
-    optionsHash: await hash({ ...settings, integrator, modelHash: await sha256(new TextEncoder().encode(projection.model)) }), extensionSetHash: await hash([]), seed: settings.seed, integrator };
+    simulationId: projection.kind === 'sample' ? 'local-flight-profile-v1' : 'local-imported-default-v1', configurationId: projection.configurationId,
+    optionsHash: await hash({ ...settings, maxTime: projection.maxTime, integrator, modelHash: await sha256(new TextEncoder().encode(projection.model)) }), extensionSetHash: await hash([]), seed: settings.seed, integrator };
   return { model: projection.model, provenance, inputHash: await simulationInputHash(provenance) };
 }
 export interface FlightResult {
@@ -22,5 +22,5 @@ export interface FlightResult {
   summary: [number, number, number, number]; events: [string, number][]; series: [number, number, number, number][];
   warningCount: number; warnings: string[]; inputs: unknown;
 }
-export interface FlightSnapshot { bytes: Uint8Array; provenance: SimulationInput; inputHash: string }
+export interface FlightSnapshot { bytes: Uint8Array; identity: import('@openrocket/contracts').IdentitySidecar; provenance: SimulationInput; inputHash: string }
 export interface SessionResult { flight: FlightResult; provenance: SimulationInput; inputHash: string; outputHash: string; source: 'browser-client'; status: 'completed'; schema: 1 }

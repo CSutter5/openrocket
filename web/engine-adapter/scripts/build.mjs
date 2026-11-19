@@ -18,6 +18,9 @@ function run(command,args) {
   const result = spawnSync(command,args,{cwd:repo,stdio:'inherit'});
   if (result.status !== 0) process.exit(result.status || 1);
 }
+const motorCatalog = JSON.parse(await readFile(resolve(repo,'web/app/src/simulation/motors.json'),'utf8'));
+assert.equal(motorCatalog.sourceSha256,sha256(await readFile(resolve(repo,'core/src/main/resources/datafiles/thrustcurves/initial_motors.db'))),'Imported motor catalog source changed');
+for(const motor of Object.values(motorCatalog.motors)) assert.equal(motor.sha256,sha256(new TextEncoder().encode(motor.rse)),'Imported motor catalog bytes changed');
 for (const change of reviewedCoreChanges) {
   assert.equal(sha256(await readFile(resolve(repo,change.path))),change.sha256,`Unreviewed source change: ${change.path}`);
 }
@@ -47,9 +50,9 @@ files.push(...await javaSources('src/main/java'),'classpath.gradle','scripts/bui
 const hashes = {};
 for (const path of files) { const bytes = await readFile(resolve(root,path)); hashes[path]={sha256:sha256(bytes),bytes:bytes.length}; }
 const catalogs = {};
-for (const path of ['core/src/main/resources/datafiles/thrustcurves/initial_motors.db','core/src/main/java/info/openrocket/core/database/Databases.java']) {
-  const bytes = await readFile(resolve(repo,path)); catalogs[path]={sha256:sha256(bytes),usedByProof:false};
+for (const path of ['core/src/main/resources/datafiles/thrustcurves/initial_motors.db','core/src/main/java/info/openrocket/core/database/Databases.java','core/resources-src/datafiles/openrocket-database/orc/top_flight.orc','web/app/src/simulation/motors.json']) {
+  const bytes = await readFile(resolve(repo,path)); catalogs[path]={sha256:sha256(bytes),usedByProof:false,usedByImportedFlight:true};
 }
-const manifest = {adaptedJvmExact:true,sourceRevision:baseline,sourceTreeListingSha256:sha256(sourceHash.stdout),reviewedCoreChanges,teavm:'0.15.0',java:'17',catalogPolicy:'Explicit synthetic curve and explicit fixture materials; desktop catalogs are not loaded',catalogs,hashes};
+const manifest = {adaptedJvmExact:true,sourceRevision:baseline,sourceTreeListingSha256:sha256(sourceHash.stdout),reviewedCoreChanges,teavm:'0.15.0',java:'17',catalogPolicy:'Original synthetic proof plus bounded imported fields, verified embedded curves and two exact pinned public motor references; immutable material/preset policy',catalogs,hashes};
 await writeFile(resolve(root,'build/manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log(JSON.stringify(manifest,null,2));
