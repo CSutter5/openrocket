@@ -1,0 +1,46 @@
+{
+  "outcome": "passed",
+  "browser": "149.0.7827.55",
+  "checks": [
+    "physical and name drafts survive switches; document unchanged",
+    "30 switches and untouched inch submissions preserve exact archive/preset/results; drawing geometry and kg mass unchanged; CG/schematic converted",
+    "invalid draft survives switch; validation uses current units and accepted archive retained",
+    "20 in length, 2 in radius and .05 in wall exported in SI, reimported and matched pinned desktop setters/save/reload"
+  ],
+  "desktop": [
+    {
+      "property": "length",
+      "inches": "20",
+      "metres": 0.508,
+      "outcome": "passed"
+    },
+    {
+      "property": "radius",
+      "inches": "2",
+      "metres": 0.0508,
+      "outcome": "passed"
+    },
+    {
+      "property": "thickness",
+      "inches": ".05",
+      "metres": 0.00127,
+      "outcome": "passed"
+    }
+  ],
+  "baseRevision": "61aaeef1c05facb21782ec1a7cbf5a0bea24b6cc",
+  "rawEvidence": "/tmp/openrocket-editor-next/web/app/build/units-acceptance",
+  "sourceHashes": {
+    "web/app/src/RocketDrawing.tsx": "e17c1d9292a60437f99357e54f074fe62115564dda99f9cc7054aea6eb946cb8",
+    "web/app/src/Schematic.tsx": "6a845a9266542cd1442aa7676523b82f8e4b3ce36122dd7fa480281f9adb9daf",
+    "web/app/src/TubeProperties.tsx": "dcb234874c1b24089f5d7e203a9a57ffd9641bc87baef86ce2ea31993e3c033e",
+    "web/app/src/main.tsx": "52c0c85e04ac51e5550d1508c74c59ca1f4927889bb4bcc705f4bbb9c7f8fedc",
+    "web/app/src/style.css": "bbfa0a43ff4ab49757a1cd1f0e0d3c517a17097678413e366fdad8b30c5514ef",
+    "web/app/test/acceptance.mjs": "c9f5f88026065ed5d13dedcd19c5b422a6ae742b1bcac15a484d559450a69f68",
+    "web/app/src/units.ts": "de84c9363289e0b221ab5a112ca40a9d5971b8cf30abc28cdbb2c1d1af39a17b",
+    "web/app/src/useLengthInput.ts": "9230da984111cb0e6c4785429a3a0fbba3cd5e17031d01d099c82499142ccea2",
+    "web/app/test/units.mjs": "96f52fa4ed50b59931de42599bb25a4a3b429075d77612b29e234a4fa6e5bc19"
+  },
+  "combinedAcceptance": "passed",
+  "runtimeBoundary": "Length conversion is UI-only; Java/codec stay SI",
+  "screenshot": "inches-editor.png"
+}

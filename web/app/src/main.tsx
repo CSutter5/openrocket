@@ -6,15 +6,17 @@ import type { Action, ComponentView, DocumentView } from './model';
 import { TubeProperties } from './TubeProperties';
 import { RocketDrawing } from './RocketDrawing';
 import { Schematic } from './Schematic';
+import {displayLength, lengthInput, lengthLabel, type LengthUnit} from './units';
+import {useLengthInput} from './useLengthInput';
 import './style.css';
 
 function message(error: unknown) { return error instanceof Error ? error.message : String(error); }
-function Properties({ component, editable, busy, edit }: {
-  component: ComponentView; editable: boolean; busy: boolean; edit: (action: Action) => void;
+function Properties({ component, editable, busy, edit, unit }: {
+  component: ComponentView; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
 }) {
   const [name, setName] = useState(component.name ?? '');
-  const [radius, setRadius] = useState(String(component.tube?.state.radius ?? ''));
-  const [numberError, setNumberError] = useState('');
+  const radius = useLengthInput(component.tube?.state.radius ?? NaN, unit);
+  const [numberError, setNumberError] = useState(false);
   const tube = component.tube;
   return <>
     <h2>{component.name || '(unnamed)'}</h2>
@@ -25,29 +27,29 @@ function Properties({ component, editable, busy, edit }: {
     </form>
     <form noValidate onSubmit={event => {
       event.preventDefault();
-      const value = radius.trim() === '' ? NaN : Number(radius);
-      if (!Number.isFinite(value) || value <= 0 || value > 1) { setNumberError('Enter a finite outer radius greater than 0 and at most 1 m. Accepted document retained.'); return; }
-      setNumberError(''); edit({ type: 'radius', id: component.id!, expected: tube!.state.radius, value });
+      const value = radius.metres;
+      if (!Number.isFinite(value) || value <= 0 || value > 1) { setNumberError(true); return; }
+      setNumberError(false); edit({ type: 'radius', id: component.id!, expected: tube!.state.radius, value });
     }}>
-      <label>BodyTube outer radius (m)<input value={radius} type="text" inputMode="decimal" aria-describedby="radius-help" aria-invalid={!!numberError} disabled={busy || !tube || !editable} onChange={e => setRadius(e.target.value)}/></label>
+      <label>BodyTube outer radius ({unit})<input value={radius.text} type="text" inputMode="decimal" aria-describedby="radius-help" aria-invalid={!!numberError} disabled={busy || !tube || !editable} onChange={e => radius.change(e.target.value)}/></label>
       <button disabled={busy || !tube || !editable}>Apply radius</button>
-      <p id="radius-help" className="muted">{tube ? 'SI metres, (0, 1]. The Java setter may clamp wall thickness, clear a known preset and invalidate stored results.' : `Read-only: ${component.radiusReason}`}</p>
-      {numberError && <p role="alert" className="error">{numberError}</p>}
+      <p id="radius-help" className="muted">{tube ? `Greater than 0, up to ${lengthInput(1, unit)} ${unit}. The Java setter may clamp wall thickness, clear a known preset and invalidate stored results.` : `Read-only: ${component.radiusReason}`}</p>
+      {numberError && <p role="alert" className="error">Enter a finite outer radius greater than 0 and at most {lengthInput(1, unit)} {unit}. Accepted document retained.</p>}
     </form>
-    {tube && <TubeProperties component={component} editable={editable} busy={busy} edit={edit}/>}
+    {tube && <TubeProperties unit={unit} component={component} editable={editable} busy={busy} edit={edit}/>}
     {tube && <section aria-label="Java intrinsic measurements"><h3>Java intrinsic measurements</h3>
       <p className="muted">Per component; excludes mass/CG overrides and motors. These are not whole-rocket values.</p>
-      <dl><dt>Outer radius (m)</dt><dd data-testid="radius">{tube.state.radius}</dd>
-        <dt>Wall thickness (m)</dt><dd data-testid="thickness">{tube.state.thickness}</dd>
+      <dl><dt>Outer radius ({unit})</dt><dd data-testid="radius">{displayLength(tube.state.radius, unit)}</dd>
+        <dt>Wall thickness ({unit})</dt><dd data-testid="thickness">{displayLength(tube.state.thickness, unit)}</dd>
         <dt>Intrinsic mass (kg)</dt><dd data-testid="mass">{tube.state.mass}</dd>
-        <dt>Local CG (m)</dt><dd data-testid="cg">{tube.state.cg}</dd>
-        <dt>Length (m)</dt><dd data-testid="length">{tube.input.length}</dd><dt>Density (kg/m³)</dt><dd data-testid="density">{tube.input.density}</dd>
+        <dt>Local CG ({unit})</dt><dd data-testid="cg">{displayLength(tube.state.cg, unit)}</dd>
+        <dt>Length ({unit})</dt><dd data-testid="length">{displayLength(tube.input.length, unit)}</dd><dt>Density (kg/m³)</dt><dd data-testid="density">{tube.input.density}</dd>
         <dt>Preset attached</dt><dd>{tube.state.preset ? 'Yes; digest checked' : 'No'}</dd>
       </dl>
-      {'ring' in tube.state && <p>Automatic ring: outer radius {tube.state.ring.outerRadius} m; inner radius {tube.state.ring.innerRadius} m; intrinsic mass {tube.state.ring.mass} kg; local CG {tube.state.ring.cg} m.</p>}
+      {'ring' in tube.state && <p>Automatic ring: outer radius {lengthLabel(tube.state.ring.outerRadius, unit)}; inner radius {lengthLabel(tube.state.ring.innerRadius, unit)}; intrinsic mass {tube.state.ring.mass} kg; local CG {lengthLabel(tube.state.ring.cg, unit)}.</p>}
     </section>}
     <details><summary>Imported properties · other values are read-only</summary>
-      <p className="muted">Shown as imported, without inferred units or whole-rocket validation. Unsupported properties are preserved.</p>
+      <p className="muted">Raw archive values are shown as stored, without inferred units or whole-rocket validation. Unsupported properties are preserved.</p>
       <dl>{component.properties.map((p, i) => <React.Fragment key={i}><dt>{p.name}</dt><dd>{p.value}</dd></React.Fragment>)}</dl>
     </details>
   </>;
@@ -55,6 +57,7 @@ function Properties({ component, editable, busy, edit }: {
 function App() {
   const [document, setDocument] = useState<DocumentView>();
   const [selected, setSelected] = useState(0);
+  const [unit, setUnit] = useState<LengthUnit>('m');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('Open the bundled sample or a local archive to begin.');
@@ -126,6 +129,9 @@ function App() {
           }, file.name);
         }}/></label>
         <button disabled={busy || !document} onClick={download}>Download .ork</button>
+        <div className="unit-choice"><label htmlFor="length-units">Length units</label><select id="length-units" value={unit} disabled={busy} onChange={event => setUnit(event.target.value as LengthUnit)}>
+          <option value="m">Meters (m)</option><option value="in">Inches (in)</option>
+        </select></div>
       </section>
       <p className="muted">One document, one browser. Opening another file or reloading discards this session, including changes. No account or backend is used.</p>
       {error && <p role="alert" className="error">{error}</p>}
@@ -136,12 +142,12 @@ function App() {
           <span>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}</span>
         </div>
         {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
-        <RocketDrawing drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }}/>
+        <RocketDrawing unit={unit} drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }}/>
         <div className="workspace">
           <nav aria-label="Component tree"><h2>Components</h2>{tree()}</nav>
-          <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
+          <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
         </div>
-        <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic component={component}/>}</details>
+        <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic unit={unit} component={component}/>}</details>
         <details><summary>Stored results · {document.simulations.length} simulations (not run)</summary>
           <p>Imported series are retained, unverified and never executed. Physical edits mark affected stored results outdated.</p>
           <ul>{document.simulations.map((s, i) => <li key={i}>{s.name}: {s.status}</li>)}</ul>

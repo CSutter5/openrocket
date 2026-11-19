@@ -35,6 +35,12 @@ Vite serves static files; neither start command starts a JVM, API, storage servi
 
 Opening another file or reloading discards the session. Changes since import/export are labeled in text. The original upload stays in memory for unchanged export and preservation; it is never overwritten on disk. Rejected replacement imports and rejected edits retain the last accepted archive. Imported scripts are data and never run. No cloud autosave, structural edits, undo, simulation, stability, 3D, account or collaboration feature is provided.
 
+## Length units
+
+Use **Length units** in the file toolbar to choose **Meters (m)** or **Inches (in)**. Radius, length, wall thickness, local CG, supported ring dimensions and both drawing labels follow this selection. Inputs accept the selected unit; requests to Java and exported archives stay in SI (1 inch = 0.0254 metres). Switching units preserves unsubmitted drafts and does not mark the document changed. The choice lasts for the current browser session and defaults to meters on reload. Mass stays in kg, density in kg/m³, and raw imported properties are displayed as stored.
+
+`test:app` also runs `test/units.mjs`: repeated switches and untouched inch submissions preserve exact archive bytes/presets/results, invalid drafts retain accepted state, and inch-based length/radius/wall downloads match the pinned desktop setters and save/reload. It writes `units-report.json` and `inches-editor.png` alongside the other acceptance evidence.
+
 ## Supported inputs
 
 The bundled `public/explicit-tube.ork` is the simplest existing three-component explicit-tube proof fixture, stored as desktop-supported XML. Local imports reuse the existing bounded XML/GZIP/ZIP codec (4 MiB upload, 16 MiB expanded total, 8 MiB per entry, 64 entries). Unsafe/ambiguous archives reject explicitly. Preservation-only versions/identities can be inspected and downloaded unchanged; their controls are read-only.

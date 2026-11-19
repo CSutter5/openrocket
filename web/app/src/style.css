@@ -6,7 +6,7 @@ h1 { font-size: 1.8rem; margin: .3rem 0; } h2 { font-size: 1.3rem; margin-top: 0
 .eyebrow { letter-spacing: .12em; font-size: .8rem; margin: 0; }
 .badge { border: 1px solid #91adbf; padding: .5rem .75rem; border-radius: .4rem; }
 main { max-width: 1450px; margin: auto; padding: 1.5rem 3rem; }
-button, input { font: inherit; } button { cursor: pointer; padding: .6rem .8rem; border: 1px solid #7690a1; border-radius: .3rem; background: white; color: #172b3a; }
+button, input, select { font: inherit; } button { cursor: pointer; padding: .6rem .8rem; border: 1px solid #7690a1; border-radius: .3rem; background: white; color: #172b3a; }
 button:hover { background: #e0edf6; } button:disabled { cursor: wait; opacity: .6; }
 :focus-visible { outline: 3px solid #b46b00; outline-offset: 3px; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
@@ -37,3 +37,7 @@ summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
 
 .property-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
 .property-grid form { margin: .5rem 0; }
+
+.toolbar select { padding: .6rem .8rem; border: 1px solid #7690a1; border-radius: .3rem; background: white; color: #172b3a; }
+
+.unit-choice { display: flex; flex-direction: column; gap: .3rem; }
