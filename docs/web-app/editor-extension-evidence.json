@@ -1,0 +1,448 @@
+{
+  "outcome": "passed",
+  "testedRevision": "592ca7fee79a4bfe25ac8e84262ea9144a841862",
+  "validationWorktree": "/tmp/openrocket-editor-next",
+  "trackedStateBeforeAndAfter": "clean",
+  "browser": "149.0.7827.55",
+  "commits": {
+    "drawing": "9f11ad652",
+    "properties": "592ca7fee"
+  },
+  "baseline": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "reducer": {
+    "sha256": "2fdafb20032573dde39b652b79c17a693890d8f9e5cef391ab90f33416dcf800",
+    "bytes": 1955054
+  },
+  "sourceHashes": {
+    "web/app/package.json": "b3d09ccc851c45d826816914d1b9d9b5df9170f4f4ed23a6f9de4af60872faaf",
+    "web/app/public/rocket-sample.ork": "8c79498b4358b5bbf4c140a54e03488d7a2a1b97a1fa1c0df6148569cf0e3d48",
+    "web/app/src/RocketDrawing.tsx": "9824642cd65a44d81e2e21b416f39634624c988aca16dd48514fdc1eb460f610",
+    "web/app/src/TubeProperties.tsx": "5199f29c10ed64972773ce97ec7f52c446622e462f2db9e19b1e9161e4aa1b48",
+    "web/app/src/document.worker.ts": "bae83efa665bb8f1c4f40925f5a52539f29c8cb82f953b07ad4f6b53e287f1fc",
+    "web/app/src/drawing.ts": "1a394dd105a99bc587bba81cbb80655dceeb669b43afee5b8347fed50681aef5",
+    "web/app/src/main.tsx": "aa6ebb36e16292fbab53f766d721cb64f98f92a732a89edf5b0af707692690ee",
+    "web/app/src/model.ts": "53170f3d54ff5fc5ccc6efa99c369b6d7d629220aa041ee3be14ea83c48e5d46",
+    "web/app/src/reducer.d.ts": "769cab61b47c9a6c7314d2378c9929ee70d9eabe0c2ee533dabb998578d6e6ce",
+    "web/app/src/style.css": "f1eff19f97275a684496331e6fadbb840c00d84d6fe1288802f01cb2fc4b9b85",
+    "web/app/test/EditorDesktopProof.java": "4933a3e4ec37eb02fd978405a5fe9c989c405d000334436d1d8688e20ff26919",
+    "web/app/test/acceptance.mjs": "7c4c1d3665f93518d62db3ba074328e2d0f5a88742b5253df1fb7b847e411017",
+    "web/app/test/drawing.mjs": "691bebb08d2ed1ac20742b6ea5b25f256cb6cba0363530c4f873a96f571e7fd2",
+    "web/app/test/fixtures.mjs": "e8c8882f0f509fe99d4afab934ef1c969175c0ed6adee207e20665bdd85d6f24",
+    "web/app/test/p02.mjs": "75de7d996131b6e9f3bc0df687cdf00352344af0c71c9c406cc6b5b33ec01ffa",
+    "web/app/test/properties.mjs": "27b30718f256483271b4ef3de08297d9fc8ca48cc0779db395898795fb359c31",
+    "web/app/test/roundtrip.mjs": "597e956d656372d071f30570c42be7878f610b225ecc76324187913b518cd363",
+    "web/engine-adapter/src/main/java/proof/EditorDrawing.java": "196fd04fc354644d62c819943d86081b811f0849dcd4698a7580a90cce712ae7",
+    "web/engine-adapter/src/main/java/proof/ImportedTubeProperties.java": "3e844a08fd5beb9c1e6c2729e9c6613c50aaf3f7bd88b572d61ce2e3f268a0be",
+    "web/engine-adapter/src/main/java/proof/ReducerFacade.java": "aa69be6e1b07a773b5458e9173268d4d82600dbfdcbdab51360cc0d89e70b0df",
+    "web/packages/ork-format/package.json": "aa9e0afa046ca4608959ca55a73eaa9b5a8f6425952e5b7ff4e889d6b70f0164",
+    "web/packages/ork-format/src/radius.d.ts": "662125f0f5bade0bacee8092d947af19f80ee91fccc245da0c305db770dbc7f3",
+    "web/packages/ork-format/src/tube-properties.d.ts": "ded548c0240761e5cbb63b7ade8e1e1a894e498c74fbe0b8361f41d08b5a0cf9",
+    "web/packages/ork-format/src/tube-properties.js": "e3022dbacf5971dc2bc439c016c1b4280349241a7211d9d7f4160031472f8e2c",
+    "web/packages/ork-format/test/tube-properties.test.js": "39182e36dca64c4f2421f37c0b4b3ab0e4b33c98554bd29e3e9890b9b5e5e996"
+  },
+  "drawing": {
+    "outcome": "passed",
+    "browser": "149.0.7827.55",
+    "cases": [
+      {
+        "name": "sample",
+        "polygons": 5,
+        "vertices": 272,
+        "desktopCoordinatesMatch": true
+      },
+      {
+        "name": "rich",
+        "polygons": 5,
+        "vertices": 272,
+        "desktopCoordinatesMatch": true
+      }
+    ]
+  },
+  "properties": {
+    "outcome": "passed",
+    "browser": "149.0.7827.55",
+    "cases": [
+      {
+        "name": "sample",
+        "property": "length",
+        "value": 0.55,
+        "before": {
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.14828307936608273,
+          "cg": 0.2,
+          "length": 0.4,
+          "density": 1850,
+          "filled": false,
+          "innerRadius": 0.0273304,
+          "volume": 8.015301587355824e-05,
+          "listeners": 0
+        },
+        "statusesBefore": [],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.2038892341283642,
+          "cg": 0.275,
+          "length": 0.55,
+          "density": 1850,
+          "filled": false,
+          "innerRadius": 0.0273304,
+          "volume": 0.00011021039682614282,
+          "listeners": 0
+        },
+        "statusesAfter": [],
+        "counts": {
+          "components": 5,
+          "decals": 0,
+          "resultPoints": 0,
+          "motorAssignments": 0,
+          "simulations": 0
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      },
+      {
+        "name": "sample",
+        "property": "thickness",
+        "value": 0.002,
+        "before": {
+          "radius": 0.0284734,
+          "thickness": 0.0011429999999999982,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.2038892341283642,
+          "cg": 0.275,
+          "length": 0.55,
+          "density": 1850,
+          "filled": false,
+          "innerRadius": 0.0273304,
+          "volume": 0.00011021039682614282,
+          "listeners": 0
+        },
+        "statusesBefore": [],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.0284734,
+          "thickness": 0.002,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.3512826426491741,
+          "cg": 0.275,
+          "length": 0.55,
+          "density": 1850,
+          "filled": false,
+          "innerRadius": 0.0264734,
+          "volume": 0.0001898825095400941,
+          "listeners": 0
+        },
+        "statusesAfter": [],
+        "counts": {
+          "components": 5,
+          "simulations": 0,
+          "motorAssignments": 0,
+          "resultPoints": 0,
+          "decals": 0
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      },
+      {
+        "name": "rich",
+        "property": "length",
+        "value": 0.45,
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.0009999999999999974,
+          "automatic": false,
+          "preset": true,
+          "mass": 0.03781220917860666,
+          "cg": 0.15,
+          "presetDigest": "726e26d7f3618af491f94460622c5110",
+          "length": 0.3,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.029,
+          "volume": 5.56061899685392e-05,
+          "listeners": 0
+        },
+        "statusesBefore": [
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded"
+        ],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.0009999999999999974,
+          "automatic": false,
+          "preset": true,
+          "mass": 0.05671831376790995,
+          "cg": 0.225,
+          "presetDigest": "726e26d7f3618af491f94460622c5110",
+          "length": 0.45,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.029,
+          "volume": 8.340928495280875e-05,
+          "listeners": 0
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "counts": {
+          "resultPoints": 3014,
+          "decals": 2,
+          "components": 13,
+          "simulations": 6,
+          "motorAssignments": 5
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      },
+      {
+        "name": "rich",
+        "property": "thickness",
+        "value": 0.002,
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.0009999999999999974,
+          "automatic": false,
+          "preset": true,
+          "mass": 0.05671831376790995,
+          "cg": 0.225,
+          "presetDigest": "726e26d7f3618af491f94460622c5110",
+          "length": 0.45,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.029,
+          "volume": 8.340928495280875e-05,
+          "listeners": 0
+        },
+        "statusesBefore": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.002,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.11151397283182335,
+          "cg": 0.225,
+          "length": 0.45,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.027999999999999997,
+          "volume": 0.0001639911365173873,
+          "listeners": 0
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "counts": {
+          "decals": 2,
+          "resultPoints": 3014,
+          "motorAssignments": 5,
+          "simulations": 6,
+          "components": 13
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      },
+      {
+        "name": "rich",
+        "property": "thickness",
+        "value": 0.9,
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.002,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.11151397283182335,
+          "cg": 0.225,
+          "length": 0.45,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0.027999999999999997,
+          "volume": 0.0001639911365173873,
+          "listeners": 0
+        },
+        "statusesBefore": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.03,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.865194616798629,
+          "cg": 0.225,
+          "length": 0.45,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0,
+          "volume": 0.0012723450247038662,
+          "listeners": 0
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "counts": {
+          "decals": 2,
+          "resultPoints": 3014,
+          "motorAssignments": 5,
+          "simulations": 6,
+          "components": 13
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      },
+      {
+        "name": "clamp-event",
+        "property": "thickness",
+        "value": 0.9,
+        "before": {
+          "radius": 0.03,
+          "thickness": 0.03,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.576796411199086,
+          "cg": 0.15,
+          "length": 0.3,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0,
+          "volume": 0.0008482300164692441,
+          "listeners": 0
+        },
+        "statusesBefore": [
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded",
+          "loaded"
+        ],
+        "functionalChange": true,
+        "after": {
+          "radius": 0.03,
+          "thickness": 0.03,
+          "automatic": false,
+          "preset": false,
+          "mass": 0.576796411199086,
+          "cg": 0.15,
+          "length": 0.3,
+          "density": 680,
+          "filled": false,
+          "innerRadius": 0,
+          "volume": 0.0008482300164692441,
+          "listeners": 0
+        },
+        "statusesAfter": [
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated",
+          "outdated"
+        ],
+        "counts": {
+          "motorAssignments": 5,
+          "resultPoints": 3014,
+          "decals": 2,
+          "components": 13,
+          "simulations": 6
+        },
+        "fullSerializationEqual": true,
+        "desktopReloadEqual": true,
+        "outcome": "passed",
+        "opaqueXmlAndAttachmentsExact": true
+      }
+    ]
+  },
+  "originalGp": "passed again, see raw roundtrip.json and gp.json",
+  "regressions": {
+    "contracts": 2,
+    "fixtureManifests": 7,
+    "codec": 49,
+    "platform": 12,
+    "outcome": "passed"
+  },
+  "userArchive": {
+    "outcome": "passed",
+    "polygons": 7,
+    "maxScreenError": 0,
+    "userArchiveUnchanged": true,
+    "lengthEditable": true,
+    "sha256": "e862a60191b1d13306cb9de0263ce6e60bed347293a03d50338551aa9b4363dc",
+    "requiredByAppOrAcceptance": false
+  },
+  "rawEvidence": "/tmp/openrocket-editor-next/web/app/build/extension-acceptance",
+  "screenshots": [
+    "rocket-drawing.png",
+    "expanded-properties.png"
+  ],
+  "limits": [
+    "One axial exterior stage; supported nose/transition/body/trapezoidal fins",
+    "Length/wall edits require an explicit BodyTube without automatic descendants",
+    "Density and other component numeric properties remain read-only",
+    "No simulation, backend, accounts, collaboration, structural editing, full compatibility or G1 closure"
+  ]
+}
