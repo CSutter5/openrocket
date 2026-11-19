@@ -149,7 +149,7 @@ function App() {
           <nav aria-label="Component tree"><h2>Components</h2>{tree()}</nav>
           <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
         </div>
-        <FlightPanel document={document} busy={busy} unit={unit}/>
+        <FlightPanel document={document} busy={busy} unit={unit} selectConfiguration={configurationId => perform({ type: 'flightConfiguration', expectedHash: document.hash, configurationId })}/>
         <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic unit={unit} component={component}/>}</details>
         <details><summary>Stored results · {document.simulations.length} simulations (not run)</summary>
           <p>Imported series are retained, unverified and never executed. Physical edits mark affected stored results outdated.</p>
@@ -157,7 +157,7 @@ function App() {
         </details>
       </>}
     </main>
-    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Flight simulation supports only the explicit flight-ready profile. Accounts, collaboration and full compatibility are deferred.</footer>
+    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Flight simulation supports bounded single-stage configurations. Accounts, collaboration and full compatibility are deferred.</footer>
   </>;
 }
 createRoot(document.getElementById('root')!).render(<App/>);

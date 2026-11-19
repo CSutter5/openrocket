@@ -35,7 +35,7 @@ const one = (n: XmlNode,key:string) => { const all=n.children.filter(c=>c.name==
 function attributes(n:XmlNode, allowed:string[]) { if(Object.keys(n.attributes).some(k=>!allowed.includes(k)))throw new Error(`Unsupported ${n.name} attributes`); }
 function scalar(n:XmlNode) { if(n.children.length)throw new Error(`Unsupported nested ${n.name}`); }
 const encode=(s:string)=>s.replace(/\\/g,'\\\\').replace(/\t/g,'\\t').replace(/\r/g,'\\r').replace(/\n/g,'\\n');
-export function importedInput(archive: ExpandedArchive) {
+export function importedInput(archive: ExpandedArchive, requestedConfigurationId?: string) {
   if(archive.mode!=='editable'||archive.parsed.version!=='1.11')throw new Error('Requires an editable format 1.11 archive');
   const nodes=archive.parsed.components;
   if(nodes.length>64||nodes[0]?.name!=='rocket'||nodes.filter(n=>n.name==='stage').length!==1||nodes[1]?.name!=='stage')throw new Error('Requires one direct axial stage and at most 64 components');
@@ -55,7 +55,8 @@ export function importedInput(archive: ExpandedArchive) {
   const ids=configurations.map(n=>attr(n,'configid'));
   if(ids.some(id=>!id||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id))||new Set(ids).size!==ids.length)throw new Error('Ambiguous configuration IDs');
   const selected=configurations.filter(n=>attr(n,'default')==='true');if(selected.length!==1)throw new Error('Requires an explicit default flight configuration');
-  const configurationId=attr(selected[0],'configid')!;
+  const configurationId=requestedConfigurationId ?? attr(selected[0],'configid')!;
+  if(!ids.includes(configurationId))throw new Error('Unknown selected flight configuration');
   const rows=['imported-flight-v1',`configuration\t${configurationId}`,`count\t${nodes.length}`];
   const materials:unknown[]=[],curves=new Map<string,{bytes:Uint8Array;hash:string}>();let selectedMotor='', mounts=0,recovery=0;const catalogReferences:string[]=[];
   function add(n:XmlNode,path:string) {
@@ -77,8 +78,13 @@ export function importedInput(archive: ExpandedArchive) {
       if(seen.has(c.name)&&!repeated)throw new Error(`Ambiguous ${n.name}/${c.name}`);seen.add(c.name);
       if(c.name==='appearance')continue; // Visual metadata never affects rigid-body flight.
       if(c.name==='motorconfiguration') {
-        attributes(c,['configid','default']);if(c.children.length!==1||c.children[0].name!=='stage'||attr(c.children[0],'number')!=='0'||attr(c.children[0],'active')!=='true')throw new Error('Requires one active axial stage');
-        attributes(c.children[0],['number','active']);if(c.children[0].children.length)throw new Error('Unknown stage configuration behavior');
+        attributes(c,['configid','default']);
+        if(c.children.some(n=>!['name','stage'].includes(n.name))||c.children.filter(n=>n.name==='name').length>1)throw new Error('Unknown or ambiguous configuration field');
+        const stage=one(c,'stage');
+        if(attr(stage,'number')!=='0'||attr(stage,'active')!=='true')throw new Error('Requires one active axial stage');
+        attributes(stage,['number','active']);if(stage.children.length)throw new Error('Unknown stage configuration behavior');
+        const name=c.children.find(n=>n.name==='name');
+        if(name){attributes(name,[]);scalar(name);if(name.text.trim())rows.push(`configurationName/${attr(c,'configid')}\t${encode(name.text)}`);}
         rows.push(`config/${attr(c,'configid')}\t${attr(c,'default')==='true'}`);continue;
       }
       if(c.name==='motormount') {
@@ -154,7 +160,7 @@ export function importedInput(archive: ExpandedArchive) {
   }
   return {model:rows.join('\n'),configurationId,catalogReferences:[...new Set(catalogReferences)],motorHashes,materials,motor:selectedMotor,recovery:`${recovery} parachute(s), using archived deployment settings`,kind:'imported' as const,maxTime:600};
 }
-export async function resolvedImportedInput(archive:ExpandedArchive) {
-  const input=importedInput(archive),hash=(value:unknown)=>sha256(new TextEncoder().encode(JSON.stringify(value)));
+export async function resolvedImportedInput(archive:ExpandedArchive, configurationId?:string) {
+  const input=importedInput(archive,configurationId),hash=(value:unknown)=>sha256(new TextEncoder().encode(JSON.stringify(value)));
   return {...input,motorHash:await hash(input.motorHashes),materialsHash:await hash(input.materials)};
 }

@@ -28,7 +28,7 @@ public final class ImportedRocketFlight {
         }
         selected=new FlightConfigurationId(text("configuration"));
         rocket=new Rocket();rocket.setID(text("0/id"));rocket.enableEvents();components.add(rocket);
-        for(String key:fields.keySet())if(key.startsWith("config/")){FlightConfigurationId id=new FlightConfigurationId(key.substring(7));configurations.add(id);rocket.createFlightConfiguration(id);}
+        for(String key:fields.keySet())if(key.startsWith("config/")){FlightConfigurationId id=new FlightConfigurationId(key.substring(7));configurations.add(id);rocket.createFlightConfiguration(id);if(fields.containsKey("configurationName/"+id))rocket.getFlightConfiguration(id).setName(text("configurationName/"+id));}
         int count=(int)num("count");if(count<2||count>64)throw new IllegalArgumentException("Component limit");
         for(int i=1;i<count;i++) {
             RocketComponent c=switch(text(i+"/type")) {

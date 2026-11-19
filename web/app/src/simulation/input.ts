@@ -9,6 +9,23 @@ const body = 'rocket/subcomponents/stage/subcomponents/bodytube';
 const variable = new Map([['length', [0, 100]], ['radius', [0, 1]], ['thickness', [0, 1]]]);
 export interface FlightInput { model: string; configurationId: string; motorHash: string; materialsHash: string; maxTime: number; kind: 'sample' | 'imported' }
 export type Support = { supported: true; configurationId: string; motor: string; kind: 'sample' | 'imported'; recovery: string; maxTime: number; catalogReferences: string[] } | { supported: false; reason: string };
+export interface FlightConfigurationChoice { id: string; label: string; isDefault: boolean }
+export function flightConfigurations(archive: ExpandedArchive): FlightConfigurationChoice[] {
+  const configs = archive.parsed.components[0]?.children.filter(n => n.name === 'motorconfiguration') ?? [];
+  if (configs.length > 16) return [];
+  const choices = configs.map(n => {
+    const id = n.attributes.configid?.value ?? '';
+    const motors = archive.parsed.nodes.filter(m => m.name === 'motor' && m.parent?.name === 'motormount' && m.attributes.configid?.value === id);
+    const description = motors.map(m => {
+      const designation = m.children.find(c => c.name === 'designation')?.text.trim() ?? 'Unresolved motor';
+      const delay = m.children.find(c => c.name === 'delay')?.text.trim();
+      return designation + (delay ? ` · delay ${delay === 'none' ? 'none' : delay + ' s'}` : '');
+    }).join(', ') || 'No configured motor';
+    const name = n.children.find(c => c.name === 'name')?.text.trim();
+    return { id, label: `${name ? name + ' · ' : ''}${description} · ${id.slice(0, 8)}`, isDefault: n.attributes.default?.value === 'true' };
+  });
+  return choices.some(c => !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(c.id)) || new Set(choices.map(c => c.id)).size !== choices.length ? [] : choices;
+}
 function fail(reason: string): never { throw new Error(`Simulation unsupported: ${reason}. The archive can still be viewed, edited where supported, and downloaded.`); }
 function records(archive: ExpandedArchive) {
   if (archive.mode !== 'editable' || archive.parsed.version !== '1.11') fail('requires an editable format 1.11 document');
@@ -48,20 +65,21 @@ function records(archive: ExpandedArchive) {
   if (Number(result[body + '/thickness'].text) > Number(result[body + '/radius'].text)) fail('wall exceeds body radius');
   return result;
 }
-export function flightSupport(archive: ExpandedArchive): Support {
+export function flightSupport(archive: ExpandedArchive, configurationId?: string): Support {
   try {
     records(archive);
+    if (configurationId !== undefined && configurationId !== profile.configurationId) fail('unknown flight configuration');
     const motor = archive.entries.find(e => e.path === profile.motor.path);
     if (!motor || motor.sha256 !== profile.motor.sha256) fail('missing or changed synthetic motor curve; digest must resolve exactly');
     return { supported: true, kind: 'sample', recovery: 'One 0.30 m parachute; automatic drag/line length; ejection deployment, no extra delay', maxTime: 120, catalogReferences: [], configurationId: profile.configurationId, motor: 'C6 synthetic browser proof · synthetic curve, not certified motor data' };
   } catch {
-    try { const input = importedInput(archive); return {supported:true,kind:'imported',configurationId:input.configurationId,motor:input.motor,recovery:input.recovery,maxTime:input.maxTime,catalogReferences:input.catalogReferences}; }
+    try { const input = importedInput(archive, configurationId); return {supported:true,kind:'imported',configurationId:input.configurationId,motor:input.motor,recovery:input.recovery,maxTime:input.maxTime,catalogReferences:input.catalogReferences}; }
     catch (error) { return { supported: false, reason: `Simulation unsupported: ${error instanceof Error ? error.message : String(error)}. Archive viewing, supported edits and download remain available.` }; }
   }
 }
-export async function flightInput(archive: ExpandedArchive): Promise<FlightInput> {
-  const support = flightSupport(archive); if (!support.supported) throw new Error(support.reason);
-  if (support.kind === 'imported') return resolvedImportedInput(archive);
+export async function flightInput(archive: ExpandedArchive, configurationId?: string): Promise<FlightInput> {
+  const support = flightSupport(archive, configurationId); if (!support.supported) throw new Error(support.reason);
+  if (support.kind === 'imported') return resolvedImportedInput(archive, configurationId);
   const fields = records(archive);
   const encode = (text: string) => text.replace(/\\/g, '\\\\').replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
   const rows: string[] = [];

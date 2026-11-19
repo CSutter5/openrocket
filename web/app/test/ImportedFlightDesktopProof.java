@@ -23,8 +23,8 @@ public class ImportedFlightDesktopProof {
             var doc=new GeneralRocketLoader(new File(args[1])).load();Rocket r=doc.getRocket();
             BodyTube body=null;InnerTube inner=null;Parachute first=null;
             for(var c:r){if(c instanceof BodyTube b)body=b;if(c instanceof InnerTube t)inner=t;if(c instanceof Parachute p)first=p;}
-            var selected=r.getSelectedConfiguration().getFlightConfigurationID();Motor motor=null;for(var m:info.openrocket.core.database.motor.ThrustCurveMotorSQLiteDatabase.readDatabase(new File("core/src/main/resources/datafiles/thrustcurves/initial_motors.db")))if(m.getDigest().equals("acee08976425e0ddc8b9bfc014a91770"))motor=m;
-            if(motor==null)throw new AssertionError("Pinned J135W missing");inner.setMotorMount(false);
+            var selected=r.getSelectedConfiguration().getFlightConfigurationID();Motor motor=null,alternate=null;for(var m:info.openrocket.core.database.motor.ThrustCurveMotorSQLiteDatabase.readDatabase(new File("core/src/main/resources/datafiles/thrustcurves/initial_motors.db"))){if(m.getDigest().equals("acee08976425e0ddc8b9bfc014a91770"))motor=m;if(m.getDigest().equals("812abf1e0e2e60f6ec54538ffbf2b8e4"))alternate=m;}
+            if(motor==null||alternate==null)throw new AssertionError("Pinned test motors missing");inner.setMotorMount(false);
             body.setLength(1.2);body.setOuterRadius(.035);body.setThickness(.001);body.setOverrideMass(1.4);body.setMassOverridden(true);body.setOverrideCGX(.6);body.setCGOverridden(true);
             inner.setLength(.4);inner.setOuterRadius(.029);inner.setThickness(.0015);
             for(var c:r){if(c instanceof NoseCone n){n.setLength(.2);n.setAftRadius(.035);}if(c instanceof TrapezoidFinSet f)f.setFinShape(.16,.08,.03,.08,.004);}
@@ -35,14 +35,15 @@ public class ImportedFlightDesktopProof {
             Bulkhead cap=new Bulkhead();inner.addChild(cap);cap.setLength(.002);cap.setOuterRadius(.009);cap.setAxialOffset(.01);
             ShockCord cord=new ShockCord();body.addChild(cord);cord.setCordLength(.10);cord.setLength(.02);cord.setRadius(.004);cord.setOverrideMass(.001);cord.setMassOverridden(true);
             body.setMotorMount(true);
-            for(int i=0;i<5;i++){var id=i==0?selected:new FlightConfigurationId("9000000"+i+"-0000-4000-8000-000000000000");r.createFlightConfiguration(id);MotorConfiguration mc=new MotorConfiguration(body,id);mc.setMotor(motor);mc.setEjectionDelay(5+i);body.setMotorConfig(mc,id);if(i==1){DeploymentConfiguration dc=new DeploymentConfiguration();dc.setDeployEvent(DeploymentConfiguration.DeployEvent.APOGEE);dc.setDeployAltitude(50);dc.setDeployDelay(.2);main.getDeploymentConfigurations().set(id,dc);}}
+            for(int i=0;i<5;i++){var id=i==0?selected:new FlightConfigurationId("9000000"+i+"-0000-4000-8000-000000000000");r.createFlightConfiguration(id);if(i==4)continue;if(i==1)r.getFlightConfiguration(id).setName("Fast flight");MotorConfiguration mc=new MotorConfiguration(body,id);mc.setMotor(i==1?alternate:motor);mc.setEjectionDelay(5+i);body.setMotorConfig(mc,id);if(i==1){DeploymentConfiguration dc=new DeploymentConfiguration();dc.setDeployEvent(DeploymentConfiguration.DeployEvent.APOGEE);dc.setDeployAltitude(50);dc.setDeployDelay(.2);main.getDeploymentConfigurations().set(id,dc);}}
             r.setSelectedConfiguration(selected);int i=0;for(var c:r){c.setID(String.format("910000%02d-0000-4000-8000-000000000000",i++));if(c instanceof MassComponent)c.setName("Ballast "+i);}
             Simulation historical=new Simulation(doc,r);historical.setFlightConfigurationId(selected);historical.setName("Imported conditions retained, new local run is separate");doc.addSimulation(historical);
             new GeneralRocketSaver().save(new File(args[2]),doc,ArchiveDesktopProof.options());return;
         }
         if(!args[0].equals("reference"))throw new IllegalArgumentException("Unknown action");
         var doc=new GeneralRocketLoader(new File(args[1])).load();var model=new ImportedRocketFlight(Files.readString(Path.of(args[2])));
-        Rocket r=doc.getRocket();var id=r.getSelectedConfiguration().getFlightConfigurationID();ThrustCurveMotor motor=null;
+        Rocket r=doc.getRocket();var id=args.length>5?new FlightConfigurationId(args[5]):r.getSelectedConfiguration().getFlightConfigurationID();
+        r.setSelectedConfiguration(id);if(!model.selected.equals(id))throw new AssertionError("Selected configuration differs from requested reference");ThrustCurveMotor motor=null;
         for(var c:r)if(c instanceof MotorMount m&&m.isMotorMount())motor=(ThrustCurveMotor)m.getMotorConfig(id).getMotor();
         String expected=new String(ArchiveDesktopProof.semanticXml(doc),java.nio.charset.StandardCharsets.UTF_8);
         String actual=new String(ArchiveDesktopProof.semanticXml(OpenRocketDocumentFactory.createDocumentFromRocket(model.rocket)),java.nio.charset.StandardCharsets.UTF_8);

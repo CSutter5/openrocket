@@ -5,11 +5,12 @@ import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
-import { flightSupport } from './simulation/input';
+import { flightSupport, flightConfigurations } from './simulation/input';
 import { bindFlight } from './simulation/provenance';
 
 let archive: ExpandedArchive | undefined;
 let filename = '', exportHash = '';
+let selectedConfigurationId: string | undefined;
 function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; after: Intrinsic } {
   return JSON.parse(tube.ring?.sibling
     ? siblingRingRadiusEdit(tube.preset?.key ?? '', tube.preset?.digest ?? '', tube.length, tube.radius, tube.thickness,
@@ -22,10 +23,10 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
     ? presetRadiusEdit(tube.preset.key, tube.preset.digest, tube.length, tube.radius, tube.thickness, tube.filled, tube.density, value)
     : radiusEdit(tube.length, tube.radius, tube.thickness, tube.filled, tube.density, value));
 }
-async function describe(current: ExpandedArchive, name: string, lastExport: string): Promise<DocumentView> {
+async function describe(current: ExpandedArchive, name: string, lastExport: string, configurationId: string | undefined): Promise<DocumentView> {
   const nodes = current.parsed.components;
   return {
-    flightSupport: flightSupport(current), drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
+    flightSupport: flightSupport(current, configurationId), flightConfigurations: flightConfigurations(current), flightConfigurationId: configurationId, drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
     identitySidecarHash: await sha256(new TextEncoder().encode(JSON.stringify(current.identity))),
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
     components: componentNames(current).map((component, index) => {
@@ -56,21 +57,31 @@ async function execute(action: Action): Promise<Reply> {
   if (action.type === 'import') {
     const candidate = await importArchive(action.bytes);
     // Build the view before publication, so a failed replacement retains the accepted archive.
-    const view = await describe(candidate, action.filename, candidate.identity.archiveHash);
+    const configurationId = flightConfigurations(candidate).find(c => c.isDefault)?.id;
+    const view = await describe(candidate, action.filename, candidate.identity.archiveHash, configurationId);
+    selectedConfigurationId = configurationId;
     archive = candidate; filename = action.filename; exportHash = candidate.identity.archiveHash;
     return { view, notice: 'Archive opened. Original upload retained in memory.' };
   }
   if (!archive) throw new Error('Open an archive first');
+  if (action.type === 'flightConfiguration') {
+    if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before configuration selection; select again');
+    if (!flightConfigurations(archive).some(c => c.id === action.configurationId)) throw new Error('Unknown flight configuration');
+    const view = await describe(archive, filename, exportHash, action.configurationId);
+    selectedConfigurationId = action.configurationId;
+    return { view, notice: 'Session flight configuration selected. Archive and stored results retained.' };
+  }
   if (action.type === 'flightSnapshot') {
+    if (action.configurationId !== selectedConfigurationId) throw new Error('Flight configuration changed before snapshot; run again');
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before simulation snapshot; run again');
-    const bound = await bindFlight(archive, action.integrator);
+    const bound = await bindFlight(archive, action.integrator, action.configurationId);
     const exported = await exportArchive(archive);
-    return { view: await describe(archive, filename, exportHash), notice: 'Exact accepted archive captured for simulation.',
+    return { view: await describe(archive, filename, exportHash, selectedConfigurationId), notice: 'Exact accepted archive captured for simulation.',
       snapshot: { bytes: exported.bytes, identity: exported.identity, provenance: bound.provenance, inputHash: bound.inputHash } };
   }
   if (action.type === 'export') {
     const exported = await exportArchive(archive);
-    const view = await describe(archive, filename, exported.identity.archiveHash);
+    const view = await describe(archive, filename, exported.identity.archiveHash, selectedConfigurationId);
     exportHash = exported.identity.archiveHash;
     return { view, bytes: exported.bytes, notice: 'Download prepared locally. Check your browser downloads; this is not cloud or durable save confirmation.' };
   }
@@ -100,7 +111,7 @@ async function execute(action: Action): Promise<Reply> {
     candidate = await applyTubeRadius(archive, input, effects.after);
     if (candidate !== archive) notice = `Java radius edit accepted. ${invalidations.length} stored result(s) marked outdated; series retained.`;
   }
-  const view = await describe(candidate, filename, exportHash);
+  const view = await describe(candidate, filename, exportHash, selectedConfigurationId);
   archive = candidate;
   return { view, notice };
 }

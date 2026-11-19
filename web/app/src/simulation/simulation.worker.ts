@@ -5,7 +5,7 @@ self.onmessage = async ({ data }: MessageEvent<FlightSnapshot & { jobId: number 
   const { jobId } = data;
   try {
     const archive = await importArchive(data.bytes, data.identity);
-    const bound = await bindFlight(archive, data.provenance.integrator);
+    const bound = await bindFlight(archive, data.provenance.integrator, data.provenance.configurationId);
     if (bound.inputHash !== data.inputHash) throw new Error('Simulation snapshot/provenance mismatch');
     // The synchronous Java call cannot provide a truthful fractional progress value.
     self.postMessage({ jobId, inputHash: bound.inputHash, type: 'running' });

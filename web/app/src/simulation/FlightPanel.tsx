@@ -18,7 +18,7 @@ function Plot({ result, unit }: { result: SessionResult; unit: LengthUnit }) {
     <text x="300" y="257">Time (s)</text>
   </svg>;
 }
-export function FlightPanel({ document, busy, unit }: { document: DocumentView; busy: boolean; unit: LengthUnit }) {
+export function FlightPanel({ document, busy, unit, selectConfiguration }: { document: DocumentView; busy: boolean; unit: LengthUnit; selectConfiguration: (id: string) => void }) {
   const [integrator, setIntegrator] = useState<Integrator>('RK6');
   const [state, setState] = useState<JobState>({ status: 'idle' });
   const job = useRef<FlightJob | null>(null);
@@ -26,19 +26,27 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
   useEffect(() => () => job.current?.dispose(), []);
   const running = ['starting', 'running'].includes(state.status), support = document.flightSupport;
   const result = state.result;
-  const current = result && result.provenance.archiveTreeHash === document.hash && result.provenance.identitySidecarHash === document.identitySidecarHash && result.provenance.integrator === integrator;
+  const current = result && result.provenance.archiveTreeHash === document.hash && result.provenance.identitySidecarHash === document.identitySidecarHash && result.provenance.integrator === integrator && result.provenance.configurationId === document.flightConfigurationId;
   async function run() {
+    if (!support.supported) return;
     const controller = job.current!, token = controller.prepare();
     try {
-      const reply = await request({ type: 'flightSnapshot', expectedHash: document.hash, integrator });
+      const reply = await request({ type: 'flightSnapshot', expectedHash: document.hash, configurationId: support.configurationId, integrator });
       controller.start(token, reply.snapshot!);
     } catch (error) { controller.fail(token, error instanceof Error ? error.message : String(error)); }
   }
   return <section className="flight-panel" aria-label="Local flight simulation">
     <h2>Local flight simulation</h2>
     <p>Session-only browser results. New flights are not written to .ork downloads or imported stored results.</p>
+    {!!document.flightConfigurations.length && <>
+      <label htmlFor="flight-configuration">Motor configuration</label>
+      <select id="flight-configuration" value={document.flightConfigurationId ?? ''} disabled={busy} onChange={event => selectConfiguration(event.target.value)}>
+        {document.flightConfigurations.map(c => <option key={c.id} value={c.id}>{c.label}{c.isDefault ? ' · archived default' : ''}</option>)}
+      </select>
+      <p>Selection applies to this session's runs. The archived default and stored results are preserved.</p>
+    </>}
     {support.supported ? <>
-      <p><strong>Supported flight configuration</strong>: archived default, one active stage · <code>{support.configurationId}</code></p>
+      <p><strong>Supported flight configuration</strong>: selected configuration, one active stage · <code>{support.configurationId}</code></p>
       <p><strong>Motor</strong>: {support.motor}. One motor; ignition and ejection use the archived configuration.</p>
       <p><strong>Recovery</strong>: {support.recovery}.</p>
       {support.kind === 'imported' && <p>New session run with the bounded settings below. Saved desktop simulations and custom expression columns are preserved separately and are not evaluated or overwritten.</p>}
@@ -68,7 +76,7 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
     {running && <p>Indeterminate progress. Editing, importing, selection and unit switching remain available. This job retains its captured input.</p>}
     {result && <div data-testid="flight-result">
       <h3>{current ? 'Current session result' : 'Stale session result · document or run settings changed'}</h3>
-      <p>Computed with {result.provenance.integrator}, seed {result.provenance.seed}. {current ? 'Matches the accepted archive and selected settings.' : 'Rerun to use the current document and settings.'}</p>
+      <p>Configuration <code>{result.provenance.configurationId}</code> · computed with {result.provenance.integrator}, seed {result.provenance.seed}. {current ? 'Matches the accepted archive and selected settings.' : 'Rerun to use the current document and settings.'}</p>
       <dl><dt>Maximum altitude ({unit})</dt><dd data-testid="flight-altitude">{displayLength(result.flight.summary[0], unit).toFixed(4)}</dd>
         <dt>Maximum speed ({unit}/s)</dt><dd>{displayLength(result.flight.summary[1], unit).toFixed(4)}</dd>
         <dt>Apogee time (s)</dt><dd>{result.flight.summary[2].toFixed(4)}</dd>
