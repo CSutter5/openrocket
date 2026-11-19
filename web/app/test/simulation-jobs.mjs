@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { FlightJob } from '../src/simulation/job.ts';
+const workers=[];
+const job=new FlightJob(()=>{},()=>{
+  const worker={onmessage:null,onerror:null,terminated:false,postMessage(data){this.sent=data;},terminate(){this.terminated=true;}};
+  workers.push(worker); return worker;
+});
+const snapshot={inputHash:'input-1',provenance:{archiveTreeHash:'archive-1',integrator:'RK6'},bytes:new Uint8Array([1])};
+const complete=(worker,patch={})=>worker.onmessage({data:{jobId:worker.sent.jobId,inputHash:worker.sent.inputHash,type:'completed',result:{inputHash:worker.sent.inputHash,provenance:worker.sent.provenance},...patch}});
+let token=job.prepare(); job.start(token,snapshot);
+const first=workers.at(-1); job.cancel(); complete(first);
+assert.equal(job.state.status,'cancelled');assert.equal(job.state.result,undefined);assert.equal(first.terminated,true);
+token=job.prepare(); job.start(token,snapshot); const second=workers.at(-1);
+const newer=job.prepare();job.start(newer,{...snapshot,inputHash:'input-2'});const third=workers.at(-1);
+complete(second); assert.equal(job.state.status,'starting');assert.equal(second.terminated,true);
+complete(third,{inputHash:'input-1'});assert.equal(job.state.status,'starting');
+complete(third);assert.equal(job.state.status,'completed');assert.equal(job.state.result.inputHash,'input-2');
+complete(second);assert.equal(job.state.result.inputHash,'input-2');
+token=job.prepare(); job.cancel();job.start(token,snapshot); assert.equal(workers.length,3);
+token=job.prepare();job.start(token,snapshot);workers.at(-1).onerror({preventDefault(){}});assert.equal(job.state.status,'failed');
+token=job.prepare();job.start(token,snapshot);complete(workers.at(-1));assert.equal(job.state.status,'completed');
+job.dispose();complete(workers.at(-1));assert.equal(job.state.status,'completed');
+console.log('Simulation job races passed: cancelled, superseded, mismatched, duplicate and disposed messages; cancellation during snapshot; worker failure and recovery.');

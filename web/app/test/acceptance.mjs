@@ -27,6 +27,7 @@ try {
   await import('./drawing.mjs');
   await import('./properties.mjs');
   await import('./units.mjs');
+  await import('./simulation.mjs');
   const report = JSON.parse(await readFile(resolve(output, 'roundtrip.json'), 'utf8'));
   const engine = JSON.parse(await readFile(resolve(repo, 'web/engine-adapter/build/manifest.json'), 'utf8'));
   await writeFile(resolve(output, 'gp.json'), JSON.stringify({ gate: 'GP', outcome: 'passed',
@@ -38,8 +39,8 @@ try {
       'explicit-hole underfit rejection and retained failing desktop-reload control', 'UI download, app reimport and pinned desktop serialization/save/reload',
       'opaque XML, script XML, attachments, IDs/references and stored series exact; affected results outdated',
       'exterior SVG vertices match actual desktop geometry; click and keyboard selection', 'length/wall setters, preset effects and clamped setter-event invalidation match desktop'],
-    roundtrip: 'roundtrip.json', interactions: 'interactions.json', drawing: 'drawing-report.json', properties: 'properties-report.json', units: 'units-report.json', g1: 'held',
-    limits: 'Bounded local POC; no simulations, accounts, collaboration, hosted services or full desktop compatibility' }, null, 2) + '\n');
+    roundtrip: 'roundtrip.json', interactions: 'interactions.json', drawing: 'drawing-report.json', properties: 'properties-report.json', units: 'units-report.json', simulation: 'simulation-report.json', g1: 'held',
+    limits: 'GP covers the bounded editor; the separate simulation report covers only the authorized local flight profile. No accounts, collaboration, hosted services or full desktop compatibility.' }, null, 2) + '\n');
   console.log(`GP passed in Chromium; actual UI downloads and desktop evidence: ${output}`);
 } finally {
   server.kill('SIGTERM');

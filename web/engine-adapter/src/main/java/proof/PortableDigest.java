@@ -2,7 +2,12 @@ package proof;
 
 /** MD5-only MessageDigest API bridge for catalog identity, following RFC 1321 section 3. */
 public final class PortableDigest {
+    private final java.io.ByteArrayOutputStream pending = new java.io.ByteArrayOutputStream();
     private PortableDigest() { }
+    public void update(byte[] input) { pending.write(input, 0, input.length); }
+    public byte[] digest() {
+        byte[] input = pending.toByteArray(); pending.reset(); return calculate(input);
+    }
     public static PortableDigest getInstance(String algorithm) {
         if (!"MD5".equals(algorithm)) throw new IllegalArgumentException("Unsupported digest: " + algorithm);
         return new PortableDigest();
@@ -23,7 +28,8 @@ public final class PortableDigest {
         0xf4292244,0x432aff97,0xab9423a7,0xfc93a039,0x655b59c3,0x8f0ccc92,0xffeff47d,0x85845dd1,
         0x6fa87e4f,0xfe2ce6e0,0xa3014314,0x4e0811a1,0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391
     };
-    public byte[] digest(byte[] input) {
+    public byte[] digest(byte[] input) { update(input); return digest(); }
+    private byte[] calculate(byte[] input) {
         int blocks = (input.length + 8) / 64 + 1;
         byte[] padded = new byte[blocks * 64];
         System.arraycopy(input, 0, padded, 0, input.length);

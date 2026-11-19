@@ -41,3 +41,9 @@ summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
 .toolbar select { padding: .6rem .8rem; border: 1px solid #7690a1; border-radius: .3rem; background: white; color: #172b3a; }
 
 .unit-choice { display: flex; flex-direction: column; gap: .3rem; }
+
+.flight-panel { margin: 1.5rem 0; padding: 1.25rem; border: 1px solid #87969e; border-radius: .5rem; background: #fff; }
+.flight-actions { display: flex; gap: .75rem; margin-top: 1rem; }
+.flight-panel code, .flight-panel dd { overflow-wrap: anywhere; }
+.flight-plot { width: 100%; max-width: 800px; height: auto; color: #273740; }
+.flight-plot text { font-size: 13px; fill: currentColor; }

@@ -132,6 +132,8 @@ Exit: G4 covers independent edits, edit/edit, delete/edit, tree/order conflicts,
 
 ### T10 — Simulation/catalog agent: browser numerical workflow
 
+The user explicitly authorizes the bounded local [browser simulation profile](browser-simulation.md) after the editor extension. Full G1, T04/T05, hosted benchmarks and arbitrary desktop compatibility are not prerequisites for that slice. The rest of T10 and G5 retain their broader gates.
+
 Depends on T01 and T06 model contracts. Own future `web/app/simulation/`, result/plot workflows, browser job scheduling, catalog integration, and numerical comparisons. Implement configuration/options, progress/cancellation, motor selection, atmosphere/wind/seed/stepper controls, event/warning display, plots, CSV output, result provenance, stale markers, and optional result upload. Integrate catalog data with version hashes and tested motor-curve semantics.
 
 Exit: G5 covers representative single/multistage/cluster/recovery flights on JVM and browser, both current steppers, fixed seeds, warnings, cancellation, rerun, and edits during a run. Compare full relevant events/series and approved numerical tolerances, plus independent expected cases. Client results remain attributed and do not overwrite another snapshot's output. Do not add cloud simulation infrastructure.

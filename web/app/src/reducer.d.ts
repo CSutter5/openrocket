@@ -8,3 +8,7 @@ declare module '*build/generated/teavm/js/reducer.js' {
   export function resetDeployment(event: string, altitude: number, delay: number, overrides: string, configurations: string, selected: string): string;
   export function digestVector(length: number): string;
 }
+
+declare module '*build/generated/teavm/js/openrocket-g1-engine.js' {
+  export function simulateArchive(input: string, rk6: boolean): string;
+}

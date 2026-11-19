@@ -2,6 +2,8 @@
 
 This is the acceptance framework for the [web application plan](README.md), not a completed parity report. The user has explicitly deferred 100% compatibility, accounts and auth until after the local editor POC. The [POC plan and GP gate](poc-plan.md#gp--poc-acceptance-gate) control that milestone; the full capability matrix and G1/G2–G7 below remain post-POC product requirements. Existing G1 evidence is preserved, and G1 remains held without blocking the bounded POC.
 
+The subsequent user-authorized [browser simulation slice](browser-simulation.md) has its own archive/JVM/Chromium acceptance alongside the retained GP checks. It does not pass the full T10/G5 matrix or close G1.
+
 ## GP: immediate local editor acceptance
 
 Run only the finite [POC acceptance workflow](poc-plan.md#gp--poc-acceptance-gate): actual Chromium import/tree/selection, validated name/radius edits and SVG feedback, rejected-edit preservation, download/reimport and pinned desktop state/serialization checks. Keep relevant codec/source/digest regressions. GP does not require accounts, hosted services, simulations, arbitrary components, broad cross-browser coverage or complete G1 closure. Correctness and opaque-data preservation for supported edits remain mandatory. Record unsupported inputs as explicit limitations rather than silently accepting or rewriting them. GP passed in a clean isolated checkout for the [recorded local editor inputs](poc-acceptance.md); broader product gates remain held.

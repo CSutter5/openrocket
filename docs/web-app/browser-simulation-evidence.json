@@ -1,0 +1,401 @@
+{
+  "date": "2026-11-18",
+  "parentCheckpoint": "83be8bf505e033a9996315336ee4e41442a6e890",
+  "sourceRevision": "33bdb6d3062a6d9ef44a00d1ff865f962136e9e9",
+  "reviewedCoreChanges": [
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/openrocket/importt/WarningHandler.java",
+      "sha256": "e740809a1be554a86448bfb7c02fc65a540e2ff83631582eeb3734655a9a77b3",
+      "commit": "40dd387ce"
+    },
+    {
+      "path": "core/src/main/java/info/openrocket/core/file/motor/RockSimMotorWriter.java",
+      "sha256": "049d8f9f050a994c22f9c159ce590268db72ad2a764397edfcc2759ab8209b57",
+      "commit": "3648d87bd"
+    }
+  ],
+  "adaptedJvmExact": true,
+  "browserEngine": {
+    "sha256": "0beed26c25247937a80411059c543603f9800746f9de75dadfacd2b18a26a699",
+    "bytes": 2788147
+  },
+  "reducer": {
+    "sha256": "0f5d3f2e62f86e61c0459c52f53eabc46d7ef63afa22f8b135f330b268a39692",
+    "bytes": 1955867
+  },
+  "runtimeSourceSha256": {
+    "web/app/public/flight-ready.ork": "c09cedbe2b9d3b0578da3d912a11faf1e3eb087947922facdee9abe992926d07",
+    "web/app/src/simulation/profile.json": "d98fd5608648933d4fdb8fa4736e69f9e96f7e452575905c2299ab29cc41a04d",
+    "web/app/src/simulation/input.ts": "43a4559ba137aa7434cbc70b4523ecc9984777a7c013a0363115730728aa9db0",
+    "web/app/src/simulation/provenance.ts": "cb926711daa3d67e2a2f3266abf9a61a60ad993aaa82f43d49500769d87d612b",
+    "web/app/src/simulation/simulation.worker.ts": "29e8a91c0b1b35680cb8802c838c7d87d057ba2d5424e4cc64e80d6a4dd833e9",
+    "web/app/src/simulation/job.ts": "ccaf2de539b82c90ff1e75f6a69bd02b11817c364b87886cb28f14f4bfc51963",
+    "web/app/src/simulation/FlightPanel.tsx": "a9e8715071eeebc810b57c3e8b905eca8d52265c0738be9a2b2c811526dedd7d",
+    "web/engine-adapter/src/main/java/proof/ImportedFlight.java": "84eb0e992640e596822d80f73bb8561472f76b817cceb95d9b15954e81798676",
+    "web/engine-adapter/src/main/java/proof/PortableDigest.java": "430767cd793f1c32c485e0920c2917e4331ef5458def7c81745b8736f0654363"
+  },
+  "outcome": "passed",
+  "browser": "149.0.7827.55",
+  "comparisons": [
+    {
+      "key": "flight-sample-RK4",
+      "rows": 689,
+      "eventErrors": [
+        [
+          "LAUNCH",
+          0
+        ],
+        [
+          "IGNITION",
+          0
+        ],
+        [
+          "LIFTOFF",
+          0
+        ],
+        [
+          "LAUNCHROD",
+          0
+        ],
+        [
+          "BURNOUT",
+          0
+        ],
+        [
+          "EJECTION_CHARGE",
+          0
+        ],
+        [
+          "RECOVERY_DEVICE_DEPLOYMENT",
+          0
+        ],
+        [
+          "APOGEE",
+          0
+        ],
+        [
+          "GROUND_HIT",
+          2.4101609596982598e-11
+        ],
+        [
+          "SIMULATION_END",
+          2.4101609596982598e-11
+        ]
+      ],
+      "summaryErrors": [
+        7.232756615849212e-10,
+        9.336531547887716e-12,
+        3.547512505974737e-9,
+        2.4101609596982598e-11
+      ],
+      "scalarErrors": {
+        "mass": 0,
+        "cg": 0,
+        "cp": 0
+      },
+      "maxAbsoluteErrors": [
+        6.1384231031524905e-9,
+        3.996341604306508e-7,
+        2.195449440023367e-7,
+        2.5236043654786044e-7
+      ],
+      "columnLimits": [
+        0.001,
+        0.12,
+        0.25,
+        3
+      ],
+      "summaryLimits": [
+        0.001,
+        0.000001,
+        0.001,
+        0.001
+      ],
+      "inputsEqual": true,
+      "completeRocketSerializationEqual": true,
+      "independentMotorAndTubeChecks": true
+    },
+    {
+      "key": "flight-sample-RK6",
+      "rows": 706,
+      "eventErrors": [
+        [
+          "LAUNCH",
+          0
+        ],
+        [
+          "IGNITION",
+          0
+        ],
+        [
+          "LIFTOFF",
+          0
+        ],
+        [
+          "LAUNCHROD",
+          0
+        ],
+        [
+          "BURNOUT",
+          0
+        ],
+        [
+          "EJECTION_CHARGE",
+          0
+        ],
+        [
+          "RECOVERY_DEVICE_DEPLOYMENT",
+          0
+        ],
+        [
+          "APOGEE",
+          0
+        ],
+        [
+          "GROUND_HIT",
+          9.112034149438841e-8
+        ],
+        [
+          "SIMULATION_END",
+          9.112034149438841e-8
+        ]
+      ],
+      "summaryErrors": [
+        0.000004444585613327945,
+        1.861687053406058e-7,
+        0.00002000999623952282,
+        9.112034149438841e-8
+      ],
+      "scalarErrors": {
+        "mass": 0,
+        "cg": 0,
+        "cp": 0
+      },
+      "maxAbsoluteErrors": [
+        0.00007029254108736893,
+        0.00483636548435129,
+        0.002732383406694794,
+        0.002313672393221111
+      ],
+      "columnLimits": [
+        0.001,
+        0.12,
+        0.25,
+        3
+      ],
+      "summaryLimits": [
+        0.001,
+        0.000001,
+        0.001,
+        0.001
+      ],
+      "inputsEqual": true,
+      "completeRocketSerializationEqual": true,
+      "independentMotorAndTubeChecks": true
+    },
+    {
+      "key": "flight-edited-RK4",
+      "rows": 653,
+      "eventErrors": [
+        [
+          "LAUNCH",
+          0
+        ],
+        [
+          "IGNITION",
+          0
+        ],
+        [
+          "LIFTOFF",
+          0
+        ],
+        [
+          "LAUNCHROD",
+          0
+        ],
+        [
+          "BURNOUT",
+          0
+        ],
+        [
+          "APOGEE",
+          1.5068835068632325e-11
+        ],
+        [
+          "EJECTION_CHARGE",
+          0
+        ],
+        [
+          "RECOVERY_DEVICE_DEPLOYMENT",
+          0
+        ],
+        [
+          "GROUND_HIT",
+          7.531752999057062e-13
+        ],
+        [
+          "SIMULATION_END",
+          7.531752999057062e-13
+        ]
+      ],
+      "summaryErrors": [
+        2.2737367544323206e-13,
+        2.842170943040401e-14,
+        1.5068835068632325e-11,
+        7.531752999057062e-13
+      ],
+      "scalarErrors": {
+        "mass": 0,
+        "cg": 0,
+        "cp": 0
+      },
+      "maxAbsoluteErrors": [
+        1.5068835068632325e-11,
+        9.611653695174027e-10,
+        5.267963842925383e-10,
+        4.2009418166344403e-10
+      ],
+      "columnLimits": [
+        0.001,
+        0.12,
+        0.25,
+        3
+      ],
+      "summaryLimits": [
+        0.001,
+        0.000001,
+        0.001,
+        0.001
+      ],
+      "inputsEqual": true,
+      "completeRocketSerializationEqual": true,
+      "independentMotorAndTubeChecks": true
+    },
+    {
+      "key": "flight-edited-RK6",
+      "rows": 667,
+      "eventErrors": [
+        [
+          "LAUNCH",
+          0
+        ],
+        [
+          "IGNITION",
+          0
+        ],
+        [
+          "LIFTOFF",
+          0
+        ],
+        [
+          "LAUNCHROD",
+          0
+        ],
+        [
+          "BURNOUT",
+          0
+        ],
+        [
+          "APOGEE",
+          1.8676784563353976e-9
+        ],
+        [
+          "EJECTION_CHARGE",
+          0
+        ],
+        [
+          "RECOVERY_DEVICE_DEPLOYMENT",
+          0
+        ],
+        [
+          "GROUND_HIT",
+          2.1316282072803006e-12
+        ],
+        [
+          "SIMULATION_END",
+          2.1316282072803006e-12
+        ]
+      ],
+      "summaryErrors": [
+        1.7388401829521172e-10,
+        1.6909496025618864e-10,
+        1.8676784563353976e-9,
+        2.1316282072803006e-12
+      ],
+      "scalarErrors": {
+        "mass": 0,
+        "cg": 0,
+        "cp": 0
+      },
+      "maxAbsoluteErrors": [
+        1.9571291254294465e-9,
+        1.6484455045429058e-7,
+        1.0598728295008186e-7,
+        7.28780420899966e-7
+      ],
+      "columnLimits": [
+        0.001,
+        0.12,
+        0.25,
+        3
+      ],
+      "summaryLimits": [
+        0.001,
+        0.000001,
+        0.001,
+        0.001
+      ],
+      "inputsEqual": true,
+      "completeRocketSerializationEqual": true,
+      "independentMotorAndTubeChecks": true
+    }
+  ],
+  "checks": [
+    "UI configuration, motor, settings, RK4/RK6, summary/plot/events/warnings and SI/inches presentation",
+    "real computing worker termination; page heartbeat; accepted archive unchanged; injected late completion rejected",
+    "accepted physical edit changes simulation input and flight, marks results stale, both edited steppers match JVM",
+    "editing and replacement import during a flight retain accepted state; old completions displayed stale",
+    "startup failure recovery, active-run restart with different settings, superseded/older worker late results cannot overwrite newer result",
+    "supported flight with inert XML comment and opaque binary attachment preserves exact archive after run and cancel",
+    "overrides, materials, fin geometry, positioning, recovery, imported extensions, unknown fields and unresolved/changed motors refuse simulation without blocking file preservation"
+  ],
+  "responsiveness": [
+    {
+      "jobId": 1,
+      "computingPageTicks": 68
+    },
+    {
+      "jobId": 2,
+      "computingPageTicks": 81
+    }
+  ],
+  "cancellation": {
+    "pageTicks": 50,
+    "simulationWorkersTerminated": 3,
+    "documentWorkersTerminated": 0,
+    "computingAcknowledged": true,
+    "noCompletionAfterTermination": true,
+    "lateCompletionRejected": true
+  },
+  "reproducibility": {
+    "cleanOfflineNpmCi": true,
+    "rebuiltProductionAssetsByteIdentical": true,
+    "workspace": {
+      "contracts": 2,
+      "fixtureManifests": 7,
+      "codec": 49,
+      "authenticatedPlatform": 12,
+      "outcome": "passed"
+    },
+    "originalEngineBrowserProof": "passed; RK4 716 rows, RK6 733 rows; unchanged original numerical limits, responsive page and terminated computing worker",
+    "originalReducerWorkerdProof": "passed; 2 projects, 9 invalid inputs, 3 accepted commands and duplicate retry",
+    "devStart": "npm run dev:app --prefix web; ready on 127.0.0.1:5174, HTTP 200; smoke instance stopped; existing 5173 process preserved"
+  },
+  "preservation": {
+    "sessionResultsNeverExported": true,
+    "supportedRunAndCancelBytesEqual": true,
+    "opaqueAttachmentAndCommentBytesEqual": true,
+    "retainedEditorRoundTrips": "passed; opaque XML, scripts as data, attachments, IDs, motor/configuration references, stored series and invalidation, explicit-hole underfit refusal"
+  },
+  "limits": "Exact seven-component flight profile/IDs/configuration and fixed materials/positions/fin/recovery; names and explicit BodyTube dimensions vary. No arbitrary imports, imported simulations/extensions, general stages/clusters/catalogs or hosted compute. Chromium Linux and headless JVM only; G1/G5 held."
+}

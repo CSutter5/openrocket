@@ -5,6 +5,9 @@ import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
+import { flightSupport } from './simulation/input';
+import { bindFlight } from './simulation/provenance';
+
 let archive: ExpandedArchive | undefined;
 let filename = '', exportHash = '';
 function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; after: Intrinsic } {
@@ -22,7 +25,7 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
 function describe(current: ExpandedArchive, name: string, lastExport: string): DocumentView {
   const nodes = current.parsed.components;
   return {
-    drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
+    flightSupport: flightSupport(current), drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
     components: componentNames(current).map((component, index) => {
       const node = nodes[index];
@@ -57,6 +60,13 @@ async function execute(action: Action): Promise<Reply> {
     return { view, notice: 'Archive opened. Original upload retained in memory.' };
   }
   if (!archive) throw new Error('Open an archive first');
+  if (action.type === 'flightSnapshot') {
+    if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before simulation snapshot; run again');
+    const bound = await bindFlight(archive, action.integrator);
+    const exported = await exportArchive(archive);
+    return { view: describe(archive, filename, exportHash), notice: 'Exact accepted archive captured for simulation.',
+      snapshot: { bytes: exported.bytes, provenance: bound.provenance, inputHash: bound.inputHash } };
+  }
   if (action.type === 'export') {
     const exported = await exportArchive(archive);
     const view = describe(archive, filename, exported.identity.archiveHash);

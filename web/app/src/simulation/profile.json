@@ -1,0 +1,769 @@
+{
+  "schema": 1,
+  "configurationId": "00000001-0001-4001-8001-000000000001",
+  "records": {
+    "rocket": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "axialoffset",
+        "position",
+        "designtype",
+        "motorconfiguration",
+        "referencetype",
+        "subcomponents"
+      ]
+    },
+    "rocket/name": {
+      "text": "Synthetic motor flight sample",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/id": {
+      "text": "30000000-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/axialoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "absolute"
+      },
+      "children": []
+    },
+    "rocket/position": {
+      "text": "0.0",
+      "attributes": {
+        "type": "absolute"
+      },
+      "children": []
+    },
+    "rocket/designtype": {
+      "text": "original",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/motorconfiguration": {
+      "text": "",
+      "attributes": {
+        "configid": "00000001-0001-4001-8001-000000000001",
+        "default": "true"
+      },
+      "children": [
+        "stage"
+      ]
+    },
+    "rocket/motorconfiguration/stage": {
+      "text": "",
+      "attributes": {
+        "number": "0",
+        "active": "true"
+      },
+      "children": []
+    },
+    "rocket/referencetype": {
+      "text": "maximum",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "stage"
+      ]
+    },
+    "rocket/subcomponents/stage": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "subcomponents"
+      ]
+    },
+    "rocket/subcomponents/stage/name": {
+      "text": "Sustainer",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/id": {
+      "text": "30000001-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "nosecone",
+        "bodytube"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "finish",
+        "material",
+        "length",
+        "thickness",
+        "shape",
+        "shapeparameter",
+        "aftradius",
+        "aftshoulderradius",
+        "aftshoulderlength",
+        "aftshoulderthickness",
+        "aftshouldercapped",
+        "isflipped"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/name": {
+      "text": "Nose cone",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/id": {
+      "text": "30000002-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/finish": {
+      "text": "normal",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/material": {
+      "text": "Flight bulk",
+      "attributes": {
+        "type": "bulk",
+        "density": "950.0",
+        "group": "Other"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/length": {
+      "text": "0.07",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/thickness": {
+      "text": "0.002",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/shape": {
+      "text": "ogive",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/shapeparameter": {
+      "text": "1.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/aftradius": {
+      "text": "0.012",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/aftshoulderradius": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/aftshoulderlength": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/aftshoulderthickness": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/aftshouldercapped": {
+      "text": "false",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/nosecone/isflipped": {
+      "text": "false",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "finish",
+        "material",
+        "length",
+        "thickness",
+        "radius",
+        "subcomponents"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/name": {
+      "text": "Body tube",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/id": {
+      "text": "30000003-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/finish": {
+      "text": "normal",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/material": {
+      "text": "Flight bulk",
+      "attributes": {
+        "type": "bulk",
+        "density": "950.0",
+        "group": "Other"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/length": {
+      "text": "0.3",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/thickness": {
+      "text": "3.0E-4",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/radius": {
+      "text": "0.012",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "trapezoidfinset",
+        "innertube",
+        "parachute"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "instancecount",
+        "fincount",
+        "radiusoffset",
+        "angleoffset",
+        "rotation",
+        "axialoffset",
+        "position",
+        "finish",
+        "material",
+        "thickness",
+        "crosssection",
+        "cant",
+        "filletradius",
+        "filletmaterial",
+        "rootchord",
+        "tipchord",
+        "sweeplength",
+        "height"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/name": {
+      "text": "Fins",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/id": {
+      "text": "30000004-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/instancecount": {
+      "text": "3",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/fincount": {
+      "text": "3",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/radiusoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "surface"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/angleoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "relative"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/rotation": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/axialoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "bottom"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/position": {
+      "text": "0.0",
+      "attributes": {
+        "type": "bottom"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/finish": {
+      "text": "normal",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/material": {
+      "text": "Flight bulk",
+      "attributes": {
+        "type": "bulk",
+        "density": "950.0",
+        "group": "Other"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/thickness": {
+      "text": "0.003",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/crosssection": {
+      "text": "square",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/cant": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/filletradius": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/filletmaterial": {
+      "text": "Cardboard",
+      "attributes": {
+        "type": "bulk",
+        "density": "680.0",
+        "shearModulus": "4.0E8",
+        "group": "PaperProducts"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/rootchord": {
+      "text": "0.05",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/tipchord": {
+      "text": "0.03",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/sweeplength": {
+      "text": "0.02",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/trapezoidfinset/height": {
+      "text": "0.03",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "axialoffset",
+        "position",
+        "material",
+        "length",
+        "radialposition",
+        "radialdirection",
+        "outerradius",
+        "thickness",
+        "clusterconfiguration",
+        "clusterscale",
+        "clusterrotation",
+        "motormount"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/name": {
+      "text": "Motor mount",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/id": {
+      "text": "30000005-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/axialoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "bottom"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/position": {
+      "text": "0.0",
+      "attributes": {
+        "type": "bottom"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/material": {
+      "text": "Flight bulk",
+      "attributes": {
+        "type": "bulk",
+        "density": "950.0",
+        "group": "Other"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/length": {
+      "text": "0.07",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/radialposition": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/radialdirection": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/outerradius": {
+      "text": "0.0095",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/thickness": {
+      "text": "5.000000000000004E-4",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/clusterconfiguration": {
+      "text": "single",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/clusterscale": {
+      "text": "1.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/clusterrotation": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "ignitionevent",
+        "ignitiondelay",
+        "overhang",
+        "motor",
+        "ignitionconfiguration"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/ignitionevent": {
+      "text": "automatic",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/ignitiondelay": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/overhang": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor": {
+      "text": "",
+      "attributes": {
+        "configid": "00000001-0001-4001-8001-000000000001"
+      },
+      "children": [
+        "type",
+        "manufacturer",
+        "digest",
+        "designation",
+        "diameter",
+        "length",
+        "delay"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/type": {
+      "text": "single",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/manufacturer": {
+      "text": "Estes",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/digest": {
+      "text": "7488ddc81508bcd347794b6c6bb01caf",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/designation": {
+      "text": "C6 synthetic browser proof",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/diameter": {
+      "text": "0.018",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/length": {
+      "text": "0.07",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/motor/delay": {
+      "text": "5.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/ignitionconfiguration": {
+      "text": "",
+      "attributes": {
+        "configid": "00000001-0001-4001-8001-000000000001"
+      },
+      "children": [
+        "ignitionevent",
+        "ignitiondelay"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/ignitionconfiguration/ignitionevent": {
+      "text": "automatic",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/innertube/motormount/ignitionconfiguration/ignitiondelay": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute": {
+      "text": "",
+      "attributes": {},
+      "children": [
+        "name",
+        "id",
+        "axialoffset",
+        "position",
+        "packedlength",
+        "packedradius",
+        "radialposition",
+        "radialdirection",
+        "cd",
+        "material",
+        "deployevent",
+        "deployaltitude",
+        "deploydelay",
+        "diameter",
+        "linecount",
+        "linelength",
+        "linematerial"
+      ]
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/name": {
+      "text": "Parachute",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/id": {
+      "text": "30000006-0000-4000-8000-000000000000",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/axialoffset": {
+      "text": "0.0",
+      "attributes": {
+        "method": "top"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/position": {
+      "text": "0.0",
+      "attributes": {
+        "type": "top"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/packedlength": {
+      "text": "0.025",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/packedradius": {
+      "text": "0.0125",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/radialposition": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/radialdirection": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/cd": {
+      "text": "auto",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/material": {
+      "text": "Flight canopy",
+      "attributes": {
+        "type": "surface",
+        "density": "0.067",
+        "group": "Other"
+      },
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/deployevent": {
+      "text": "ejection",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/deployaltitude": {
+      "text": "200.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/deploydelay": {
+      "text": "0.0",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/diameter": {
+      "text": "0.3",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/linecount": {
+      "text": "6",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/linelength": {
+      "text": "auto",
+      "attributes": {},
+      "children": []
+    },
+    "rocket/subcomponents/stage/subcomponents/bodytube/subcomponents/parachute/linematerial": {
+      "text": "Flight cord",
+      "attributes": {
+        "type": "line",
+        "density": "5.0E-4",
+        "group": "Other"
+      },
+      "children": []
+    }
+  },
+  "motor": {
+    "path": "thrustcurves/7488ddc81508bcd347794b6c6bb01caf.rse",
+    "sha256": "eb12c5e9867ad085f65dbff49ae7bad400f1ac8fd982ef49072203a8be897a86",
+    "digest": "7488ddc81508bcd347794b6c6bb01caf",
+    "rows": [
+      [
+        0.0,
+        0.0,
+        0.024,
+        0.035
+      ],
+      [
+        0.1,
+        12.0,
+        0.0231,
+        0.035
+      ],
+      [
+        0.3,
+        6.0,
+        0.0215,
+        0.035
+      ],
+      [
+        0.5,
+        5.1,
+        0.0202,
+        0.035
+      ],
+      [
+        1.0,
+        4.9,
+        0.0174,
+        0.035
+      ],
+      [
+        1.5,
+        4.8,
+        0.0147,
+        0.035
+      ],
+      [
+        1.85,
+        4.5,
+        0.0133,
+        0.035
+      ],
+      [
+        2.0,
+        0.0,
+        0.0132,
+        0.035
+      ]
+    ]
+  }
+}

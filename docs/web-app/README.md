@@ -1,6 +1,6 @@
 # OpenRocket web application plan
 
-Status: bounded local editor POC and GP passed, November 18, 2026; user demo review is next. See [acceptance evidence](poc-acceptance.md) and the [local run guide](../../web/app/README.md). The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block this explicitly authorized POC slice.
+Status: bounded local editor POC and GP passed, November 18, 2026. The user subsequently authorized the drawing/units extension and the bounded local [browser simulation workflow](browser-simulation.md); see ADR-16/17. See [acceptance evidence](poc-acceptance.md) and the [local run guide](../../web/app/README.md). The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block this explicitly authorized POC slice.
 
 ## Scope and constraints
 

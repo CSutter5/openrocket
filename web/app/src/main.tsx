@@ -8,6 +8,7 @@ import { RocketDrawing } from './RocketDrawing';
 import { Schematic } from './Schematic';
 import {displayLength, lengthInput, lengthLabel, type LengthUnit} from './units';
 import {useLengthInput} from './useLengthInput';
+import { FlightPanel } from './simulation/FlightPanel';
 import './style.css';
 
 function message(error: unknown) { return error instanceof Error ? error.message : String(error); }
@@ -115,6 +116,7 @@ function App() {
     <header><div><p className="eyebrow">OPENROCKET / LOCAL POC</p><h1>Rocket editor</h1></div><span className="badge">Local memory only</span></header>
     <main>
       <section className="toolbar" aria-label="Local files">
+        <button disabled={busy} onClick={() => openSample('flight-ready.ork')}>Open flight-ready sample</button>
         <button disabled={busy} onClick={() => openSample('rocket-sample.ork')}>Open rocket sample</button>
         <button disabled={busy} onClick={() => open(async () => {
           const response = await fetch('/explicit-tube.ork');
@@ -147,6 +149,7 @@ function App() {
           <nav aria-label="Component tree"><h2>Components</h2>{tree()}</nav>
           <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
         </div>
+        <FlightPanel document={document} busy={busy} unit={unit}/>
         <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic unit={unit} component={component}/>}</details>
         <details><summary>Stored results · {document.simulations.length} simulations (not run)</summary>
           <p>Imported series are retained, unverified and never executed. Physical edits mark affected stored results outdated.</p>
@@ -154,7 +157,7 @@ function App() {
         </details>
       </>}
     </main>
-    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Simulations, accounts, collaboration and full compatibility are deferred.</footer>
+    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Flight simulation supports only the explicit flight-ready profile. Accounts, collaboration and full compatibility are deferred.</footer>
   </>;
 }
 createRoot(document.getElementById('root')!).render(<App/>);
