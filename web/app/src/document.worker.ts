@@ -2,8 +2,10 @@ import { sha256, componentNames, renameComponent, importArchive, exportArchive, 
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
 import { tubePropertyInput, applyTubeProperty } from '../../packages/ork-format/src/tube-properties.js';
 import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { createConfiguration, renameConfiguration, deleteConfiguration } from './simulation/configurations';
+import { numeric } from '../../packages/ork-format/src/radius.js';
 import { assignMotor } from './simulation/assign-motor';
-import { resolveCatalogMotors } from './simulation/motor-catalog';
+import { motors, resolveCatalogMotors } from './simulation/motor-catalog';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
@@ -30,7 +32,21 @@ async function describe(current: ExpandedArchive, name: string, lastExport: stri
   const nodes = current.parsed.components;
   try { await resolveCatalogMotors(current); } catch { /* File inspection remains available when catalog assets are unavailable. */ }
   return {
-    motorMounts: nodes.filter(n => n.id && ['bodytube', 'innertube'].includes(n.name) && n.children.some(c => c.name === 'motormount')).map(n => ({ id: n.id!, name: n.label ?? n.name })),
+    motorMounts: nodes.filter(n => n.id && ['bodytube', 'innertube'].includes(n.name) && n.children.some(c => c.name === 'motormount')).map(n => {
+      let diameter: number | undefined, length: number | undefined;
+      const value = (name: string) => numeric(n.children.find(c => c.name === name)?.text.trim() ?? '', name);
+      try { diameter = n.children.find(c => c.name === 'filled')?.text.trim() === 'true' ? 0 : 2 * Math.max(0, value(n.name === 'bodytube' ? 'radius' : 'outerradius') - value('thickness')); } catch { /* Automatic dimensions are not inferred. */ }
+      try { length = value('length'); } catch { /* Missing dimensions leave their fit filter disabled. */ }
+      const matchedGroups: number[] = [];
+      const assignments = n.children.find(c => c.name === 'motormount')!.children.filter(c => c.name === 'motor').map(ref => {
+        const text = (name: string) => ref.children.find(c => c.name === name)?.text.trim();
+        const manufacturer = (text('manufacturer') ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const motor = motors.find(m => m.digest === text('digest') && m.designation.toLowerCase() === text('designation')?.toLowerCase() && m.diameter === Number(text('diameter')) && m.length === Number(text('length')) && m.manufacturerNames.includes(manufacturer));
+        if (motor) matchedGroups.push(motor.group);
+        return { configurationId: ref.attributes.configid?.value ?? '', motorKey: motor?.key, delay: text('delay') ?? 'none' };
+      });
+      return { id: n.id!, name: n.label ?? n.name, diameter, length, usedGroups: [...new Set(matchedGroups)], assignments };
+    }),
     flightSupport: flightSupport(current, configurationId), flightConfigurations: flightConfigurations(current), flightConfigurationId: configurationId, drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
     identitySidecarHash: await sha256(new TextEncoder().encode(JSON.stringify(current.identity))),
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
@@ -90,8 +106,18 @@ async function execute(action: Action): Promise<Reply> {
     exportHash = exported.identity.archiveHash;
     return { view, bytes: exported.bytes, notice: 'Download prepared locally. Check your browser downloads; this is not cloud or durable save confirmation.' };
   }
-  let candidate = archive, notice = 'No change; accepted document retained.';
-  if (action.type === 'assignMotor') {
+  let candidate = archive, nextConfigurationId = selectedConfigurationId, notice = 'No change; accepted document retained.';
+  if (['createConfiguration', 'renameConfiguration', 'deleteConfiguration'].includes(action.type) && archive.identity.archiveHash !== (action as { expectedHash: string }).expectedHash) throw new Error('Document changed before configuration edit; try again');
+  if (action.type === 'createConfiguration') {
+    const created = await createConfiguration(archive, action.name, action.mountId, action.motorKey, action.delay);
+    candidate = created.archive; nextConfigurationId = created.configurationId; notice = 'Configuration and linked simulation created.';
+  } else if (action.type === 'renameConfiguration') {
+    candidate = await renameConfiguration(archive, action.configurationId, action.name); notice = 'Configuration renamed.';
+  } else if (action.type === 'deleteConfiguration') {
+    candidate = await deleteConfiguration(archive, action.configurationId);
+    if (nextConfigurationId === action.configurationId) nextConfigurationId = flightConfigurations(candidate).find(c => c.isDefault)?.id;
+    notice = 'Configuration and linked simulations deleted.';
+  } else if (action.type === 'assignMotor') {
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before motor assignment; choose again');
     candidate = await assignMotor(archive, action.configurationId, action.mountId, action.motorKey, action.delay);
     if (candidate !== archive) notice = 'Motor assigned to the selected configuration. Affected stored results are outdated; existing series retained.';
@@ -120,8 +146,8 @@ async function execute(action: Action): Promise<Reply> {
     candidate = await applyTubeRadius(archive, input, effects.after);
     if (candidate !== archive) notice = `Java radius edit accepted. ${invalidations.length} stored result(s) marked outdated; series retained.`;
   }
-  const view = await describe(candidate, filename, exportHash, selectedConfigurationId);
-  archive = candidate;
+  const view = await describe(candidate, filename, exportHash, nextConfigurationId);
+  archive = candidate; selectedConfigurationId = nextConfigurationId;
   return { view, notice };
 }
 // Serialize asynchronous codec operations; never publish an intermediate candidate.

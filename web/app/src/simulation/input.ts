@@ -10,7 +10,7 @@ const body = 'rocket/subcomponents/stage/subcomponents/bodytube';
 const variable = new Map([['length', [0, 100]], ['radius', [0, 1]], ['thickness', [0, 1]]]);
 export interface FlightInput { model: string; configurationId: string; motorHash: string; materialsHash: string; maxTime: number; kind: 'sample' | 'imported' }
 export type Support = { supported: true; configurationId: string; motor: string; kind: 'sample' | 'imported'; recovery: string; maxTime: number; catalogReferences: string[] } | { supported: false; reason: string };
-export interface FlightConfigurationChoice { id: string; label: string; isDefault: boolean }
+export interface FlightConfigurationChoice { id: string; label: string; name: string; isDefault: boolean }
 export function flightConfigurations(archive: ExpandedArchive): FlightConfigurationChoice[] {
   const configs = archive.parsed.components[0]?.children.filter(n => n.name === 'motorconfiguration') ?? [];
   if (configs.length > 16) return [];
@@ -23,7 +23,7 @@ export function flightConfigurations(archive: ExpandedArchive): FlightConfigurat
       return designation + (delay ? ` · delay ${delay === 'none' ? 'none' : delay + ' s'}` : '');
     }).join(', ') || 'No configured motor';
     const name = n.children.find(c => c.name === 'name')?.text.trim();
-    return { id, label: `${name ? name + ' · ' : ''}${description} · ${id.slice(0, 8)}`, isDefault: n.attributes.default?.value === 'true' };
+    return { id, name: name ?? '', label: `${name ? name + ' · ' : ''}${description}`, isDefault: n.attributes.default?.value === 'true' };
   });
   return choices.some(c => !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(c.id)) || new Set(choices.map(c => c.id)).size !== choices.length ? [] : choices;
 }

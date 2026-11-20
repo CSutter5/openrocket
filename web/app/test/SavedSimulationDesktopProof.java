@@ -17,15 +17,23 @@ public class SavedSimulationDesktopProof {
         var motors=info.openrocket.core.database.motor.ThrustCurveMotorSQLiteDatabase.readDatabase(new File("core/src/main/resources/datafiles/thrustcurves/initial_motors.db"));
         for(var m:motors)database.addMotor(m);
         var doc=new GeneralRocketLoader(new File(args[1])).load();
-        if(args[0].equals("generate")) {
+        if(args[0].equals("generate") || args[0].equals("generate-simple")) {
+            boolean simple=args[0].equals("generate-simple");
             while(doc.getSimulationCount()>0)doc.removeSimulation(0);
             for(int i=0;i<2;i++) {
-                var sim=new Simulation(doc,doc.getRocket());sim.setName(i==0?"Saved low wind":"Saved windy flight");
-                sim.setFlightConfigurationId(i==0?doc.getRocket().getSelectedConfiguration().getFlightConfigurationID():new FlightConfigurationId("90000001-0000-4000-8000-000000000000"));
+                var sim=new Simulation(doc,doc.getRocket());sim.setName(simple?"Simple RK"+(i==0?"4":"6"):i==0?"Saved low wind":"Saved windy flight");
+                sim.setFlightConfigurationId(i==0 || simple?doc.getRocket().getSelectedConfiguration().getFlightConfigurationID():new FlightConfigurationId("90000001-0000-4000-8000-000000000000"));
                 var o=sim.getOptions();o.setLaunchRodLength(1.6+i*.2);o.setLaunchRodAngle(Math.toRadians(5+i));o.setLaunchRodDirection(Math.toRadians(100));o.setLaunchIntoWind(false);
                 o.setLaunchLatitude(41.5);o.setLaunchLongitude(-89.5);o.setLaunchAltitude(100+i*30);o.setISAAtmosphere(true);
                 o.getAverageWindModel().setAverage(1.3+i);o.getAverageWindModel().setDirection(.7);o.getAverageWindModel().setStandardDeviation(.13+i*.1);
                 o.setRandomSeed(197+i);o.setRandomSeedFixed(true);o.setTimeStep(.05);o.setMaxSimulationTime(600);o.setSimulationStepperMethodChoice(i==0?SimulationStepperMethod.RK4:SimulationStepperMethod.RK6);
+                if(simple) {
+                    // Retain the established synthetic-profile inputs when migrating its UI proof to saved rows.
+                    o.setLaunchRodLength(1);o.setLaunchRodAngle(0);o.setLaunchRodDirection(Math.PI/2);
+                    o.setLaunchLatitude(28.61);o.setLaunchLongitude(-80.6);o.setLaunchAltitude(0);
+                    o.getAverageWindModel().setAverage(1);o.getAverageWindModel().setDirection(Math.PI/2);o.getAverageWindModel().setStandardDeviation(.1);
+                    o.setRandomSeed(42);o.setMaxSimulationTime(120);
+                }
                 doc.addSimulation(sim);sim.simulate();
             }
             new GeneralRocketSaver().save(new File(args[2]),doc,ArchiveDesktopProof.options());return;

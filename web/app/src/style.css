@@ -145,12 +145,6 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .window-content details svg { max-height: 250px; }
 .window-footer { display: flex; align-items: center; justify-content: end; gap: .6rem; padding-top: .8rem; margin-top: .75rem; border-top: 1px solid var(--border); }
 .window-footer span { margin-right: auto; color: var(--muted); font-size: .9rem; }
-.motor-selector { width: min(950px, calc(100vw - 32px)); }
-.selector-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.5rem; }
-.selector-layout aside { border-left: 1px solid var(--border); padding-left: 1rem; }
-.selector-layout .table-scroll { margin-top: .75rem; height: 260px; }
-.selector-layout .table-scroll table { white-space: normal; }
-.selector-layout td label { cursor: pointer; }
 .search-field { display: flex; flex-direction: column; gap: .35rem; margin-top: .75rem; }
 @media (min-width: 1900px) { .palette-items button { width: 96px; min-height: 80px; } .palette-group { margin-bottom: 1.25rem; } }
 @media (max-width: 1000px) { .design-panel { grid-template-columns: minmax(200px, 35%) 85px minmax(0, 1fr); } .palette-items { gap: .4rem; } .palette-items button { width: 75px; } .stage-label { display: none !important; } .view-toolbar { gap: .75rem; } .configuration-choice { width: 45%; } }
@@ -161,18 +155,32 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .motor-layout { grid-template-columns: 1fr; } .configuration-info { display: none; }
   .status-bar { flex-direction: column; gap: .2rem; } .status-bar > span { white-space: normal; }
   .window-panel { right: 8px; top: 80px; width: calc(100vw - 16px); max-height: calc(100dvh - 96px); }
-  .property-fields, .property-grid, .selector-layout { grid-template-columns: 1fr; gap: .4rem; }
-  .selector-layout aside { border-left: 0; border-top: 1px solid var(--border); padding: .5rem 0 0; }
+  .property-fields, .property-grid { grid-template-columns: 1fr; gap: .4rem; }
   .drawing-title { flex-wrap: wrap; } .drawing-canvas { height: 260px; }
 }
 .simulation-table tbody tr { cursor: pointer; }
 .simulation-table tr[aria-selected=true] { outline: 1px solid #9bc3fb; outline-offset: -1px; }
 .flight-graph { width: min(1000px, calc(100vw - 32px)); }
 .flight-graph .flight-plot { max-width: none; }
-.picker-tabs { display: flex; gap: .5rem; margin-bottom: .75rem; }
-.picker-tabs button[aria-pressed=true] { background: #345f94; border-color: #9bc3fb; }
-.catalog-filters, .catalog-assignment { display: flex; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
-.catalog-filters label, .catalog-assignment label { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
-.catalog-table { height: 300px; }
+.catalog-assignment { display: flex; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
+.catalog-assignment label { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
 .catalog-table tr { cursor: pointer; }
 .catalog-pagination { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: .5rem 0; }
+.motor-selector { width: min(1250px, calc(100vw - 32px)); }
+.motor-picker-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 1.25rem; }
+.motor-picker-main { min-width: 0; }
+.motor-picker-main .catalog-table { height: 360px; }
+.motor-picker-filters fieldset { border: 1px solid var(--border); padding: .65rem; margin-bottom: .75rem; }
+.motor-picker-filters label:not(.check-row) { display: flex; flex-direction: column; gap: .25rem; font-size: .9rem; }
+.check-row { display: flex; align-items: center; gap: .4rem; margin: .45rem 0; font-size: .9rem; }
+.manufacturer-list { max-height: 150px; overflow: auto; }
+.manufacturer-actions, .name-column { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .4rem 0; }
+.name-column { font-size: .9rem; }
+.range-caption { color: #e0e4ec; text-align: center; margin-bottom: .35rem; }
+.length-range { display: flex; gap: .5rem; }
+.length-range > label { min-width: 0; flex: 1; }
+.configuration-name { display: flex; gap: .75rem; align-items: center; margin-bottom: .5rem; }
+.configuration-name input { flex: 1; }
+.flight-panel { height: 100%; display: flex; flex-direction: column; }
+.flight-panel .simulation-table { flex: 1; max-height: none; }
+@media (max-width: 850px) { .motor-picker-layout { grid-template-columns: 1fr; } .motor-picker-main .catalog-table { height: 260px; } }

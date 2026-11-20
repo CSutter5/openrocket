@@ -4,7 +4,8 @@ import { LIMITS } from '@openrocket/ork-format';
 import { request } from './bridge';
 import type { Action, DocumentView } from './model';
 import { Properties } from './Properties';
-import { ComponentIcon, ComponentPalette, MotorConfigurations, MotorSelector, WindowPanel } from './WorkspacePanels';
+import { MotorSelector } from './MotorSelector';
+import { ComponentIcon, ComponentPalette, MotorConfigurations, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
 import type { LengthUnit } from './units';
 import { FlightPanel } from './simulation/FlightPanel';
@@ -17,7 +18,7 @@ function App() {
   const [unit, setUnit] = useState<LengthUnit>('m');
   const [tab, setTab] = useState('design');
   const [editor, setEditor] = useState(false);
-  const [motorSelector, setMotorSelector] = useState(false);
+  const [motorSelector, setMotorSelector] = useState<'assign' | 'create'>();
   const [help, setHelp] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -128,10 +129,10 @@ function App() {
             <ComponentPalette/>
           </section>
           <section id="panel-motors" role="tabpanel" aria-labelledby="tab-motors" hidden={tab !== 'motors'}>
-            <MotorConfigurations document={document} busy={busy} select={selectConfiguration} openSelector={() => setMotorSelector(true)}/>
+            <MotorConfigurations key={document.identitySidecarHash} document={document} busy={busy} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
           </section>
           <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
-            <FlightPanel document={document} busy={busy} unit={unit} selectConfiguration={selectConfiguration}/>
+            <FlightPanel document={document} busy={busy} unit={unit}/>
           </div>
         </div>
         <div className="splitter" aria-hidden="true">•••</div>
@@ -155,7 +156,7 @@ function App() {
           <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
           <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
         </WindowPanel>}
-        {motorSelector && <MotorSelector key={document.identitySidecarHash} document={document} busy={busy} select={id => { selectConfiguration(id); setMotorSelector(false); }} close={() => setMotorSelector(false)} assign={(configurationId, mountId, motorKey, delay) => perform({ type: 'assignMotor', expectedHash: document.hash, configurationId, mountId, motorKey, delay })}/>}
+        {motorSelector && <MotorSelector key={`${document.identitySidecarHash}:${document.flightConfigurationId}:${motorSelector}`} document={document} busy={busy} creating={motorSelector === 'create'} close={() => setMotorSelector(undefined)} assign={(mountId, motorKey, delay, name) => motorSelector === 'create' ? perform({ type: 'createConfiguration', expectedHash: document.hash, name: name!, mountId, motorKey, delay }) : perform({ type: 'assignMotor', expectedHash: document.hash, configurationId: document.flightConfigurationId!, mountId, motorKey, delay })}/>}
       </>}
       <div className="status-bar"><p role="status">{busy ? 'Working…' : notice}</p><span data-testid="dirty">{document?.dirty ? 'Changed since import / export' : 'No changes since import / export'}</span></div>
     </main>

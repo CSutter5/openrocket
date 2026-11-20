@@ -2,8 +2,8 @@ import data from './motor-index.json' with { type: 'json' };
 import pinned from './motors.json' with { type: 'json' };
 import { sha256, type ExpandedArchive } from '@openrocket/ork-format';
 export interface CatalogMotor {
-  key: string; digest: string; sha256: string; functionalDigest: string; manufacturer: string; designation: string; commonName: string;
-  type: string; diameter: number; length: number; caseInfo: string; impulse: number; burnTime: number; delays: string[];
+  key: string; digest: string; sha256: string; functionalDigest: string; manufacturer: string; manufacturerNames: string[]; designation: string; commonName: string;
+  type: string; diameter: number; length: number; caseInfo: string; group: number; filterImpulse: number; available: boolean; similar: string[]; impulse: number; burnTime: number; delays: string[];
 }
 if (data.sourceSha256 !== pinned.sourceSha256) throw new Error('Browser motor catalog source differs from the pinned database');
 export const motors = data.motors as CatalogMotor[];

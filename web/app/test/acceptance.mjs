@@ -6,8 +6,8 @@ import { resolve } from 'node:path';
 import { output, repo } from './fixtures.mjs';
 assert.ok(process.env.ORK_PROOF_CLASSPATH?.trim(), 'Set ORK_PROOF_CLASSPATH to the documented desktop test runtime classpath');
 await mkdir(output, { recursive: true });
-const url = 'http://127.0.0.1:4173';
-const server = spawn(process.execPath, [resolve(repo, 'web/node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4173', '--strictPort'],
+const port = process.env.ORK_POC_PORT || '4173', url = `http://127.0.0.1:${port}`;
+const server = spawn(process.execPath, [resolve(repo, 'web/node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'],
   { cwd: resolve(repo, 'web/app'), stdio: ['ignore', 'pipe', 'pipe'] });
 let log = '', exited = false;
 server.stdout.on('data', data => { log += data; }); server.stderr.on('data', data => { log += data; });
@@ -28,9 +28,11 @@ try {
   await import('./properties.mjs');
   await import('./units.mjs');
   await import('./simulation.mjs');
-  await import('./imported-flight.mjs');
-  await import('./desktop-ui.mjs');
   await import('./saved-flights.mjs');
+  await import('./imported-flight.mjs');
+  await import('./motor-filters.mjs');
+  await import('./configurations.mjs');
+  await import('./desktop-ui.mjs');
   const report = JSON.parse(await readFile(resolve(output, 'roundtrip.json'), 'utf8'));
   const engine = JSON.parse(await readFile(resolve(repo, 'web/engine-adapter/build/manifest.json'), 'utf8'));
   await writeFile(resolve(output, 'gp.json'), JSON.stringify({ gate: 'GP', outcome: 'passed',

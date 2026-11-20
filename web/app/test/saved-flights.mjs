@@ -54,9 +54,8 @@ try {
   report.checks.push('stored motor configuration and summary columns; double-click opens the exact stored graph');
   async function runRow(index, path = fixture, key = `saved-${index}`) {
     await table.getByRole('button', { name: rows[index].name, exact: true }).click();
-    assert.equal(await page.getByLabel('Flight integrator', { exact: true }).isDisabled(), true);
     await page.getByRole('button', { name: /^(Run|Restart) flight$/, exact: true }).click();
-    if (index === 1) { await page.getByTestId('flight-status').filter({ hasText: 'Running Java' }).waitFor();await table.getByRole('button', { name: rows[0].name, exact: true }).click(); }
+    if (index === 1) { await page.getByTestId('flight-status').filter({ hasText: 'Running flight' }).waitFor();await table.getByRole('button', { name: rows[0].name, exact: true }).click(); }
     await page.getByTestId('flight-status').filter({ hasText: 'Flight completed.' }).waitFor({ timeout: 60000 });
     const result = await page.evaluate(() => window.flights.filter(m => m.type === 'completed').at(-1).result);
     assert.equal(result.provenance.configurationId, rows[index].configurationId);assert.equal(result.provenance.seed, 197 + index);
@@ -69,7 +68,7 @@ try {
   const first = await runRow(0), second = await runRow(1);
   assert.notEqual(first.provenance.simulationId, second.provenance.simulationId);
   await table.getByRole('button', { name: rows[0].name, exact: true }).click();
-  assert.equal(Number(await page.getByTestId('flight-altitude').textContent()), Number(first.flight.summary[0].toFixed(4)));
+  assert.ok((await table.getByRole('row').filter({ hasText: rows[0].name }).innerText()).includes(first.flight.summary[0].toFixed(2)));
   await table.getByRole('button', { name: rows[1].name, exact: true }).dblclick();
   const secondGraph = page.getByRole('dialog', { name: `Flight graph · ${rows[1].name}`, exact: true });
   assert.equal((await secondGraph.locator('polyline').getAttribute('points')).split(' ').length, second.flight.series.length);
@@ -80,11 +79,10 @@ try {
 
   await page.getByRole('tab', { name: 'Motors & Configuration', exact: true }).click();
   await page.getByRole('button', { name: 'Select motor', exact: true }).click();
-  const picker = page.getByRole('dialog', { name: 'Select motor configuration', exact: true });
-  await picker.getByRole('button', { name: 'Motor catalog · 1942 curves', exact: true }).click();
+  const picker = page.getByRole('dialog', { name: 'Select motor', exact: true });
   await picker.getByLabel('Search motors', { exact: true }).fill(motor.designation);
   const target = picker.getByRole('radio', { name: `${motor.manufacturer} ${motor.designation} ${motor.digest.slice(0, 8)}`, exact: true }).first();
-  await target.check();await picker.getByLabel('Assign to configuration', { exact: true }).selectOption(rows[0].configurationId);
+  await target.check();
   await picker.getByLabel('Ejection delay (seconds or none)', { exact: true }).fill('9');
   await page.route(`**/motors/${motor.sha256}.rse`, route => route.fulfill({ status: 200, body: 'invalid curve bytes' }));
   await picker.getByRole('button', { name: 'OK', exact: true }).click();
@@ -120,7 +118,7 @@ try {
   await page.getByLabel('Open local .ork').setInputFiles({ name: 'missing-configuration.ork', mimeType: 'application/octet-stream', buffer: Buffer.from(missing) });
   await page.getByText('missing-configuration.ork', { exact: true }).waitFor();
   await table.getByRole('button', { name: rows[0].name, exact: true }).click();
-  await page.getByTestId('flight-unsupported').filter({ hasText: 'Unknown selected flight configuration' }).waitFor();
+  await page.getByRole('alert').filter({ hasText: 'Unknown selected flight configuration' }).waitFor();
   assert.equal(await page.getByRole('button', { name: 'Run flight', exact: true }).isDisabled(), true);
   assert.deepEqual(await download(), Buffer.from(missing));
   report.checks.push('unresolved saved configuration refuses without using the archived default');
