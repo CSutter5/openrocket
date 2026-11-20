@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ComponentView } from './model';
 import type { Drawing } from './drawing';
-import {lengthLabel, type LengthUnit} from './units';
+import {displayLength, lengthLabel, type LengthUnit} from './units';
 export function RocketDrawing({ drawing, components, selected, select, busy, unit, edit }: {
   drawing: Drawing; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit; edit: () => void;
 }) {
@@ -27,7 +27,7 @@ export function RocketDrawing({ drawing, components, selected, select, busy, uni
       <div ref={canvas} className="drawing-canvas"><svg style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 100}%`, height: `${zoom * 100}%` }} viewBox={`0 0 1000 ${height}`} role="img" aria-label="Rocket exterior side drawing: select a component to edit">
         <defs><pattern id="ruler-ticks" width="20" height="12" patternUnits="userSpaceOnUse"><path d="M0 0V10M10 0V5" stroke="currentColor" strokeWidth=".5"/></pattern></defs>
         <rect x="35" y="0" width="930" height="12" fill="url(#ruler-ticks)"/>
-        {Array.from({ length: 10 }, (_, i) => <text key={i} className="ruler-number" x={50 + i * 100} y="24">{Number((i * 100 / scale / (unit === 'in' ? .0254 : 1)).toPrecision(3))}</text>)}
+        {Array.from({ length: 10 }, (_, i) => <text key={i} className="ruler-number" x={50 + i * 100} y="24">{Number((displayLength(i * 100 / scale, unit)).toPrecision(3))}</text>)}
         <g transform={`translate(0 ${(height + 20) / 2 - 150})`}><line x1="35" x2="965" y1="150" y2="150" stroke="#8298a6" strokeDasharray="5 5"/>
         {drawing.polygons.map((polygon, i) => {
           const index = drawing.componentIndices[polygon.index], component = components[index];

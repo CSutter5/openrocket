@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { request } from '../bridge';
 import type { DocumentView } from '../model';
-import { displayLength, type LengthUnit } from '../units';
+import { displayLength, lengthUnits, type LengthUnit } from '../units';
 import { FlightJob, type JobState } from './job';
 import type { SessionResult } from './provenance';
 import { FlightPlot } from './FlightPlot';
 
-export function FlightPanel({ document, busy, unit }: { document: DocumentView; busy: boolean; unit: LengthUnit }) {
+export function FlightPanel({ document, busy, unit, setUnit }: { document: DocumentView; busy: boolean; unit: LengthUnit; setUnit: (unit: LengthUnit) => void }) {
   const [state, setState] = useState<JobState>({ status: 'idle' });
   const [selected, setSelected] = useState('');
   const [results, setResults] = useState<Record<string, SessionResult>>({});
@@ -43,6 +43,7 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
       <button className="primary" disabled={busy || !saved || !!reason} onClick={run}>{running ? 'Restart flight' : 'Run flight'}</button>
       <button disabled={!saved} onClick={() => setGraph(selected)}>Plot</button>
       <button disabled={!running} onClick={() => job.current!.cancel()}>Cancel flight</button>
+      <label>Simulation units<select aria-label="Simulation units" value={unit} onChange={event => setUnit(event.target.value as LengthUnit)}>{lengthUnits.map(u => <option key={u.id} value={u.id}>{u.label} ({u.id})</option>)}</select></label>
     </div>
     <div className="simulation-table table-scroll"><table><thead><tr><th>Name</th><th>Configuration</th><th>Status</th><th>Apogee ({unit})</th><th>Max. velocity ({unit}/s)</th><th>Time to apogee (s)</th></tr></thead><tbody>
       {document.simulations.map(row => {
@@ -52,12 +53,12 @@ export function FlightPanel({ document, busy, unit }: { document: DocumentView; 
         const status = running && active.current === row.id ? 'Running…' : completed ? current ? 'Completed' : 'Outdated' : row.status === 'not_simulated' ? 'Not run' : row.status === 'outdated' ? 'Outdated' : 'Stored result';
         return <tr key={row.id} aria-selected={selected === row.id} className={selected === row.id ? 'selected-row' : ''} onClick={() => setSelected(row.id)} onDoubleClick={() => { setSelected(row.id); setGraph(row.id); }}>
           <td><button aria-pressed={selected === row.id} onClick={() => setSelected(row.id)}>{row.name}</button></td><td>{label}</td><td>{status}</td>
-          <td>{summary?.[0] != null ? displayLength(summary[0], unit).toFixed(2) : '—'}</td><td>{summary?.[1] != null ? displayLength(summary[1], unit).toFixed(2) : '—'}</td><td>{summary?.[2] != null ? summary[2].toFixed(2) : '—'}</td>
+          <td>{summary?.[0] != null ? displayLength(summary[0], unit).toFixed(unit === 'km' || unit === 'mi' ? 6 : 2) : '—'}</td><td>{summary?.[1] != null ? displayLength(summary[1], unit).toFixed(unit === 'km' || unit === 'mi' ? 6 : 2) : '—'}</td><td>{summary?.[2] != null ? summary[2].toFixed(2) : '—'}</td>
         </tr>;
       })}
     </tbody></table>{!document.simulations.length && <p className="empty-state">No simulations. Create a configuration in Motors &amp; Configuration to add one.</p>}</div>
     {reason && <p role="alert" className="error">{reason}</p>}
     {state.status !== 'idle' && <p role="status" data-testid="flight-status">{state.status === 'starting' ? 'Starting flight…' : state.status === 'running' ? 'Running flight…' : state.status === 'completed' ? 'Flight completed.' : state.status === 'cancelled' ? 'Flight cancelled.' : `Flight failed: ${state.error}`}</p>}
-    {graph && graphSaved && <FlightPlot plots={graphPlots} unit={unit} name={graphSaved.name} source={graphResult ? freshness(graphResult) ? 'Completed flight' : 'Outdated result' : 'Stored flight data'} close={() => setGraph(undefined)}/>}
+    {graph && graphSaved && <FlightPlot plots={graphPlots} unit={unit} setUnit={setUnit} name={graphSaved.name} source={graphResult ? freshness(graphResult) ? 'Completed flight' : 'Outdated result' : 'Stored flight data'} close={() => setGraph(undefined)}/>}
   </section>;
 }

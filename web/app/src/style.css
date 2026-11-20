@@ -201,3 +201,11 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .document-info { grid-area: 4 / 1 / 5 / 2; min-width: 0; }
   .status-bar { grid-area: 4 / 2 / 5 / 3; min-width: 0; }
 }
+
+.flight-toolbar label { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+@media (max-height: 650px) {
+  .flight-toolbar { gap: .35rem; margin-bottom: 0; padding: .3rem; }
+  .flight-toolbar button { padding: .25rem .5rem; }
+  .flight-toolbar label { flex-direction: column; align-items: start; gap: 0; }
+  .flight-toolbar select { width: 130px; padding: .15rem .4rem; }
+}

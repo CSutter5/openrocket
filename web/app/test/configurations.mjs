@@ -35,9 +35,10 @@ try {
   const flightPanel = page.getByRole('region', { name: 'Flight simulations', exact: true });
   assert.equal(await flightPanel.getByRole('row').count(), 3);
   for (const text of ['Session flight', 'Local flight simulation', 'Session-only', 'Run settings', 'Supported flight configuration', 'Motor data resolved']) assert.ok(!(await flightPanel.innerText()).includes(text), text);
-  assert.equal(await flightPanel.getByRole('combobox').count(), 0);
+  assert.equal(await flightPanel.getByRole('combobox').count(), 1);
+  assert.equal(await flightPanel.getByLabel('Simulation units', { exact: true }).inputValue(), 'm');
   assert.equal(await flightPanel.locator('.panel-toolbar button').count(), 3);
-  checks.push('flight tab contains only actual simulations, run/plot/cancel, and relevant status');
+  checks.push('flight tab contains actual simulations, run/plot/cancel, units, and relevant status');
 
   await motorsTab();await page.getByRole('button', { name: 'New configuration', exact: true }).click();
   const picker = page.getByRole('dialog', { name: 'New configuration', exact: true });

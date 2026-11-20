@@ -7,7 +7,7 @@ import { Properties } from './Properties';
 import { MotorSelector } from './MotorSelector';
 import { ComponentIcon, ComponentPalette, MotorConfigurations, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
-import type { LengthUnit } from './units';
+import { lengthUnits, type LengthUnit } from './units';
 import { FlightPanel } from './simulation/FlightPanel';
 import './style.css';
 
@@ -132,14 +132,14 @@ function App() {
             <MotorConfigurations key={document.identitySidecarHash} document={document} busy={busy} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
           </section>
           <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
-            <FlightPanel document={document} busy={busy} unit={unit}/>
+            <FlightPanel document={document} busy={busy} unit={unit} setUnit={setUnit}/>
           </div>
         </div>
         <div className="splitter" aria-hidden="true">•••</div>
         <div className="view-toolbar">
           <div><span>View type</span><strong>Side view</strong></div>
           <div className="unit-choice"><label htmlFor="length-units">Length units</label><select id="length-units" value={unit} disabled={busy} onChange={event => setUnit(event.target.value as LengthUnit)}>
-            <option value="m">Meters (m)</option><option value="in">Inches (in)</option>
+            {lengthUnits.map(u => <option key={u.id} value={u.id}>{u.label} ({u.id})</option>)}
           </select></div>
           <div className="stage-label"><span>Stage</span><strong>{components.find(c => c.type === 'stage')?.name ?? '—'}</strong></div>
           <div className="configuration-choice"><label htmlFor="view-configuration">Flight configuration</label><select id="view-configuration" value={document.flightConfigurationId ?? ''} disabled={busy || !document.flightConfigurations.length} onChange={event => selectConfiguration(event.target.value)}>
