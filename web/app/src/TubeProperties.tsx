@@ -9,7 +9,7 @@ const fields = [
 export function TubeProperties({component,busy,editable,edit,unit}: {component:ComponentView;busy:boolean;editable:boolean;edit:(action:Action)=>void;unit:LengthUnit}) {
   return <section aria-label="Additional tube dimensions"><h3>Additional tube dimensions</h3>
     <div className="property-grid">{fields.map(field => <Property key={field.property} {...field} component={component} busy={busy} editable={editable} edit={edit} unit={unit}/>)}</div>
-    <p className="muted">{component.extraProperties ? 'Java applies each change. Wall thickness is clamped to the radius and makes a filled tube hollow. A length edit retains a known preset; wall changes clear it. Material density remains read-only; catalog/history effects are not yet supported.' : `Read-only: ${component.extraPropertiesReason}`}</p>
+    <p className="muted">{component.extraProperties ? 'Wall thickness is limited to the radius and makes a filled tube hollow. Length retains a preset; wall changes clear it. Material density is read-only.' : `Read-only: ${component.extraPropertiesReason}`}</p>
   </section>;
 }
 function Property({property,label,max,zero,component,busy,editable,edit,unit}: typeof fields[number] & {component:ComponentView;busy:boolean;editable:boolean;edit:(action:Action)=>void;unit:LengthUnit}) {

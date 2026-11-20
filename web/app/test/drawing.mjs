@@ -12,7 +12,7 @@ try {
   const page=await browser.newPage({viewport:{width:1440,height:1100}}), errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(process.env.ORK_POC_URL || 'http://127.0.0.1:5173');
-  await page.getByRole('heading',{name:'Body tube',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Body tube bodytube',exact:true}).waitFor();
   for(const [key,path] of [['sample',resolve(repo,'web/app/public/rocket-sample.ork')],['rich',resolve(output,'explicit/G1-A.ork')]]) {
     if(key!=='sample') await page.getByLabel('Open local .ork').setInputFiles(path);
     const archive=await importArchive(new Uint8Array(await readFile(path))), projection=drawingInput(archive);
@@ -24,7 +24,9 @@ try {
     const polygons=page.getByRole('region',{name:'Rocket drawing'}).locator('polygon');
     await polygons.first().waitFor();
     assert.equal(await polygons.count(),expected.polygons.length);
-    const scale=Math.min(900/(expected.maxX-expected.minX),110/Math.max(expected.radius,.001));
+    const canvas=await page.locator('.drawing-canvas').boundingBox();
+    const viewportHeight=Math.max(80,1000*canvas.height/canvas.width);
+    const scale=Math.min(900/(expected.maxX-expected.minX),(viewportHeight-60)/2/Math.max(expected.radius,.001));
     for(let i=0;i<expected.polygons.length;i++) {
       const points=(await polygons.nth(i).getAttribute('points')).split(' ').map(p=>p.split(',').map(Number));
       assert.equal(points.length,expected.polygons[i].points.length);
@@ -39,9 +41,9 @@ try {
       assert.ok(Math.abs(expected.maxX-.52)<1e-12);
       assert.ok(Math.abs(expected.radius-.0884734)<1e-12);
       await page.getByRole('button',{name:'Select Nose cone in drawing',exact:true}).click();
-      await page.getByRole('heading',{name:'Nose cone',exact:true}).waitFor();
+      assert.equal(await page.getByRole('button',{name:'Nose cone nosecone',exact:true}).getAttribute('aria-pressed'),'true');
       await page.getByRole('button',{name:'Select Fins in drawing',exact:true}).first().focus(); await page.keyboard.press('Enter');
-      await page.getByRole('heading',{name:'Fins',exact:true}).waitFor();
+      assert.equal(await page.getByRole('button',{name:'Fins trapezoidfinset',exact:true}).getAttribute('aria-pressed'),'true');
       await page.getByRole('button',{name:'Select Body tube in drawing',exact:true}).click();
       await page.screenshot({path:resolve(output,'rocket-drawing.png'),fullPage:true});
     }

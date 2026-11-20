@@ -12,7 +12,7 @@ function Plot({ result, unit }: { result: SessionResult; unit: LengthUnit }) {
   return <svg viewBox="0 0 680 265" role="img" aria-label={`Altitude versus time, ${unit}, seconds`} className="flight-plot">
     <title>Altitude versus time · {unit} and seconds</title>
     <path d="M55 30V215H645" fill="none" stroke="currentColor"/>
-    <polyline points={points} fill="none" stroke="#0072b2" strokeWidth="2"/>
+    <polyline points={points} fill="none" stroke="#72b9ee" strokeWidth="2"/>
     <text x="55" y="20">Altitude ({unit}) · peak {displayLength(altitude, unit).toFixed(2)}</text>
     <text x="50" y="235">0</text><text x="580" y="235">{time.toFixed(2)} s</text>
     <text x="300" y="257">Time (s)</text>
@@ -36,6 +36,16 @@ export function FlightPanel({ document, busy, unit, selectConfiguration }: { doc
     } catch (error) { controller.fail(token, error instanceof Error ? error.message : String(error)); }
   }
   return <section className="flight-panel" aria-label="Local flight simulation">
+    <div className="panel-toolbar flight-toolbar">
+      <label htmlFor="flight-stepper">Flight integrator</label>
+      <select id="flight-stepper" value={integrator} onChange={event => setIntegrator(event.target.value as Integrator)}><option>RK4</option><option>RK6</option></select>
+      <button className="primary" disabled={busy || !support.supported} onClick={run}>{running ? 'Restart flight' : 'Run flight'}</button>
+      <button disabled={!running} onClick={() => job.current!.cancel()}>Cancel flight</button>
+    </div>
+    <div className="simulation-table table-scroll"><table><thead><tr><th>Name</th><th>Configuration</th><th>Status</th><th>Apogee ({unit})</th><th>Max. velocity ({unit}/s)</th><th>Time to apogee (s)</th></tr></thead><tbody>
+      {result && <tr className="selected-row"><td>Session flight</td><td>{result.provenance.configurationId.slice(0, 8)}</td><td>{current ? 'Completed · current' : 'Completed · stale'}</td><td>{displayLength(result.flight.summary[0], unit).toFixed(2)}</td><td>{displayLength(result.flight.summary[1], unit).toFixed(2)}</td><td>{result.flight.summary[2].toFixed(2)}</td></tr>}
+      {document.simulations.map((simulation, i) => <tr key={i}><td>{simulation.name}</td><td>Archived</td><td>{simulation.status} · unverified</td><td>—</td><td>—</td><td>—</td></tr>)}
+    </tbody></table>{!result && !document.simulations.length && <p className="empty-state">No flight results yet. Choose a motor configuration and run a flight.</p>}</div>
     <h2>Local flight simulation</h2>
     <p>Session-only browser results. New flights are not written to .ork downloads or imported stored results.</p>
     {!!document.flightConfigurations.length && <>
@@ -52,10 +62,6 @@ export function FlightPanel({ document, busy, unit, selectConfiguration }: { doc
       {support.kind === 'imported' && <p>New session run with the bounded settings below. Saved desktop simulations and custom expression columns are preserved separately and are not evaluated or overwritten.</p>}
       {!!support.catalogReferences.length && <p>Motor data resolved by exact digest from the pinned public catalog. Older embedded curve bytes are preserved. Catalog references: {support.catalogReferences.join(', ')}.</p>}
     </> : <p className="error" data-testid="flight-unsupported">{support.reason}</p>}
-    <label htmlFor="flight-stepper">Flight integrator</label>
-    <select id="flight-stepper" value={integrator} onChange={event => setIntegrator(event.target.value as Integrator)}>
-      <option>RK4</option><option>RK6</option>
-    </select>
     <details><summary>Run settings · bounded and read-only</summary>
       <dl><dt>Random seed</dt><dd>{settings.seed} (deterministic)</dd>
         <dt>Requested time step / maximum duration</dt><dd>{settings.timeStep} s / {support.supported ? support.maxTime : settings.maxTime} s</dd>
@@ -65,10 +71,6 @@ export function FlightPanel({ document, busy, unit, selectConfiguration }: { doc
         <dt>Wind</dt><dd>Seeded pink noise, mean {displayLength(settings.wind, unit)} {unit}/s, deviation {displayLength(settings.windDeviation, unit)} {unit}/s</dd>
       </dl>
     </details>
-    <div className="flight-actions">
-      <button disabled={busy || !support.supported} onClick={run}>{running ? 'Restart flight' : 'Run flight'}</button>
-      <button disabled={!running} onClick={() => job.current!.cancel()}>Cancel flight</button>
-    </div>
     <p role="status" data-testid="flight-status">{state.status === 'starting' ? 'Starting · capturing and validating accepted archive…'
       : state.status === 'running' ? 'Running Java simulation in a separate worker…'
       : state.status === 'completed' ? 'Flight completed.' : state.status === 'cancelled' ? 'Flight cancelled. Simulation worker terminated.'

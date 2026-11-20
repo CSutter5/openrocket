@@ -1,3 +1,4 @@
+import { openProperties } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -12,6 +13,7 @@ const report={outcome:'running',browser:browser.version(),cases:[]};
 try {
  const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.ORK_POC_URL||'http://127.0.0.1:5173');
+  await openProperties(page);
  await page.getByRole('heading',{name:'Body tube',exact:true}).waitFor();
  async function read(path){return importArchive(new Uint8Array(await readFile(path)));}
  async function download(name){const event=page.waitForEvent('download');await page.getByRole('button',{name:'Download .ork',exact:true}).click();const file=await event;assert.equal(await file.failure(),null);const path=resolve(output,name);await file.saveAs(path);return path;}

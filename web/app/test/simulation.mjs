@@ -1,3 +1,4 @@
+import { openSample, openProperties, closeProperties, flights } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -58,9 +59,10 @@ try {
     };
   });
   await page.goto(process.env.ORK_POC_URL || 'http://127.0.0.1:5173');
+  await flights(page);
   const panel=page.getByRole('region',{name:'Local flight simulation'}), status=page.getByTestId('flight-status');
   const result=page.getByTestId('flight-result'), stepper=page.getByLabel('Flight integrator',{exact:true});
-  const open=()=>page.getByRole('button',{name:'Open flight-ready sample',exact:true}).click();
+  const open=()=>openSample(page, 'Open flight-ready sample');
   const run=()=>panel.getByRole('button',{name:/^(Run|Restart) flight$/}).click();
   const complete=()=>status.filter({hasText:'Flight completed.'}).waitFor();
   const latest=()=>page.evaluate(()=>window.flightMessages.filter(m=>m.type==='completed').at(-1).result);
@@ -110,9 +112,11 @@ try {
   report.cancellation=await page.evaluate(start=>({pageTicks:window.pageTicks-start.ticks,simulationWorkersTerminated:window.workerObservations.filter(o=>o.event==='terminate'&&o.flight).length,documentWorkersTerminated:window.workerObservations.filter(o=>o.event==='terminate'&&!o.flight).length,computingAcknowledged:true,noCompletionAfterTermination:true,lateCompletionRejected:true}),cancelStart);
   assert.ok(report.cancellation.pageTicks>0);assert.equal(report.cancellation.documentWorkersTerminated,0);
   report.checks.push('real computing worker termination; page heartbeat; accepted archive unchanged; injected late completion rejected');
+  await openProperties(page);
   await page.getByLabel('BodyTube length (m)',{exact:true}).fill('0.35');
   await page.getByRole('button',{name:'Apply length',exact:true}).click();
   await page.getByTestId('length').filter({hasText:'0.35'}).waitFor();
+  await closeProperties(page);
   await result.getByRole('heading',{name:/Stale session result/}).waitFor();
   const edited=await download('flight-edited.ork');
   for(const integrator of ['RK4','RK6']) {
@@ -123,9 +127,11 @@ try {
     await reference(edited,actual,'flight-edited-'+integrator);assert.deepEqual(await download(),edited);
   }
   report.checks.push('accepted physical edit changes simulation input and flight, marks results stale, both edited steppers match JVM');
+  await openProperties(page);
   await run();await status.filter({hasText:'Running Java'}).waitFor();
   await page.getByLabel('BodyTube length (m)',{exact:true}).fill('0.36');await page.getByRole('button',{name:'Apply length',exact:true}).click();
-  await page.getByTestId('length').filter({hasText:'0.36'}).waitFor();await complete();
+  await page.getByTestId('length').filter({hasText:'0.36'}).waitFor();
+  await closeProperties(page);await complete();
   await result.getByRole('heading',{name:/Stale session result/}).waitFor();
   assert.equal((await latest()).flight.inputs.components.find(c=>c.type==='BodyTube').length,.35);
   const duringEdit=await download('flight-during-edit.ork');
@@ -134,7 +140,7 @@ try {
   const editedInFlight=edits.some(o=>o.type==='tubeProperty'&&o.computing);
   assert.ok(editedInFlight);
   await run();await status.filter({hasText:'Running Java'}).waitFor();
-  await page.getByRole('button',{name:'Open explicit tube sample',exact:true}).click();
+  await openSample(page, 'Open explicit tube sample');
   await complete();await result.getByRole('heading',{name:/Stale session result/}).waitFor();
   assert.ok(await page.evaluate(()=>window.workerObservations.some(o=>o.type==='import'&&o.computing)));
   assert.deepEqual(await download(),await readFile(resolve(repo,'web/app/public/explicit-tube.ork')));

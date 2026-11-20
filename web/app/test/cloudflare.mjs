@@ -1,3 +1,4 @@
+import { openSample, openProperties, closeProperties, flights } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
@@ -44,7 +45,8 @@ try {
   page.on('request', request => requests.push(request.url()));
   page.on('worker', worker => workers.push(worker.url()));
   await page.goto(url);
-  await page.getByRole('button', { name: 'Open explicit tube sample', exact: true }).click();
+  await openSample(page, 'Open explicit tube sample');
+  await openProperties(page);
   await page.getByRole('button', { name: 'Tube bodytube', exact: true }).click();
   await page.getByLabel('Component name', { exact: true }).fill('Cloudflare local tube');
   await page.getByRole('button', { name: 'Apply name', exact: true }).click();
@@ -69,7 +71,9 @@ try {
   assert.equal(await page.getByTestId('radius').textContent(), '0.03');
   assert.deepEqual(await download(), edited);
 
-  await page.getByRole('button', { name: 'Open flight-ready sample', exact: true }).click();
+  await openSample(page, 'Open flight-ready sample');
+  await closeProperties(page);
+  await flights(page);
   const panel = page.getByRole('region', { name: 'Local flight simulation' });
   await panel.getByRole('button', { name: 'Run flight', exact: true }).click();
   await page.getByTestId('flight-status').filter({ hasText: 'Flight completed.' }).waitFor({ timeout: 30000 });

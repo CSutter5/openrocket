@@ -1,3 +1,4 @@
+import { openSample, openProperties } from './workspace.mjs';
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -9,6 +10,7 @@ try {
   const errors=[]; page.on('pageerror', e=>errors.push(e.message));
   const worker=page.waitForEvent('worker');
   await page.goto(process.env.ORK_POC_URL || 'http://127.0.0.1:5173');
+  await openProperties(page);
   const javaWorker = await worker;
   assert.ok(javaWorker.url().includes('document.worker'));
   await mkdir(output, {recursive:true});
@@ -18,7 +20,7 @@ try {
     const download=await event; assert.equal(await download.failure(),null);
     return readFile(await download.path());
   }
-  await page.getByRole('button',{name:'Open explicit tube sample'}).click();
+  await openSample(page, 'Open explicit tube sample');
   await page.getByRole('button',{name:'Tube bodytube',exact:true}).click();
   const value = name=>page.getByTestId(name).textContent();
   assert.equal(await value('radius'),'0.0284734');

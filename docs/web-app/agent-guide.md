@@ -2,6 +2,8 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
+The November 19 UI follow-up adds the [desktop-style browser workspace](desktop-ui.md). It preserves the existing local editor and simulation boundaries; component creation and full catalog editing remain unsupported.
+
 The November 19 follow-up adds [session motor-configuration selection](motor-configuration-selection.md). Development now uses the user-moved local checkout `/home/colin/Documents/openrocket`; the old NAS and `/tmp` checkout paths are historical.
 
 ## Start a task

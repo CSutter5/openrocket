@@ -1,3 +1,4 @@
+import { openProperties, closeProperties, flights } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -44,6 +45,7 @@ try {
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{const Native=Worker;window.replies=[];window.heldFlights=[];window.holdFlights=false;window.ticks=0;setInterval(()=>window.ticks++,10);window.Worker=class extends Native{constructor(url,options){super(url,options);if(String(url).includes('simulation.worker'))this.addEventListener('message',e=>{window.replies.push({...e.data,ticks:window.ticks});if(e.data.type==='completed'&&window.holdFlights){window.heldFlights.push({worker:this,data:e.data});e.stopImmediatePropagation();}});}};});
  await page.goto(process.env.ORK_POC_URL||'http://127.0.0.1:5173');
+  await flights(page);
  await page.getByLabel('Open local .ork').setInputFiles(fixture);await page.getByText('imported-flight.ork',{exact:true}).waitFor();
  assert.equal(await page.getByTestId('flight-unsupported').count(),0);
  await page.getByText(/Saved desktop simulations and custom expression columns/).waitFor();
@@ -91,7 +93,9 @@ try {
  const down=async()=>{const event=page.waitForEvent('download');await page.getByRole('button',{name:'Download .ork',exact:true}).click();return readFile(await (await event).path());};
  assert.deepEqual(await down(),bytes);
  await run();await page.getByTestId('flight-status').filter({hasText:'Running Java'}).waitFor();await page.getByRole('button',{name:'Cancel flight',exact:true}).click();await page.getByTestId('flight-status').filter({hasText:'Flight cancelled'}).waitFor();await setTimeout(200);assert.deepEqual(await down(),bytes);
+ await openProperties(page);
  await page.getByLabel('BodyTube length (m)',{exact:true}).fill('1.25');await page.getByRole('button',{name:'Apply length',exact:true}).click();await page.getByTestId('length').filter({hasText:'1.25'}).waitFor();assert.equal(await configuration.inputValue(),alternateId);await page.getByRole('heading',{name:/Stale session result/}).waitFor();
+ await closeProperties(page);
  const edited=await down(),editedPath=resolve(output,'imported-edited.ork');await writeFile(editedPath,edited);await run();const result=await finished();
  const model=resolve(output,'imported-edited-model.txt'),reference=resolve(output,'imported-edited-jvm.json');await writeFile(model,(await flightInput(await importArchive(new Uint8Array(edited)),alternateId)).model);
  await java('ImportedFlightDesktopProof',['reference',editedPath,model,reference,'true',alternateId],'imported-edited-reference');report.comparisons.push({integrator:'RK6 edited',...compare(JSON.parse(await readFile(reference,'utf8')),result.flight)});

@@ -1,3 +1,4 @@
+import { openSample, openProperties } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -9,7 +10,8 @@ const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXEC
 const report={outcome:'running',browser:browser.version(),checks:[],desktop:[]};
 try {
  const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(process.env.ORK_POC_URL||'http://127.0.0.1:5173');await page.getByRole('heading',{name:'Body tube',exact:true}).waitFor();
+ await page.goto(process.env.ORK_POC_URL||'http://127.0.0.1:5173');
+  await openProperties(page);
  const selector=page.getByLabel('Length units',{exact:true});
  const field=(name,unit)=>page.getByLabel(`${name} (${unit})`,{exact:true});
  const radius=unit=>field('BodyTube outer radius',unit),length=unit=>field('BodyTube length',unit),wall=unit=>field('Wall thickness',unit);
@@ -40,7 +42,7 @@ try {
  await radius('in').fill('NaN');await page.getByRole('button',{name:'Apply radius',exact:true}).click();await page.getByRole('alert').filter({hasText:'finite outer radius'}).waitFor();
  await selector.selectOption('m');assert.equal(await radius('m').inputValue(),'NaN');await page.getByRole('alert').filter({hasText:'1 m.'}).waitFor();
  assert.deepEqual(await readFile(await download('units-invalid.ork')),await readFile(rich));report.checks.push('invalid draft survives switch; validation uses current units and accepted archive retained');
- await selector.selectOption('in');await page.getByRole('button',{name:'Open rocket sample',exact:true}).click();await page.getByRole('status').filter({hasText:'Archive opened'}).waitFor();
+ await selector.selectOption('in');await openSample(page, 'Open rocket sample');await page.getByRole('status').filter({hasText:'Archive opened'}).waitFor();
  let current=sample;const sampleId='20000003-0000-4000-8000-000000000000';
  for(const [property,label,value,metres] of [['length','BodyTube length','20','.508'],['radius','BodyTube outer radius','2','.0508'],['thickness','Wall thickness','.05','.00127']]){
   await field(label,'in').fill(value);await page.getByRole('button',{name:property==='thickness'?'Apply wall thickness':`Apply ${property}`,exact:true}).click();

@@ -1,3 +1,4 @@
+import { openSample, openProperties } from './workspace.mjs';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -12,6 +13,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto(process.env.ORK_POC_URL || 'http://127.0.0.1:5173');
+  await openProperties(page);
   async function download(name) {
     const event = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Download .ork', exact: true }).click();
@@ -63,7 +65,7 @@ try {
     assert.ok(!edited.entries.some(e => e.path.includes('sidecar')));
   }
   const samplePath = resolve(repo, 'web/app/public/explicit-tube.ork'), sample = await read(samplePath);
-  await page.getByRole('button', { name: 'Open explicit tube sample', exact: true }).click();
+  await openSample(page, 'Open explicit tube sample');
   await select('Tube');
   const originalDownload = await download('sample-original.ork');
   assert.deepEqual(await readFile(originalDownload), await readFile(samplePath));

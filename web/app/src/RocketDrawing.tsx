@@ -1,29 +1,47 @@
+import { useEffect, useRef, useState } from 'react';
 import type { ComponentView } from './model';
 import type { Drawing } from './drawing';
 import {lengthLabel, type LengthUnit} from './units';
-export function RocketDrawing({ drawing, components, selected, select, busy, unit }: {
-  drawing: Drawing; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit;
+export function RocketDrawing({ drawing, components, selected, select, busy, unit, edit }: {
+  drawing: Drawing; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit; edit: () => void;
 }) {
-  const scale = Math.min(900 / (drawing.maxX - drawing.minX), 110 / Math.max(drawing.radius, 0.001));
+  const [zoom, setZoom] = useState(1);
+  const canvas = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(300);
+  useEffect(() => {
+    const element = canvas.current;
+    if (!element) return;
+    const resize = () => {
+      const box = element.getBoundingClientRect();
+      if (box.width) setHeight(Math.max(80, 1000 * box.height / box.width));
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(element); resize();
+    return () => observer.disconnect();
+  }, [drawing.error]);
+  const scale = Math.min(900 / (drawing.maxX - drawing.minX), (height - 60) / 2 / Math.max(drawing.radius, 0.001));
   const x = (value: number) => 50 + (value - drawing.minX) * scale;
   const y = (value: number) => 150 - value * scale;
-  return <section className="rocket-drawing" aria-label="Rocket drawing"><div className="drawing-title"><h2>Rocket side view</h2><span>Java geometry · {unit === 'm' ? 'metres' : 'inches'}</span></div>
+  return <section className="rocket-drawing" aria-label="Rocket drawing"><div className="drawing-title"><div><h2>Rocket side view</h2><span>Exterior extent: {lengthLabel(drawing.maxX - drawing.minX, unit)}</span></div><div className="zoom-controls"><button aria-label="Zoom out" disabled={zoom <= 0.5} onClick={() => setZoom(Math.max(.5, zoom - .25))}>−</button><button onClick={() => setZoom(1)}>{Math.round(zoom * 100)}% · Fit</button><button aria-label="Zoom in" disabled={zoom >= 3} onClick={() => setZoom(Math.min(3, zoom + .25))}>+</button></div></div>
     {drawing.error ? <p>{drawing.error}</p> : <>
-      <svg viewBox="0 0 1000 300" role="img" aria-label="Rocket exterior side drawing: select a component to edit">
-        <line x1="35" x2="965" y1="150" y2="150" stroke="#8298a6" strokeDasharray="5 5"/>
+      <div ref={canvas} className="drawing-canvas"><svg style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 100}%`, height: `${zoom * 100}%` }} viewBox={`0 0 1000 ${height}`} role="img" aria-label="Rocket exterior side drawing: select a component to edit">
+        <defs><pattern id="ruler-ticks" width="20" height="12" patternUnits="userSpaceOnUse"><path d="M0 0V10M10 0V5" stroke="currentColor" strokeWidth=".5"/></pattern></defs>
+        <rect x="35" y="0" width="930" height="12" fill="url(#ruler-ticks)"/>
+        {Array.from({ length: 10 }, (_, i) => <text key={i} className="ruler-number" x={50 + i * 100} y="24">{Number((i * 100 / scale / (unit === 'in' ? .0254 : 1)).toPrecision(3))}</text>)}
+        <g transform={`translate(0 ${(height + 20) / 2 - 150})`}><line x1="35" x2="965" y1="150" y2="150" stroke="#8298a6" strokeDasharray="5 5"/>
         {drawing.polygons.map((polygon, i) => {
           const index = drawing.componentIndices[polygon.index], component = components[index];
           return <polygon key={i} data-testid={`rocket-part-${component.id}`} points={polygon.points.map(([a,b]) => `${x(a)},${y(b)}`).join(' ')}
-            fill={selected === index ? '#cce9fa' : component.type === 'trapezoidfinset' ? '#c4d0db' : '#f9fcff'}
-            stroke={selected === index ? '#0072b2' : '#344e60'} strokeWidth={selected === index ? 3 : 1.5}
+            fill={selected === index ? '#344a64' : '#292c32'}
+            stroke={selected === index ? '#90bfff' : '#b7c8e6'} strokeWidth={selected === index ? 3 : 1.5}
             tabIndex={busy ? -1 : 0} role="button" aria-label={`Select ${component.name} in drawing`} aria-pressed={selected === index}
-            onClick={() => !busy && select(index)} onKeyDown={event => { if (!busy && ['Enter',' '].includes(event.key)) { event.preventDefault(); select(index); } }}>
+            onClick={() => !busy && select(index)} onDoubleClick={() => !busy && edit()} onKeyDown={event => { if (!busy && ['Enter',' '].includes(event.key)) { event.preventDefault(); select(index); } }}>
             <title>{component.name} · {component.type}</title>
           </polygon>;
         })}
-        <text x="50" y="280">Exterior extent: {lengthLabel(drawing.maxX-drawing.minX, unit)} · nose at left</text>
-      </svg>
-      <p className="drawing-selection">Selected: <strong>{components[selected]?.name}</strong>. Click the drawing or use the component tree to select a part.</p>
+        </g>
+      </svg></div>
+      <p className="drawing-selection">Selected: <strong>{components[selected]?.name}</strong>. Click to select · Double-click to edit · Enter / Space to select with keyboard.</p>
     </>}
     {!!drawing.omitted.length && <details><summary>Parts omitted from the exterior view ({drawing.omitted.length})</summary><ul>{drawing.omitted.map((text,i) => <li key={i}>{text}</li>)}</ul></details>}
   </section>;

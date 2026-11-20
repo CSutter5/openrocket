@@ -2,63 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LIMITS } from '@openrocket/ork-format';
 import { request } from './bridge';
-import type { Action, ComponentView, DocumentView } from './model';
-import { TubeProperties } from './TubeProperties';
+import type { Action, DocumentView } from './model';
+import { Properties } from './Properties';
+import { ComponentIcon, ComponentPalette, MotorConfigurations, MotorSelector, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
-import { Schematic } from './Schematic';
-import {displayLength, lengthInput, lengthLabel, type LengthUnit} from './units';
-import {useLengthInput} from './useLengthInput';
+import type { LengthUnit } from './units';
 import { FlightPanel } from './simulation/FlightPanel';
 import './style.css';
 
 function message(error: unknown) { return error instanceof Error ? error.message : String(error); }
-function Properties({ component, editable, busy, edit, unit }: {
-  component: ComponentView; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
-}) {
-  const [name, setName] = useState(component.name ?? '');
-  const radius = useLengthInput(component.tube?.state.radius ?? NaN, unit);
-  const [numberError, setNumberError] = useState(false);
-  const tube = component.tube;
-  return <>
-    <h2>{component.name || '(unnamed)'}</h2>
-    <dl><dt>Type</dt><dd>{component.type}</dd><dt>Component ID</dt><dd>{component.id || 'Missing; read-only'}</dd></dl>
-    <form onSubmit={event => { event.preventDefault(); edit({ type: 'rename', id: component.id!, expected: component.name!, value: name }); }}>
-      <label>Component name<input value={name} maxLength={LIMITS.name} disabled={busy || !editable} onChange={e => setName(e.target.value)}/></label>
-      <button disabled={busy || !editable}>Apply name</button>
-    </form>
-    <form noValidate onSubmit={event => {
-      event.preventDefault();
-      const value = radius.metres;
-      if (!Number.isFinite(value) || value <= 0 || value > 1) { setNumberError(true); return; }
-      setNumberError(false); edit({ type: 'radius', id: component.id!, expected: tube!.state.radius, value });
-    }}>
-      <label>BodyTube outer radius ({unit})<input value={radius.text} type="text" inputMode="decimal" aria-describedby="radius-help" aria-invalid={!!numberError} disabled={busy || !tube || !editable} onChange={e => radius.change(e.target.value)}/></label>
-      <button disabled={busy || !tube || !editable}>Apply radius</button>
-      <p id="radius-help" className="muted">{tube ? `Greater than 0, up to ${lengthInput(1, unit)} ${unit}. The Java setter may clamp wall thickness, clear a known preset and invalidate stored results.` : `Read-only: ${component.radiusReason}`}</p>
-      {numberError && <p role="alert" className="error">Enter a finite outer radius greater than 0 and at most {lengthInput(1, unit)} {unit}. Accepted document retained.</p>}
-    </form>
-    {tube && <TubeProperties unit={unit} component={component} editable={editable} busy={busy} edit={edit}/>}
-    {tube && <section aria-label="Java intrinsic measurements"><h3>Java intrinsic measurements</h3>
-      <p className="muted">Per component; excludes mass/CG overrides and motors. These are not whole-rocket values.</p>
-      <dl><dt>Outer radius ({unit})</dt><dd data-testid="radius">{displayLength(tube.state.radius, unit)}</dd>
-        <dt>Wall thickness ({unit})</dt><dd data-testid="thickness">{displayLength(tube.state.thickness, unit)}</dd>
-        <dt>Intrinsic mass (kg)</dt><dd data-testid="mass">{tube.state.mass}</dd>
-        <dt>Local CG ({unit})</dt><dd data-testid="cg">{displayLength(tube.state.cg, unit)}</dd>
-        <dt>Length ({unit})</dt><dd data-testid="length">{displayLength(tube.input.length, unit)}</dd><dt>Density (kg/m³)</dt><dd data-testid="density">{tube.input.density}</dd>
-        <dt>Preset attached</dt><dd>{tube.state.preset ? 'Yes; digest checked' : 'No'}</dd>
-      </dl>
-      {'ring' in tube.state && <p>Automatic ring: outer radius {lengthLabel(tube.state.ring.outerRadius, unit)}; inner radius {lengthLabel(tube.state.ring.innerRadius, unit)}; intrinsic mass {tube.state.ring.mass} kg; local CG {lengthLabel(tube.state.ring.cg, unit)}.</p>}
-    </section>}
-    <details><summary>Imported properties · other values are read-only</summary>
-      <p className="muted">Raw archive values are shown as stored, without inferred units or whole-rocket validation. Unsupported properties are preserved.</p>
-      <dl>{component.properties.map((p, i) => <React.Fragment key={i}><dt>{p.name}</dt><dd>{p.value}</dd></React.Fragment>)}</dl>
-    </details>
-  </>;
-}
 function App() {
   const [document, setDocument] = useState<DocumentView>();
   const [selected, setSelected] = useState(0);
   const [unit, setUnit] = useState<LengthUnit>('m');
+  const [tab, setTab] = useState('design');
+  const [editor, setEditor] = useState(false);
+  const [motorSelector, setMotorSelector] = useState(false);
+  const [help, setHelp] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('Open the bundled sample or a local archive to begin.');
@@ -107,23 +67,37 @@ function App() {
     const children = components.map((n, i) => ({ n, i })).filter(({ n }) => n.parent === parent);
     if (!children.length) return null;
     return <ul>{children.map(({ n, i }) => <li key={i}>
-      <button disabled={busy} aria-pressed={selected === i} onClick={() => { setSelected(i); setError(''); }}>
-        {n.name || '(unnamed)'} <small>{n.type}</small>
+      <button disabled={busy} aria-label={`${n.name || '(unnamed)'} ${n.type}`} aria-pressed={selected === i} onClick={() => { setSelected(i); setError(''); }} onDoubleClick={() => setEditor(true)}>
+        <ComponentIcon type={n.type}/><span>{n.name || '(unnamed)'}</span>
       </button>{tree(i)}
     </li>)}</ul>;
   }
+  function selectConfiguration(configurationId: string) {
+    if (document) void perform({ type: 'flightConfiguration', expectedHash: document.hash, configurationId });
+  }
+  const tabs = [['design', 'Rocket design'], ['motors', 'Motors & Configuration'], ['simulations', 'Flight simulations']];
+  function tabKey(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : -1;
+    if (next < 0) return;
+    event.preventDefault(); setTab(tabs[next][0]); window.document.getElementById(`tab-${tabs[next][0]}`)?.focus();
+  }
   return <>
-    <header><div><p className="eyebrow">OPENROCKET / LOCAL POC</p><h1>Rocket editor</h1></div><span className="badge">Local memory only</span></header>
-    <main>
-      <section className="toolbar" aria-label="Local files">
-        <button disabled={busy} onClick={() => openSample('flight-ready.ork')}>Open flight-ready sample</button>
-        <button disabled={busy} onClick={() => openSample('rocket-sample.ork')}>Open rocket sample</button>
-        <button disabled={busy} onClick={() => open(async () => {
-          const response = await fetch('/explicit-tube.ork');
-          if (!response.ok) throw new Error('Bundled sample unavailable');
-          return new Uint8Array(await response.arrayBuffer());
-        }, 'explicit-tube.ork')}>Open explicit tube sample</button>
-        <label>Open local .ork <input type="file" accept=".ork" disabled={busy} onChange={event => {
+    <header className="app-header">
+      <div className="menu-bar">
+        <details className="file-menu" onKeyDown={event => {
+          if (event.key === 'Escape') { event.currentTarget.removeAttribute('open'); event.currentTarget.querySelector('summary')?.focus(); }
+        }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.removeAttribute('open'); }}><summary>File</summary><div className="menu-popup" onClick={event => event.currentTarget.closest('details')?.removeAttribute('open')}>
+          <button disabled={busy} onClick={() => openSample('rocket-sample.ork')}>Open rocket sample</button>
+          <button disabled={busy} onClick={() => openSample('flight-ready.ork')}>Open flight-ready sample</button>
+          <button disabled={busy} onClick={() => openSample('explicit-tube.ork')}>Open explicit tube sample</button>
+          <p>Opening a file replaces this browser session.</p>
+        </div></details>
+        <button disabled={!component} onClick={() => setEditor(true)}>Edit component</button>
+        <button onClick={() => setHelp(true)}>Help</button>
+        <span className="app-name">OpenRocket <span>Web</span></span>
+      </div>
+      <div className="file-toolbar" aria-label="Local files">
+        <label className="file-open">Open local .ork<input type="file" accept=".ork" disabled={busy} onChange={event => {
           const file = event.target.files?.[0]; event.target.value = '';
           if (file) void open(async () => {
             if (file.size > LIMITS.upload) throw new Error('File exceeds the 4 MiB upload limit');
@@ -131,33 +105,66 @@ function App() {
           }, file.name);
         }}/></label>
         <button disabled={busy || !document} onClick={download}>Download .ork</button>
-        <div className="unit-choice"><label htmlFor="length-units">Length units</label><select id="length-units" value={unit} disabled={busy} onChange={event => setUnit(event.target.value as LengthUnit)}>
-          <option value="m">Meters (m)</option><option value="in">Inches (in)</option>
-        </select></div>
-      </section>
-      <p className="muted">One document, one browser. Opening another file or reloading discards this session, including changes. No account or backend is used.</p>
-      {error && <p role="alert" className="error">{error}</p>}
-      <p role="status">{busy ? 'Working in the document worker…' : notice}</p>
+        <strong className="filename">{document?.filename ?? 'Opening rocket…'}</strong>
+        <span className="session-label">Local session</span>
+      </div>
+      <div className="workspace-tabs" role="tablist" aria-label="Rocket workspace">
+        {tabs.map(([id, label], index) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={tab === id} aria-controls={`panel-${id}`} tabIndex={tab === id ? 0 : -1} onKeyDown={event => tabKey(event, index)} onClick={() => setTab(id)}>{label}</button>)}
+      </div>
+    </header>
+    <main>
+      {error && <p role="alert" className="error app-error">{error}</p>}
       {document && <>
-        <div className="document-status"><strong>{document.filename}</strong><span>{components.length} components</span>
-          <strong data-testid="dirty">{document.dirty ? 'Changed since import / export' : 'No changes since import / export'}</strong>
-          <span>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}</span>
+        <div className="upper-workspace">
+          <section id="panel-design" role="tabpanel" aria-labelledby="tab-design" hidden={tab !== 'design'} className="design-panel">
+            <nav aria-label="Component tree" className="component-tree"><h2>Rocket</h2>{tree()}</nav>
+            <div className="tree-actions">
+              <button disabled title="Component reordering is not supported yet">Move up</button>
+              <button disabled title="Component reordering is not supported yet">Move down</button>
+              <button disabled={busy || !component} onClick={() => setEditor(true)}>Edit</button>
+              <button disabled title="Component duplication is not supported yet">Duplicate</button>
+              <button disabled title="Component deletion is not supported yet">Delete</button>
+            </div>
+            <ComponentPalette/>
+          </section>
+          <section id="panel-motors" role="tabpanel" aria-labelledby="tab-motors" hidden={tab !== 'motors'}>
+            <MotorConfigurations document={document} busy={busy} select={selectConfiguration} openSelector={() => setMotorSelector(true)}/>
+          </section>
+          <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
+            <FlightPanel document={document} busy={busy} unit={unit} selectConfiguration={selectConfiguration}/>
+          </div>
         </div>
-        {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
-        <RocketDrawing unit={unit} drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }}/>
-        <div className="workspace">
-          <nav aria-label="Component tree"><h2>Components</h2>{tree()}</nav>
-          <section aria-label="Component properties">{component && <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>}</section>
+        <div className="splitter" aria-hidden="true">•••</div>
+        <div className="view-toolbar">
+          <div><span>View type</span><strong>Side view</strong></div>
+          <div className="unit-choice"><label htmlFor="length-units">Length units</label><select id="length-units" value={unit} disabled={busy} onChange={event => setUnit(event.target.value as LengthUnit)}>
+            <option value="m">Meters (m)</option><option value="in">Inches (in)</option>
+          </select></div>
+          <div className="stage-label"><span>Stage</span><strong>{components.find(c => c.type === 'stage')?.name ?? '—'}</strong></div>
+          <div className="configuration-choice"><label htmlFor="view-configuration">Flight configuration</label><select id="view-configuration" value={document.flightConfigurationId ?? ''} disabled={busy || !document.flightConfigurations.length} onChange={event => selectConfiguration(event.target.value)}>
+            {!document.flightConfigurations.length && <option value="">No motor configuration</option>}
+            {document.flightConfigurations.map(c => <option key={c.id} value={c.id}>{c.label}{c.isDefault ? ' · archived default' : ''}</option>)}
+          </select></div>
         </div>
-        <FlightPanel document={document} busy={busy} unit={unit} selectConfiguration={configurationId => perform({ type: 'flightConfiguration', expectedHash: document.hash, configurationId })}/>
-        <details className="preview"><summary>Selected tube measurements and local schematic</summary>{component && <Schematic unit={unit} component={component}/>}</details>
-        <details><summary>Stored results · {document.simulations.length} simulations (not run)</summary>
-          <p>Imported series are retained, unverified and never executed. Physical edits mark affected stored results outdated.</p>
-          <ul>{document.simulations.map((s, i) => <li key={i}>{s.name}: {s.status}</li>)}</ul>
+        <RocketDrawing unit={unit} drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }} edit={() => setEditor(true)}/>
+        <details className="document-info" open={document.mode === 'preservation'}><summary>Document information · {components.length} components{document.diagnostics.length ? ` · ${document.diagnostics.length} notices` : ''}</summary>
+          <p>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
+          {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
         </details>
+        {editor && component && <WindowPanel title="Component editor" close={() => { setEditor(false); }}>
+          <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
+          <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
+        </WindowPanel>}
+        {motorSelector && <MotorSelector key={document.identitySidecarHash} document={document} busy={busy} select={id => { selectConfiguration(id); setMotorSelector(false); }} close={() => setMotorSelector(false)}/>}
       </>}
+      <div className="status-bar"><p role="status">{busy ? 'Working…' : notice}</p><span data-testid="dirty">{document?.dirty ? 'Changed since import / export' : 'No changes since import / export'}</span></div>
     </main>
-    <footer>Supported geometry: explicit BodyTube scalars accepted by the existing archive projection, the G1-A/G1-B digest-checked proof presets and bounded one-ring dependency. Other properties and shapes are read-only. Flight simulation supports bounded single-stage configurations. Accounts, collaboration and full compatibility are deferred.</footer>
+    {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
+      <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
+      <p>Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session. Flight results stay in the session and are not written to downloads.</p>
+      <p>Supported tube dimensions and names can be edited. Structural editing, a full motor catalog, 3D, accounts and collaboration are not yet available.</p>
+      <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
+    </WindowPanel>}
   </>;
 }
 createRoot(document.getElementById('root')!).render(<App/>);
