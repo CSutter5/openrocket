@@ -6,12 +6,14 @@ import { TubeProperties } from './TubeProperties';
 import { Schematic } from './Schematic';
 import { displayLength, lengthInput, lengthLabel, type LengthUnit } from './units';
 import { useLengthInput } from './useLengthInput';
+import { useEditorUnit } from './QuantityInput';
 
 export function Properties({ component, expectedHash, editable, busy, edit, unit }: {
   component: ComponentView; expectedHash: string; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
 }) {
   const [name, setName] = useState(component.name ?? '');
-  const radius = useLengthInput(component.tube?.state.radius ?? NaN, unit);
+  const selectedUnit = useEditorUnit('quick-radius', 'length'), radiusUnit = selectedUnit.unit as LengthUnit;
+  const radius = useLengthInput(component.tube?.state.radius ?? NaN, radiusUnit);
   const [numberError, setNumberError] = useState(false);
   const tube = component.tube;
   const imported = <ImportedProperties component={component} expectedHash={expectedHash} editable={editable} busy={busy} edit={edit}/>;
@@ -31,10 +33,11 @@ export function Properties({ component, expectedHash, editable, busy, edit, unit
       if (!Number.isFinite(value) || value <= 0 || value > 1) { setNumberError(true); return; }
       setNumberError(false); edit({ type: 'radius', id: component.id!, expected: tube!.state.radius, value });
     }}>
-      <label>BodyTube outer radius ({unit})<input value={radius.text} type="text" inputMode="decimal" aria-describedby="radius-help" aria-invalid={!!numberError} disabled={busy || !tube || !editable} onChange={e => radius.change(e.target.value)}/></label>
+      <label>BodyTube outer radius ({radiusUnit})<input value={radius.text} type="text" inputMode="decimal" aria-describedby="radius-help" aria-invalid={!!numberError} disabled={busy || !tube || !editable} onChange={e => radius.change(e.target.value)}/></label>
+      <select aria-label="Quick outer radius unit" value={radiusUnit} disabled={busy || !tube || !editable} onChange={event => selectedUnit.choose(event.target.value)}>{selectedUnit.options.map(u => <option key={u.id} value={u.id}>{u.label}</option>)}</select>
       <button disabled={busy || !tube || !editable}>Apply radius</button>
-      <p id="radius-help" className="muted">{tube ? `Greater than 0, up to ${lengthInput(1, unit)} ${unit}. Changing radius may clamp the wall, clear a preset and mark stored flights outdated.` : `Read-only: ${component.radiusReason}`}</p>
-      {numberError && <p role="alert" className="error">Enter a finite outer radius greater than 0 and at most {lengthInput(1, unit)} {unit}. Accepted document retained.</p>}
+      <p id="radius-help" className="muted">{tube ? `Greater than 0, up to ${lengthInput(1, radiusUnit)} ${radiusUnit}. Changing radius may clamp the wall, clear a preset and mark stored flights outdated.` : `Read-only: ${component.radiusReason}`}</p>
+      {numberError && <p role="alert" className="error">Enter a finite outer radius greater than 0 and at most {lengthInput(1, radiusUnit)} {radiusUnit}. Accepted document retained.</p>}
     </form>
     {tube && <TubeProperties unit={unit} component={component} editable={editable} busy={busy} edit={edit}/>}
     </div>{tube && <section aria-label="Component measurements"><h3>Component measurements</h3>

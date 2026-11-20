@@ -1,5 +1,6 @@
 import type { TubeRadiusInput, IntrinsicTubeState, PresetTubeState, AutomaticRingTubeState } from '../../packages/ork-format/src/radius.js';
 export type Intrinsic = IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState;
+export interface ComponentPropertyChange { key?: number; name: string; value: string; attributes: Record<string, string>; remove?: boolean }
 export interface ComponentView {
   id?: string; name?: string; type: string; parent: number;
   properties: { key: number; name: string; value: string; attributes: Record<string, string> }[];
@@ -22,6 +23,7 @@ export type Action =
   | { type: 'new' }
   | { type: 'addComponent'; expectedHash: string; selectedId: string; componentType: string; position: 'after' | 'end' }
   | { type: 'componentProperty'; expectedHash: string; id: string; key: number; value: string; attributes: Record<string, string> }
+  | { type: 'componentProperties'; expectedHash: string; id: string; name: string; changes: ComponentPropertyChange[] }
   | { type: 'componentTree'; expectedHash: string; id: string; operation: 'up' | 'down' | 'duplicate' | 'delete' }
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }

@@ -217,3 +217,62 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .imported-property label { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .45rem; }
 .imported-property input, .imported-property select, .imported-property textarea { width: 100%; min-width: 0; }
 .imported-property textarea { resize: vertical; background: #252930; color: #e0e4ec; font: inherit; }
+.quantity-input { display: flex; gap: .35rem; min-width: 0; }
+.quantity-input > input { flex: 1; width: 5rem; min-width: 0; }
+.quantity-input > select { flex: none; width: 5rem; padding: .15rem .25rem; }
+.component-editor-window { width: min(880px, calc(100vw - 32px)); }
+.component-editor-window .window-content { padding: .65rem .6rem 0; display: flex; flex-direction: column; overflow: hidden; }
+.native-editor { display: flex; flex-direction: column; min-height: min(490px, 70dvh); max-height: calc(88dvh - 54px); width: 100%; }
+.native-name { display: flex; flex: none; align-items: center; gap: .55rem; margin-bottom: .7rem; }
+.native-name > input { flex: 1; min-width: 0; padding: .15rem .4rem; }
+.component-tabs { display: flex; flex: none; flex-wrap: wrap; border-bottom: 1px solid #41464f; margin-bottom: .65rem; }
+.component-tabs button { border: 0; border-right: 1px solid #343942; border-radius: 0; background: none; padding: .55rem .85rem; color: #abb3c0; }
+.component-tabs button[aria-selected=true] { background: #303640; border-bottom: 3px solid #929aa7; color: #e0e4ec; padding-bottom: calc(.55rem - 3px); }
+.native-tab-content { flex: 1; min-width: 0; min-height: 0; overflow: auto; }
+.native-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.07fr); gap: 1.3rem; }
+.native-field { margin-bottom: .65rem; min-width: 0; }
+.native-row { display: grid; grid-template-columns: minmax(110px, 1.1fr) minmax(0, 1.15fr) minmax(55px, .65fr); align-items: center; gap: .55rem; }
+.native-row > label { color: #b6becb; }
+.native-row > input:not([type=range]) { width: 5.3rem; }
+.native-row input:not([type=range]), .native-row select { padding: .13rem .3rem; height: 1.7rem; }
+.native-row .quantity-input > select { width: 4.3rem; font-size: .9rem; }
+.native-row .quantity-input > input { width: 4rem; }
+.native-slider { min-width: 0; width: 100%; accent-color: #568fec; padding: 0; margin: 0; height: 1rem; border: 0; background: none; }
+.native-row-option { margin: .15rem 0 0 36%; }
+.native-check { display: flex; align-items: center; gap: .35rem; color: #adb6c4; margin: .3rem 0; }
+.native-check input { margin: 0; accent-color: #568fec; }
+.native-choice { display: flex; align-items: center; gap: .5rem; margin: .3rem 0 .75rem; min-width: 0; }
+.native-choice > span { flex: none; }
+.native-choice > select { min-width: 0; flex: 1; padding: .15rem .4rem; }
+.native-stacked { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .65rem; min-width: 0; }
+.native-stacked > input, .native-stacked > select { width: 100%; padding: .15rem .4rem; }
+.native-group { border: 1px solid #373d45; padding: .55rem .65rem; margin: 0 0 .85rem; min-width: 0; }
+.native-group legend { color: #afb8c6; padding: 0 .3rem; }
+.native-group .native-row { grid-template-columns: minmax(95px, .9fr) minmax(0, 1.2fr) minmax(45px, .6fr); }
+.native-group .native-group { padding: 0; margin-bottom: 0; border: 0; }
+.native-group .native-choice { flex-direction: column; align-items: stretch; gap: .35rem; }
+.native-group .native-choice > select { flex: auto; }
+.native-group .native-check { margin-bottom: .4rem; }
+.native-group .material-properties { font-size: .92rem; border-top: 0; margin-top: .35rem; }
+.material-properties > summary { color: #a7b1c0; cursor: pointer; padding: .25rem 0; }
+.material-properties .native-row { grid-template-columns: minmax(90px, 1fr) minmax(0, 1.4fr); }
+.material-properties .quantity-input > select { width: 6.5rem; }
+.nose-description { border: 1px solid #737b89; padding: .5rem; font-size: .92rem; color: #b6bfcd; margin-bottom: 1rem; }
+.native-overrides { display: grid; gap: .4rem; }
+.native-overrides .native-row { grid-template-columns: 13rem minmax(0, 210px); }
+.native-stacked > textarea { min-height: 260px; resize: vertical; background: #252930; color: #e0e4ec; font: inherit; padding: .5rem; border: 1px solid var(--border); }
+.native-editor-footer { display: flex; align-items: center; gap: .5rem; padding: .65rem 0; margin-top: 1rem; flex: none; }
+.native-editor-footer > button { min-width: 5.2rem; padding: .18rem .6rem; }
+.component-mass { display: flex; align-items: center; gap: .6rem; margin-right: auto; font-size: .88rem; color: #b4bdcb; }
+.info-icon { border: 1px solid #83b8ff; color: #83b8ff; border-radius: 50%; width: 1.4rem; height: 1.4rem; display: inline-flex; align-items: center; justify-content: center; font-style: italic; }
+@media (max-width: 700px) {
+  .component-editor-window { width: calc(100vw - 16px); }
+  .native-columns { grid-template-columns: minmax(0, 1fr); gap: .8rem; }
+  .native-name { align-items: stretch; flex-direction: column; }
+  .component-tabs button { padding: .45rem .6rem; }
+  .native-row { grid-template-columns: minmax(95px, 1fr) minmax(0, 1.15fr) 60px; }
+  .native-group .native-row { grid-template-columns: minmax(90px, 1fr) minmax(0, 1.2fr) 45px; }
+  .native-overrides .native-row { grid-template-columns: 1fr minmax(0, 155px); }
+  .native-editor-footer { flex-wrap: wrap; }
+  .component-mass { flex: 1 0 100%; }
+}

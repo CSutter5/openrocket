@@ -9,7 +9,7 @@ import { motors, resolveCatalogMotors } from './simulation/motor-catalog';
 import { stability } from '../../engine-adapter/build/generated/teavm/js/openrocket-g1-engine.js';
 import { importedInput } from './simulation/imported';
 import { editComponentTree } from './component-tree';
-import { editComponentProperty } from './component-properties';
+import { editComponentProperty, editComponentProperties } from './component-properties';
 import { addComponent, newRocket } from './components';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
@@ -119,9 +119,20 @@ async function execute(action: Action): Promise<Reply> {
   let candidate = archive, nextConfigurationId = selectedConfigurationId, notice = 'No change; accepted document retained.';
   if (['createConfiguration', 'renameConfiguration', 'deleteConfiguration'].includes(action.type) && archive.identity.archiveHash !== (action as { expectedHash: string }).expectedHash) throw new Error('Document changed before configuration edit; try again');
   let selectedId: string | undefined;
-  if (action.type === 'componentProperty' || action.type === 'componentTree') {
+  if (action.type === 'componentProperty' || action.type === 'componentProperties' || action.type === 'componentTree') {
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before component edit; try again');
-    if (action.type === 'componentProperty') {
+    if (action.type === 'componentProperties') {
+      candidate = await editComponentProperties(archive, action.id, action.changes);
+      const radius = action.changes.find(change => change.name === 'radius' && !change.remove);
+      if (radius && Number.isFinite(Number(radius.value)) && archive.parsed.components.find(n => n.id === action.id)?.name === 'bodytube') {
+        let input: TubeRadiusInput | undefined;
+        try { input = tubeRadiusInput(archive, action.id); } catch { /* Automatic/unsupported graphs retain the raw editing boundary. */ }
+        if (input) validateTubeRadiusEdit(archive, input, intrinsic(input, Number(radius.value)).after);
+      }
+      const currentName = componentNames(candidate).find(n => n.id === action.id)?.name;
+      if (currentName !== action.name) candidate = await renameComponent(candidate, action.id, currentName!, action.name);
+      if (candidate !== archive) notice = 'Component updated.';
+    } else if (action.type === 'componentProperty') {
       candidate = await editComponentProperty(archive, action.id, action.key, action.value, action.attributes);
       const component = archive.parsed.components.find(n => n.id === action.id);
       if (candidate !== archive && component?.name === 'bodytube' && component.children[action.key]?.name === 'radius' && Number.isFinite(Number(action.value))) {

@@ -1,7 +1,8 @@
 import type { ExpandedArchive } from '@openrocket/ork-format';
 import { radiusEdit, tubePropertyEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { fieldRule, attributeChoices } from './components';
-import { editArchive, element, componentResultChanges, type Span } from './archive-edit';
+import { editArchive, element, escapeXml, componentResultChanges, type Span } from './archive-edit';
+import type { ComponentPropertyChange } from './model';
 
 const decimal = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
 const signed = new Set(['axialoffset', 'position', 'radialdirection', 'angleoffset', 'radiusoffset', 'rotation', 'clusterrotation', 'sweeplength', 'cant', 'overridecg', 'tabposition', 'deployaltitude', 'separationaltitude']);
@@ -78,6 +79,11 @@ export async function editComponentProperty(archive: ExpandedArchive, id: string
     replace(alias, normalized, attrs);
   }
   if (component.name === 'tubefinset') for (const duplicate of component.children.filter(n => n !== field && n.name === field.name)) replace(duplicate, normalized, attributes);
+  if (field.name === 'tabposition') {
+    const modern: Record<string, string> = { front: 'top', center: 'middle', end: 'bottom' }, legacy: Record<string, string> = { top: 'front', middle: 'center', bottom: 'end' };
+    const method = modern[attributes.relativeto] ?? attributes.relativeto;
+    for (const duplicate of component.children.filter(n => n !== field && n.name === 'tabposition')) replace(duplicate, normalized, { ...Object.fromEntries(Object.entries(duplicate.attributes).map(([key, attr]) => [key, attr.value])), relativeto: modern[duplicate.attributes.relativeto?.value] ? legacy[method] : method });
+  }
   const physical = !presentation.has(field.name);
   const clearsPreset = fieldRule(component.name, field.name)?.kind === 'MaterialSetter' || /^(?:length|thickness|radius|outerradius|innerradius|shape|shapeparameter|isflipped|(?:fore|aft)shoulder(?:radius|length|thickness|capped)|diameter|linecount|linelength|striplength|stripwidth)$/.test(field.name);
   if (clearsPreset && !(component.name === 'bodytube' && field.name === 'length')) {
@@ -85,4 +91,34 @@ export async function editComponentProperty(archive: ExpandedArchive, id: string
   }
   if (physical) for (const status of componentResultChanges(archive)) spans.set(status.start, status);
   return editArchive(archive, [...spans.values()]);
+}
+
+const optionalFields = new Set(['comment', 'overridemass', 'overridecg', 'overridecd', 'overridesubcomponentsmass', 'overridesubcomponentscg', 'overridesubcomponentscd', 'color', 'linestyle', 'finish', 'cant', 'crosssection', 'isflipped', 'shapeparameter', 'shapeclipped', 'tablength', 'tabheight', 'tabposition', 'filletradius', 'filletmaterial', 'aftshoulderradius', 'aftshoulderlength', 'aftshoulderthickness', 'aftshouldercapped', 'foreshoulderradius', 'foreshoulderlength', 'foreshoulderthickness', 'foreshouldercapped']);
+export async function editComponentProperties(archive: ExpandedArchive, id: string, changes: ComponentPropertyChange[]) {
+  const original = archive.parsed.components.find(n => n.id === id);
+  if (!original || archive.mode !== 'editable') throw new Error('Select an editable component');
+  const targets = new Set<string>();
+  let candidate = archive;
+  for (const change of changes) {
+    const source = change.key === undefined ? undefined : original.children[change.key];
+    if (source && source.name !== change.name || change.key !== undefined && !source) throw new Error('Component property changed before editing');
+    const target = change.key === undefined ? change.name : String(change.key);
+    if (targets.has(target)) throw new Error('Duplicate component property edit');
+    targets.add(target);
+    const component = candidate.parsed.components.find(n => n.id === id)!;
+    const ordinal = source ? original.children.slice(0, change.key).filter(n => n.name === change.name).length : 0;
+    const field = component.children.filter(n => n.name === change.name)[ordinal];
+    if (change.remove) {
+      if (!optionalFields.has(change.name)) throw new Error('That property cannot be removed');
+      if (field) candidate = await editArchive(candidate, [{ start: field.start, end: field.end, text: '' }, ...(!presentation.has(change.name) ? componentResultChanges(candidate) : [])]);
+    } else if (field) candidate = await editComponentProperty(candidate, id, component.children.indexOf(field), change.value, change.attributes);
+    else {
+      if (source || !optionalFields.has(change.name) || !fieldRule(component.name, change.name)) throw new Error('That property cannot be added');
+      if (Object.keys(change.attributes).some(key => !/^[A-Za-z][\w.-]*$/.test(key))) throw new Error('Invalid property attribute');
+      validate(component.name, change.name, change.value, change.attributes);
+      const attrs = Object.entries(change.attributes).map(([key, value]) => ` ${key}="${escapeXml(value)}"`).join('');
+      candidate = await editArchive(candidate, [{ start: component.contentEnd, end: component.contentEnd, text: `<${change.name}${attrs}>${escapeXml(change.value)}</${change.name}>` }, ...(!presentation.has(change.name) ? componentResultChanges(candidate) : [])]);
+    }
+  }
+  return candidate;
 }

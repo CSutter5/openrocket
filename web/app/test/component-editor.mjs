@@ -26,6 +26,7 @@ try {
 
   // A new automatic BodyTube exposes its native fields immediately.
   await page.getByRole('region',{name:'Add new component'}).getByRole('button',{name:'Body tube',exact:true}).click();await page.getByRole('status').filter({hasText:'Component created.'}).waitFor();
+  await editor.getByRole('tab',{name:'Advanced',exact:true}).click();
   assert.ok(await editor.getByLabel('radius value',{exact:true}).isEnabled());assert.ok(await editor.getByLabel('length value',{exact:true}).isEnabled());
   await close();
 

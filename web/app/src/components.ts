@@ -1,7 +1,7 @@
 import { exportArchive, importArchive, type ExpandedArchive, type XmlNode } from '@openrocket/ork-format';
 import { componentResultChanges } from './archive-edit';
 import generated from '../build/components/defaults.json';
-export interface FieldRule { kind: string; values?: string[]; special?: string; separator?: string; materialType?: string }
+export interface FieldRule { kind: string; values?: string[]; labels?: Record<string, string>; special?: string; separator?: string; materialType?: string }
 interface DefaultComponent { fields: Record<string, FieldRule>; name: string; xml: string; additionalStageXml?: string; parents: string[]; body: boolean }
 export const componentDefaults: Record<string, DefaultComponent> = generated;
 const templateId = '00000000-0000-4000-8000-000000000001';

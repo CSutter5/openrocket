@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { LIMITS } from '@openrocket/ork-format';
 import { request } from './bridge';
 import type { Action, DocumentView } from './model';
-import { Properties } from './Properties';
+import { ComponentEditor } from './ComponentEditor';
+import { EditorUnits } from './QuantityInput';
 import { MotorSelector } from './MotorSelector';
 import { ComponentIcon, ComponentPalette, MotorConfigurations, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
@@ -21,6 +22,8 @@ function App() {
   const [unit, setUnit] = useState<LengthUnit>('m');
   const [tab, setTab] = useState('design');
   const [editor, setEditor] = useState(false);
+  const [editorTab, setEditorTab] = useState('General');
+  const [editorUnits, setEditorUnits] = useState<Record<string, string>>({});
   const [motorSelector, setMotorSelector] = useState<'assign' | 'create'>();
   const [insertion, setInsertion] = useState<PendingComponent>();
   const [help, setHelp] = useState(false);
@@ -37,7 +40,7 @@ function App() {
   async function perform(action: Action) {
     setBusy(true); setError('');
     try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice);
-      if (reply.selectedId) { setSelected(reply.view.components.findIndex(c => c.id === reply.selectedId)); if (action.type === 'addComponent') setEditor(true); }
+      if (reply.selectedId) { setSelected(reply.view.components.findIndex(c => c.id === reply.selectedId)); if (action.type === 'addComponent') { setEditorTab('General');setEditor(true); } }
       if (action.type === 'componentTree') setEditor(false);
       if (action.type === 'new') { setSelected(1); setEditor(false); }
       return true; }
@@ -175,9 +178,10 @@ function App() {
           <p>{document.mode === 'editable' ? 'Component properties and tree editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
           {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
         </details>
-        {editor && component && <WindowPanel title="Component editor" close={() => { setEditor(false); }}>
-          <Properties key={`${selected}:${document.hash}`} component={component} expectedHash={document.hash} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
-          <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
+        {editor && component && <WindowPanel title="Component editor" className="component-editor-window" close={() => { if (!busy) setEditor(false); }}>
+          <EditorUnits.Provider value={{ length: unit, units: Object.fromEntries(Object.entries(editorUnits).filter(([key]) => key.startsWith(component.id + ':')).map(([key, value]) => [key.slice(component.id!.length + 1), value])), choose: (key, value) => setEditorUnits(current => ({ ...current, [`${component.id}:${key}`]: value })) }}>
+            <ComponentEditor key={`${selected}:${document.hash}`} component={component} document={document} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform} close={() => setEditor(false)} motors={() => { setEditor(false);setTab('motors'); }} tab={editorTab} setTab={setEditorTab}/>
+          </EditorUnits.Provider>
         </WindowPanel>}
         {insertion && <WindowPanel title="Insert component" close={() => setInsertion(undefined)}><p>Where should the new component be added?</p><div className="window-footer"><button onClick={() => setInsertion(undefined)}>Cancel</button><button disabled={busy} onClick={() => insertComponent(insertion, 'after')}>Insert after selected component</button><button disabled={busy} onClick={() => insertComponent(insertion, 'end')}>Add to the end</button></div></WindowPanel>}
         {motorSelector && <MotorSelector key={`${document.identitySidecarHash}:${document.flightConfigurationId}:${motorSelector}`} document={document} busy={busy} creating={motorSelector === 'create'} close={() => setMotorSelector(undefined)} assign={(mountId, motorKey, delay, name) => motorSelector === 'create' ? perform({ type: 'createConfiguration', expectedHash: document.hash, name: name!, mountId, motorKey, delay }) : perform({ type: 'assignMotor', expectedHash: document.hash, configurationId: document.flightConfigurationId!, mountId, motorKey, delay })}/>}
@@ -187,7 +191,7 @@ function App() {
     {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
       <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
       <p>Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session. Flight results stay in the session and are not written to downloads.</p>
-      <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Edit component values in Imported properties; move, duplicate or delete components with the tree controls. 3D, accounts and collaboration are not yet available.</p>
+      <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Use the property tabs and individual unit selectors, then OK to save or Cancel to discard. Additional archive values remain under Advanced. Move, duplicate or delete components with the tree controls. 3D, accounts and collaboration are not yet available.</p>
       <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
     </WindowPanel>}
   </>;

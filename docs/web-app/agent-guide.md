@@ -2,7 +2,9 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
-The latest follow-up enables [editable imported properties and component tree actions](component-editing.md) (ADR-24), and reduces/unletters the CG/CP symbols. Read its raw-field, stage-reference and desktop-deletion verification boundaries before changing editor commands.
+The latest screenshot-guided follow-up adds [desktop-style component dialogs and individual field units](component-dialogs.md) (ADR-25), with atomic OK/Cancel and the existing scalar editor under Advanced. The parts library is excluded. Read its units, optional-field and native-verification boundaries before changing the dialogs.
+
+The preceding follow-up enables [editable imported properties and component tree actions](component-editing.md) (ADR-24), and reduces/unletters the CG/CP symbols. Read its raw-field, stage-reference and desktop-deletion verification boundaries before changing editor commands.
 
 The preceding follow-up enables [component creation, CG/CP markers and simulation units](component-creation.md) (ADR-23). All palette types can be created; detailed component editors, drawings and static calculations retain the explicit limits in that record. Read it before changing structural commands or stability projection.
 

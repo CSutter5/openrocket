@@ -32,6 +32,9 @@ public class ComponentDefaultsExporter {
                 if (setter != null && setter.getClass().getSimpleName().equals("EnumSetter")) {
                     var enumType = (Class<?>)privateField(setter,"enumClass");
                     rule.put("values",Arrays.stream(enumType.getEnumConstants()).map(v -> ((Enum<?>)v).name().toLowerCase(Locale.ROOT).replace("_", "")).toList());
+                    Map<String,String> labels = new LinkedHashMap<>();
+                    for (Object value : enumType.getEnumConstants()) labels.put(((Enum<?>)value).name().toLowerCase(Locale.ROOT).replace("_", ""),value.toString());
+                    rule.put("labels",labels);
                 }
                 if (setter != null && setter.getClass().getSimpleName().equals("ClusterConfigurationSetter")) {
                     rule.put("values",Arrays.stream(ClusterConfiguration.CONFIGURATIONS).map(ClusterConfiguration::getXMLName).toList());
@@ -75,6 +78,14 @@ public class ComponentDefaultsExporter {
             row.put("fields",fields(type));row.put("parents",compatible);row.put("body",component instanceof BodyComponent);rows.put(tag,row);
         }
         Files.writeString(Path.of(args[0]),new Gson().toJson(rows)+"\n");
+        List<Object> materials = new ArrayList<>();
+        for (var database : List.of(info.openrocket.core.database.Databases.BULK_MATERIAL, info.openrocket.core.database.Databases.SURFACE_MATERIAL, info.openrocket.core.database.Databases.LINE_MATERIAL)) {
+            for (var material : database) if (!material.isUserDefined()) materials.add(Map.of(
+                "name",Application.getTranslator().getBaseText("material",material.getName()),
+                "type",material.getType().name().toLowerCase(Locale.ROOT), "density",material.getDensity(),
+                "shearModulus",material.getInPlaneShearModulus(), "group",material.getGroup().getDatabaseString()));
+        }
+        Files.writeString(Path.of(args[0]).resolveSibling("materials.json"),new Gson().toJson(materials)+"\n");
         System.out.println("Exported " + rows.size() + " native component defaults and compatibility rules");
     }
 }

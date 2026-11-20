@@ -8,6 +8,15 @@ import proof.EditorStability;
 
 /** Native creation and stability oracle using actual desktop-loaded archives. */
 public class ComponentDesktopProof {
+    static void setProperty(RocketComponent component, String name, String value, java.util.HashMap<String,String> attrs) throws Exception {
+        var config=Class.forName("info.openrocket.core.file.openrocket.importt.DocumentConfig");
+        var field=config.getDeclaredField("setters");field.setAccessible(true);var setters=(Map<?,?>)field.get(null);
+        Object setter=null;for(Class<?> type=component.getClass();type!=null;type=type.getSuperclass())if(setters.containsKey(type.getSimpleName()+":"+name)){setter=setters.get(type.getSimpleName()+":"+name);break;}
+        if(setter==null)throw new IllegalArgumentException("Native setter missing: "+name);
+        var method=setter.getClass().getMethod("set",RocketComponent.class,String.class,java.util.HashMap.class,info.openrocket.core.logging.WarningSet.class);method.setAccessible(true);
+        var warnings=new info.openrocket.core.logging.WarningSet();method.invoke(setter,component,value,attrs,warnings);
+        if(!warnings.isEmpty())throw new AssertionError("Native setter refused: "+warnings);
+    }
     static byte[] comparable(byte[] xml, Set<String> removed, String removedId) {
         String text=new String(xml,java.nio.charset.StandardCharsets.UTF_8);
         for(String id:removed)text=text.replace("source=\""+id+"\"","source=\""+removedId+"\"").replace("<source>"+id+"</source>","<source>"+removedId+"</source>");
@@ -35,7 +44,7 @@ public class ComponentDesktopProof {
             Files.writeString(Path.of(args[3]), EditorStability.snapshot(original.getRocket().getSelectedConfiguration()));return;
         }
         var edited = new GeneralRocketLoader(new File(args[2])).load();
-        if (args[0].equals("tree") || args[0].equals("property")) {
+        if (args[0].equals("tree") || args[0].equals("property") || args[0].equals("dialog")) {
             var component = original.getRocket().findComponent(UUID.fromString(args[3]));
             Path directory;Set<String> removed = new HashSet<>();
             if (args[0].equals("tree")) {
@@ -55,16 +64,35 @@ public class ComponentDesktopProof {
                     default: throw new IllegalArgumentException("Unknown tree operation");
                 }
                 directory=Path.of(args[6]);
+            } else if (args[0].equals("dialog")) {
+                var changes=JsonParser.parseString(Files.readString(Path.of(args[4]))).getAsJsonObject();
+                if(changes.has("name"))component.setName(changes.get("name").getAsString());
+                for(var entry:changes.getAsJsonArray("changes")) {
+                    var change=entry.getAsJsonObject();String name=change.get("name").getAsString();
+                    String value=change.has("value")?change.get("value").getAsString():"";
+                    if(change.has("lengthUnit"))value=Double.toString(info.openrocket.core.unit.UnitGroup.UNITS_ALL_LENGTHS.getUnit(change.get("lengthUnit").getAsString()).fromUnit(Double.parseDouble(value))/(change.has("diameter")?2:1));
+                    if(change.has("remove") && change.get("remove").getAsBoolean()) {
+                        switch(name) {
+                            case "overridemass":component.setMassOverridden(false);break;
+                            case "overridecg":component.setCGOverridden(false);break;
+                            case "overridecd":component.setCDOverridden(false);break;
+                            default:throw new IllegalArgumentException("Unexpected removed field: "+name);
+                        }
+                    } else if(change.has("method") && change.get("method").getAsString().equals("innerRadius")) {
+                        ((BodyTube)component).setInnerRadius(Double.parseDouble(value));
+                    } else if(change.has("method") && change.get("method").getAsString().equals("sweepAngle")) {
+                        ((TrapezoidFinSet)component).setSweepAngle(Double.parseDouble(value));
+                    } else {
+                        var attrs=new java.util.HashMap<String,String>();
+                        if(change.has("attributes"))for(var attr:change.getAsJsonObject("attributes").entrySet())attrs.put(attr.getKey(),attr.getValue().getAsString());
+                        setProperty(component,name,value,attrs);
+                    }
+                }
+                directory=Path.of(args[5]);
             } else {
                 String name=args[4];var attrs=new java.util.HashMap<String,String>();
                 var json=JsonParser.parseString(args[6]).getAsJsonObject();for(var entry:json.entrySet())attrs.put(entry.getKey(),entry.getValue().getAsString());
-                var config=Class.forName("info.openrocket.core.file.openrocket.importt.DocumentConfig");
-                var field=config.getDeclaredField("setters");field.setAccessible(true);var setters=(Map<?,?>)field.get(null);
-                Object setter=null;for(Class<?> type=component.getClass();type!=null;type=type.getSuperclass())if(setters.containsKey(type.getSimpleName()+":"+name)){setter=setters.get(type.getSimpleName()+":"+name);break;}
-                if(setter==null)throw new IllegalArgumentException("Native setter missing: "+name);
-                var method=setter.getClass().getMethod("set",RocketComponent.class,String.class,java.util.HashMap.class,info.openrocket.core.logging.WarningSet.class);method.setAccessible(true);
-                var warnings=new info.openrocket.core.logging.WarningSet();method.invoke(setter,component,args[5],attrs,warnings);
-                if(!warnings.isEmpty())throw new AssertionError("Native setter refused: "+warnings);
+                setProperty(component,name,args[5],attrs);
                 directory=Path.of(args[7]);
             }
             Files.createDirectories(directory);
