@@ -66,6 +66,19 @@ try {
   }
   assert.deepEqual(await download(a), accepted);
   await a.getByRole('button', { name: 'Close Component editor', exact: true }).click();
+  await b.getByRole('button', { name: 'Close Component editor', exact: true }).click();
+  await b.getByRole('button', { name: /^Race [AB] bodytube$/ }).click();await openProperties(b, { advanced: false });
+  const motorEditor = b.getByRole('dialog', { name: 'Component editor', exact: true });
+  await motorEditor.getByRole('tab', { name: 'Motor', exact: true }).click();
+  await motorEditor.getByLabel('This component is a motor mount', { exact: true }).check();
+  await motorEditor.getByLabel('Motor overhang unit', { exact: true }).selectOption('mm');
+  await motorEditor.getByRole('spinbutton', { name: 'Motor overhang', exact: true }).fill('5');
+  const beforeMount = await a.evaluate(() => window.rawA.state.token);
+  await motorEditor.getByRole('button', { name: 'OK', exact: true }).click();await motorEditor.waitFor({ state: 'detached' });
+  await a.waitForFunction(token => window.rawA.state.token !== token, beforeMount);
+  accepted = await download(a);assert.deepEqual(accepted, await download(b));
+  const mounted = await importArchive(new Uint8Array(accepted));
+  assert.equal(Number(mounted.parsed.components.find(n => n.id === tube.id).children.find(n => n.name === 'motormount').children.find(n => n.name === 'overhang').text), .005);
   await a.getByRole('button', { name: 'Duplicate', exact: true }).click();
   await a.waitForFunction(() => document.querySelectorAll('.component-tree [aria-label$=" bodytube"]').length === 2);
   await b.waitForFunction(() => document.querySelectorAll('.component-tree [aria-label$=" bodytube"]').length === 2);

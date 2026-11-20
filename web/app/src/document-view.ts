@@ -9,6 +9,7 @@ import { flightSupport, flightConfigurations } from './simulation/input';
 import { savedSimulations } from './simulation/saved';
 import { intrinsic } from './document-session';
 import type { DocumentView } from './model';
+import { motorMountSettings } from './motor-mount';
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 export async function describe(current: ExpandedArchive, name: string, lastExport: string, configurationId: string | undefined): Promise<DocumentView> {
   const nodes = current.parsed.components;
@@ -39,6 +40,7 @@ export async function describe(current: ExpandedArchive, name: string, lastExpor
     components: componentNames(current).map((component, index) => {
       const node = nodes[index];
       const view: DocumentView['components'][number] = { ...component, parent: nodes.indexOf(node.parent?.parent!),
+        ...(['bodytube', 'innertube'].includes(node.name) ? { motorMount: motorMountSettings(node) } : {}),
         properties: node.children.map((n, key) => ({ n, key })).filter(({ n }) => !n.children.length && !['name', 'id', 'subcomponents'].includes(n.name))
           .map(({ n, key }) => ({ key, name: n.name, value: n.text, attributes: Object.fromEntries(Object.entries(n.attributes).map(([key, v]) => [key, v.value])) })) };
       try {

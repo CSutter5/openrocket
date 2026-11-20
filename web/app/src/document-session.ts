@@ -6,6 +6,7 @@ import { createConfiguration, renameConfiguration, deleteConfiguration } from '.
 import { assignMotor } from './simulation/assign-motor';
 import { editComponentTree } from './component-tree';
 import { editComponentProperty, editComponentProperties } from './component-properties';
+import { editMotorMount } from './motor-mount';
 import { addComponent, newRocket } from './components';
 import type { Action, Intrinsic, Reply } from './model';
 
@@ -71,6 +72,7 @@ export function createDocumentSession<V>(describe: (archive: ExpandedArchive, fi
       if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before component edit; try again');
       if (action.type === 'componentProperties') {
         candidate = await editComponentProperties(archive, action.id, action.changes);
+        if (action.motorMount !== undefined) candidate = await editMotorMount(candidate, action.id, action.motorMount);
         const radius = action.changes.find(change => change.name === 'radius' && !change.remove);
         if (radius && Number.isFinite(Number(radius.value)) && archive.parsed.components.find(n => n.id === action.id)?.name === 'bodytube') {
           let input: TubeRadiusInput | undefined;

@@ -44,7 +44,7 @@ public class ComponentDesktopProof {
             Files.writeString(Path.of(args[3]), EditorStability.snapshot(original.getRocket().getSelectedConfiguration()));return;
         }
         var edited = new GeneralRocketLoader(new File(args[2])).load();
-        if (args[0].equals("tree") || args[0].equals("property") || args[0].equals("dialog")) {
+        if (args[0].equals("tree") || args[0].equals("property") || args[0].equals("dialog") || args[0].equals("motor-mount")) {
             var component = original.getRocket().findComponent(UUID.fromString(args[3]));
             Path directory;Set<String> removed = new HashSet<>();
             if (args[0].equals("tree")) {
@@ -64,6 +64,16 @@ public class ComponentDesktopProof {
                     default: throw new IllegalArgumentException("Unknown tree operation");
                 }
                 directory=Path.of(args[6]);
+            } else if (args[0].equals("motor-mount")) {
+                var settings=JsonParser.parseString(Files.readString(Path.of(args[4]))).getAsJsonObject();
+                var mount=(MotorMount)component;
+                mount.setMotorMount(settings.get("enabled").getAsBoolean());
+                if(settings.get("enabled").getAsBoolean()) {
+                    mount.setMotorOverhang(settings.get("overhang").getAsDouble());
+                    mount.getDefaultMotorConfig().setIgnitionEvent(info.openrocket.core.motor.IgnitionEvent.valueOf(settings.get("ignitionEvent").getAsString().toUpperCase(java.util.Locale.ROOT).replace("EJECTIONCHARGE","EJECTION_CHARGE")));
+                    mount.getDefaultMotorConfig().setIgnitionDelay(settings.get("ignitionDelay").getAsDouble());
+                }
+                directory=Path.of(args[5]);
             } else if (args[0].equals("dialog")) {
                 var changes=JsonParser.parseString(Files.readString(Path.of(args[4]))).getAsJsonObject();
                 if(changes.has("name"))component.setName(changes.get("name").getAsString());

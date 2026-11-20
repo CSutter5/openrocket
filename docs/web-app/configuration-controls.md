@@ -1,5 +1,7 @@
 # Motor configurations and the saved simulation workspace
 
+The subsequent [tube motor-mount controls](motor-mount-controls.md) (ADR-31) supersede the mount-creation deferral below; catalog configuration uses tubes enabled in the component dialog.
+
 The November 19, 2026 user follow-up authorizes removing the explanatory/manual controls and Session flight row, making motor selection catalog-only with desktop filters, and implementing New, Rename and Delete configuration. This supersedes the manual UI descriptions in ADR-17/20/21 and the earlier workflow records. Existing saved settings, graph support, preservation rules and browser-only result storage remain in effect. ADR-22 records the updated contract.
 
 Flight simulations now contains the document's actual rows, compact Run flight / Plot / Cancel flight controls, and necessary errors or job status. A row runs its own archived configuration and supported launch/weather/integrator options. Double-click opens its stored or completed altitude graph. A completed run belongs to its captured sidecar UUID even if selection changes. Removing a row or importing another document cannot redirect a late completion to another row. No synthetic session row, manual settings selector, settings/provenance block or introductory text remains.

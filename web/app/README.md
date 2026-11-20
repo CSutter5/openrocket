@@ -8,6 +8,8 @@ The one-time migration creates username `admin` with temporary password `admin`.
 
 Owners can Rename rocket from its library entry or editor header; existing share links remain valid. Account settings lets any signed-in user change their password using the current password and signs out their other sessions. Run `npm run test:account-settings --prefix web` for these browser and authorization checks; see the [name/password contract](../../docs/web-app/account-settings.md).
 
+To use a tube as a motor mount, edit a body or inner tube, open Motor, and enable This component is a motor mount. Set overhang and default ignition if needed, then OK or Apply and open Motors & Configuration. The enabled tube is available in the catalog's Motor mount selector. See the [mount editing and desktop verification record](../../docs/web-app/motor-mount-controls.md).
+
 The [account run and verification record](../../docs/web-app/accounts-and-rockets.md) describes auth, URLs, concurrency, storage and deployment setup. Run `npm run test:accounts --prefix web`, `npm run test:coediting --prefix web`, `npm run test:management --prefix web` or `npm run test:cloudflare --prefix web` for their separate checks. Deployment now requires a stable `AUTH_SECRET` and `OPENROCKET_ORIGIN`; `./deploy-cloudflare.sh --dry-run` still stops before remote changes. No app deployment was performed for this increment. Plain Vite retains the local-only workflow below.
 
 ## Browser-local workflow

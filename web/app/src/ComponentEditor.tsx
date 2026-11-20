@@ -7,6 +7,7 @@ import { QuantityInput, useEditorUnit } from './QuantityInput';
 import { propertyDimension, quantityNumber, quantityUnits, type Dimension } from './quantities';
 import type { LengthUnit } from './units';
 import materials from '../build/components/materials.json';
+import { ignitionEvents } from './motor-mount';
 
 const labels: Record<string, string> = {
   length: 'Length', thickness: 'Wall thickness', radius: 'Outer radius', outerradius: 'Outer radius', innerradius: 'Inner radius',
@@ -43,6 +44,7 @@ export function ComponentEditor({ component, document, editable, busy, unit, edi
   const [draft, setDraft] = useState<Record<string, ComponentPropertyChange>>({});
   const [error, setError] = useState('');
   const [previousWall, setPreviousWall] = useState('0.002');
+  const [mount, setMount] = useState(component.motorMount);
   const disabled = busy || !editable;
   const fins = ['trapezoidfinset', 'ellipticalfinset', 'freeformfinset'].includes(component.type), body = component.type === 'bodytube', nose = component.type === 'nosecone';
   const tabs = ['General', ...(body || component.type === 'innertube' ? ['Motor'] : []), ...(nose || component.type === 'transition' ? ['Shoulder'] : []), ...(fins ? ['Fin tabs'] : []), 'Override', 'Appearance', 'Comment', 'Advanced'];
@@ -188,8 +190,9 @@ export function ComponentEditor({ component, document, editable, busy, unit, edi
       const flag = original(flagName);
       if (flag) changes.push({ ...flag, remove: true });
     }
-    if (await edit({ type: 'componentProperties', expectedHash: document.hash, id: component.id!, name, changes })) close();
-    else setError('Changes could not be saved. Review the values and try again.');
+    const motorMount = mount && JSON.stringify(mount) !== JSON.stringify(component.motorMount) ? mount : undefined;
+    if (await edit({ type: 'componentProperties', expectedHash: document.hash, id: component.id!, name, changes, ...(motorMount ? { motorMount } : {}) })) { close();return true; }
+    setError('Changes could not be saved. Review the values and try again.');return false;
   }
   const massUnit = useEditorUnit('component-mass', 'mass');
   return <div className="native-editor" onKeyDown={event => {
@@ -211,7 +214,19 @@ export function ComponentEditor({ component, document, editable, busy, unit, edi
         {['red', 'green', 'blue'].filter(channel => property('color', '', { red: '128', green: '128', blue: '128' }).attributes[channel] !== undefined).map(channel => <NumericRow key={channel} label={title(channel)} value={property('color', '', { red: '128', green: '128', blue: '128' }).attributes[channel]} disabled={disabled} max={255} integer change={value => set('color', '', { ...property('color', '', { red: '128', green: '128', blue: '128' }).attributes, [channel]: value })}/>)}
       </fieldset>}
       {active === 'Comment' && <label className="native-stacked">Comment<textarea aria-label="Component comment" disabled={disabled} value={property('comment', '').value} onChange={event => set('comment', event.target.value)}/></label>}
-      {active === 'Motor' && <fieldset className="native-group"><legend>Motor configuration</legend><p>{document.motorMounts.some(m => m.id === component.id) ? 'This component is a motor mount.' : 'Motor assignments are managed in Motors & Configuration.'}</p><button onClick={motors} disabled={busy}>Open Motors & Configuration</button></fieldset>}
+      {active === 'Motor' && mount && <fieldset className="native-group" disabled={disabled || !!mount.reason}>
+        <legend>{checkbox('This component is a motor mount', mount.enabled, enabled => setMount({ ...mount, enabled }), disabled || !!mount.reason)}</legend>
+        {mount.reason && <p role="alert">{mount.reason}</p>}
+        <NumericRow label="Motor overhang" value={mount.overhang} dimension="length" unitKey="motor-overhang" disabled={disabled || !mount.enabled || !!mount.reason} min={-.02} max={.06} change={overhang => setMount({ ...mount, overhang })}/>
+        <label className="native-choice"><span>Ignition at:</span><select aria-label="Ignition at" disabled={disabled || !mount.enabled || !!mount.reason} value={mount.ignitionEvent} onChange={event => setMount({ ...mount, ignitionEvent: event.target.value })}>
+          {!Object.hasOwn(ignitionEvents, mount.ignitionEvent) && <option value={mount.ignitionEvent}>{mount.ignitionEvent}</option>}
+          {Object.entries(ignitionEvents).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select></label>
+        <NumericRow label="Ignition delay" value={mount.ignitionDelay} dimension="time" unitKey="motor-ignition-delay" disabled={disabled || !mount.enabled || !!mount.reason} slider={false} change={ignitionDelay => setMount({ ...mount, ignitionDelay })}/>
+        <p>Ignition defaults can be overridden in each flight configuration.</p>
+        {!mount.enabled && component.motorMount?.enabled && <p>Saving removes this tube’s motor assignments.</p>}
+        <button onClick={async () => { if (await save()) motors(); }} disabled={disabled || !mount.enabled || !!mount.reason}>Apply and open Motors &amp; Configuration</button>
+      </fieldset>}
       {active === 'Advanced' && <Properties key={document.hash} component={component} expectedHash={document.hash} unit={unit} editable={editable} busy={busy} edit={edit}/>}
     </div>
     {error && <p role="alert" className="error">{error}</p>}

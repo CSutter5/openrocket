@@ -1,5 +1,7 @@
 # Desktop-style component dialogs and individual units
 
+The subsequent [motor-mount follow-up](motor-mount-controls.md) (ADR-31) replaces this milestone's link-only Motor tab with body/inner tube mount, overhang and ignition editing.
+
 The user's body tube, nose cone and fin screenshots authorize replacing the default archive-field grid with desktop-style component dialogs and giving every measured input its own units. The parts library is explicitly excluded. ADR-25 supersedes ADR-24's default presentation and individual-Apply behavior for the new tabs; the raw archive editor and proven tube controls remain available under Advanced.
 
 ## Interface and scope

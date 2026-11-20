@@ -37,6 +37,7 @@ try {
   await import('./components.mjs');
   await import('./component-editor.mjs');
   await import('./component-dialog.mjs');
+  await import('./motor-mount.mjs');
   const report = JSON.parse(await readFile(resolve(output, 'roundtrip.json'), 'utf8'));
   const engine = JSON.parse(await readFile(resolve(repo, 'web/engine-adapter/build/manifest.json'), 'utf8'));
   await writeFile(resolve(output, 'gp.json'), JSON.stringify({ gate: 'GP', outcome: 'passed',

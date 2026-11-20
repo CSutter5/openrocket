@@ -2,7 +2,7 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
-The latest follow-up adds [owner rocket renaming and account password settings](account-settings.md) (ADR-30), preserving public URLs and using the existing Better Auth/D1 stack. The same user request also authorizes tube motor-mount controls in the component editor; its implementation and verification are recorded separately.
+The latest follow-up adds [tube motor-mount controls](motor-mount-controls.md) (ADR-31), replacing the link-only Motor tab with native mount/overhang/ignition editing. Read its per-flight inheritance and atomic save boundaries before changing the reducer. The same request adds [owner rocket renaming and account password settings](account-settings.md) (ADR-30), preserving public URLs and using the existing Better Auth/D1 stack.
 
 The preceding follow-up adds [two creation cards, confirmed owner deletion and a protected administrator](admin-and-deletion.md) (ADR-29). The user requested a new `admin` login with temporary password `admin`, requiring a change before any writes or management operations. Read the singleton bootstrap, session-reset race, immutable deletion ID and D1/DO cleanup boundaries before changing these flows. No app deployment is included.
 

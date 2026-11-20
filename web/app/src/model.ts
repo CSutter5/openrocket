@@ -7,6 +7,7 @@ export interface ComponentView {
   tube?: { input: TubeRadiusInput; state: Intrinsic };
   radiusReason?: string;
   extraProperties?: boolean; extraPropertiesReason?: string;
+  motorMount?: import('./motor-mount').MotorMountSettings & { reason?: string };
 }
 export interface DocumentView {
   flightSupport: import('./simulation/input').Support;
@@ -24,7 +25,7 @@ export type Action =
   | { type: 'new' }
   | { type: 'addComponent'; expectedHash: string; selectedId: string; componentType: string; position: 'after' | 'end' }
   | { type: 'componentProperty'; expectedHash: string; id: string; key: number; value: string; attributes: Record<string, string> }
-  | { type: 'componentProperties'; expectedHash: string; id: string; name: string; changes: ComponentPropertyChange[] }
+  | { type: 'componentProperties'; expectedHash: string; id: string; name: string; changes: ComponentPropertyChange[]; motorMount?: import('./motor-mount').MotorMountSettings }
   | { type: 'componentTree'; expectedHash: string; id: string; operation: 'up' | 'down' | 'duplicate' | 'delete' }
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }
