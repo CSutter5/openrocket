@@ -2,6 +2,8 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
+The latest layout follow-up makes the app fit the browser viewport with internal panel scrolling. Read [the viewport fitting record](desktop-ui.md#viewport-fitting) before changing workspace heights or dialog overflow.
+
 The latest configuration follow-up removes the manual/session simulation UI, makes motor selection catalog-only with native-style filters, and adds atomic configuration creation (including a saved simulation), rename and deletion. Read [the configuration controls record](configuration-controls.md) and ADR-22 before changing these contracts. Earlier manual-flight UI descriptions are historical; the engine proof path remains available internally.
 
 The latest November 19 follow-up adds [selected saved simulations and the complete bundled motor picker](saved-simulations-and-motors.md) (ADR-21). Saved rows use their archived motor configuration and supported launch/weather settings; graph dialogs and explicit catalog assignments are now available. Earlier catalog/settings deferrals do not block this authorized slice.

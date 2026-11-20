@@ -26,7 +26,7 @@ try {
     assert.equal(await polygons.count(),expected.polygons.length);
     const canvas=await page.locator('.drawing-canvas').boundingBox();
     const viewportHeight=Math.max(80,1000*canvas.height/canvas.width);
-    const scale=Math.min(900/(expected.maxX-expected.minX),(viewportHeight-60)/2/Math.max(expected.radius,.001));
+    const scale=Math.min(900/(expected.maxX-expected.minX),(viewportHeight-36)/2/Math.max(expected.radius,.001));
     for(let i=0;i<expected.polygons.length;i++) {
       const points=(await polygons.nth(i).getAttribute('points')).split(' ').map(p=>p.split(',').map(Number));
       assert.equal(points.length,expected.polygons[i].points.length);

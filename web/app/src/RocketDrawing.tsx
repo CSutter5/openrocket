@@ -19,7 +19,7 @@ export function RocketDrawing({ drawing, components, selected, select, busy, uni
     observer.observe(element); resize();
     return () => observer.disconnect();
   }, [drawing.error]);
-  const scale = Math.min(900 / (drawing.maxX - drawing.minX), (height - 60) / 2 / Math.max(drawing.radius, 0.001));
+  const scale = Math.min(900 / (drawing.maxX - drawing.minX), (height - 36) / 2 / Math.max(drawing.radius, 0.001));
   const x = (value: number) => 50 + (value - drawing.minX) * scale;
   const y = (value: number) => 150 - value * scale;
   return <section className="rocket-drawing" aria-label="Rocket drawing"><div className="drawing-title"><div><h2>Rocket side view</h2><span>Exterior extent: {lengthLabel(drawing.maxX - drawing.minX, unit)}</span></div><div className="zoom-controls"><button aria-label="Zoom out" disabled={zoom <= 0.5} onClick={() => setZoom(Math.max(.5, zoom - .25))}>−</button><button onClick={() => setZoom(1)}>{Math.round(zoom * 100)}% · Fit</button><button aria-label="Zoom in" disabled={zoom >= 3} onClick={() => setZoom(Math.min(3, zoom + .25))}>+</button></div></div>
