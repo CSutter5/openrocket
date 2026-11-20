@@ -39,10 +39,9 @@ export function RocketDrawing({ drawing, stability, components, selected, select
             <title>{component.name} · {component.type}</title>
           </polygon>;
         })}
-        {([['cg', stability.cg, '#56b4e9'], ['cp', stability.cp, '#e69f00']] as const).map(([kind, value, color]) => value != null && Number.isFinite(value) && <g key={kind} data-testid={`rocket-${kind}`} data-position={value} transform={`translate(${x(value)} 150)`} pointerEvents="none" aria-label={`${kind === 'cg' ? 'Center of gravity' : 'Center of pressure'}: ${lengthLabel(value, unit)}`}>
+        {([['cg', stability.cg, '#56b4e9'], ['cp', stability.cp, '#e69f00']] as const).map(([kind, value, color]) => value != null && Number.isFinite(value) && <g key={kind} data-testid={`rocket-${kind}`} data-position={value} transform={`translate(${x(value)} 150) scale(0.75)`} pointerEvents="none" aria-label={`${kind === 'cg' ? 'Center of gravity' : 'Center of pressure'}: ${lengthLabel(value, unit)}`}>
           <circle r="9" fill="#171a20" stroke={color} strokeWidth="2"/>
           {kind === 'cg' ? <path d="M-9 0H9M0-9V9M0 0H9A9 9 0 0 0 0-9ZM0 0H-9A9 9 0 0 0 0 9Z" fill={color} stroke={color}/> : <><circle r="3" fill={color}/><path d="M-13 0H-9M9 0H13M0-13V-9M0 9V13" stroke={color} strokeWidth="2"/></>}
-          <text y={kind === 'cg' ? -18 : 29} textAnchor="middle" fill={color}>{kind.toUpperCase()}</text>
         </g>)}
         </g>
       </svg></div>
