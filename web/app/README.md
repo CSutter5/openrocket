@@ -12,6 +12,8 @@ To use a tube as a motor mount, edit a body or inner tube, open Motor, and enabl
 
 The [account run and verification record](../../docs/web-app/accounts-and-rockets.md) describes auth, URLs, concurrency, storage and deployment setup. Run `npm run test:accounts --prefix web`, `npm run test:coediting --prefix web`, `npm run test:management --prefix web` or `npm run test:cloudflare --prefix web` for their separate checks. Deployment now requires a stable `AUTH_SECRET` and `OPENROCKET_ORIGIN`; `./deploy-cloudflare.sh --dry-run` still stops before remote changes. No app deployment was performed for this increment. Plain Vite retains the local-only workflow below.
 
+`./deploy-cloudflare.sh` loads those settings from the ignored `.env` beside the script, with exported values taking precedence. Use `.env.example` and `chmod 600 .env` once for each checkout. The [deployment settings guide](../../docs/web-app/cloudflare-deployment.md#persistent-deployment-settings) explains setup; never regenerate the auth secret for routine deployments.
+
 ## Browser-local workflow
 
 This implements the bounded P01–P04 editor from [the POC plan](../../docs/web-app/poc-plan.md). It runs in one browser with one in-memory archive, without login, credentials or a backend. React/TypeScript/Vite supplies the UI; the pinned Java reducer and archive codec run in a dedicated browser Web Worker. Java and Node are development/build tools, not physics services.

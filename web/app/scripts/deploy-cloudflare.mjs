@@ -1,11 +1,17 @@
 import { spawn } from 'node:child_process';
+import { writeSync } from 'node:fs';
 import { resolve } from 'node:path';
 const app = resolve(import.meta.dirname, '..'), wrangler = resolve(app, '../node_modules/wrangler/bin/wrangler.js');
-const args = process.argv.slice(2), dryRun = args.length === 1 && args[0] === '--dry-run';
-if (args.length && !dryRun) throw new Error('Only --dry-run is supported');
+const args = process.argv.slice(2), dryRun = args.length === 1 && args[0] === '--dry-run', check = args.length === 1 && args[0] === '--check';
+if (args.length && !dryRun && !check) throw new Error('Only --dry-run or --check is supported');
 const origin = process.env.OPENROCKET_ORIGIN, secret = process.env.AUTH_SECRET;
-if (!origin || new URL(origin).origin !== origin || !origin.startsWith('https://')) throw new Error('Set OPENROCKET_ORIGIN to the exact HTTPS origin of this Worker, without a trailing slash');
-if (!secret || secret.length < 32) throw new Error('Set AUTH_SECRET to a stable secret of at least 32 characters');
+let validOrigin = false;
+try { validOrigin = !!origin && new URL(origin).origin === origin && origin.startsWith('https://'); } catch {}
+if (!validOrigin || !secret || secret.length < 32) {
+  writeSync(2, (!validOrigin ? 'Set OPENROCKET_ORIGIN to the exact HTTPS origin of this Worker, without a trailing slash.' : 'Set AUTH_SECRET to a stable secret of at least 32 characters.') + '\n');
+  process.exit(1);
+}
+if (check) process.exit(0);
 function run(command, input) {
   return new Promise(resolve => {
     // A shell pipe lets Wrangler reopen /dev/stdin; Node's direct pipe is a socket.

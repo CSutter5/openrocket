@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: %s [--dry-run]\nBuild the latest local commit and deploy it to Cloudflare.\n' "$0"
+    printf 'Usage: %s [--dry-run]\nBuild the latest local commit and deploy it to Cloudflare.\nDeployment settings are loaded from .env beside this script; exported values take precedence.\n' "$0"
 }
 
 dry_run=false
@@ -17,15 +17,27 @@ case "${1:-}" in
     *) usage >&2; exit 2 ;;
 esac
 
-if ! "$dry_run" && { [[ -z "${OPENROCKET_ORIGIN:-}" ]] || [[ -z "${AUTH_SECRET:-}" ]]; }; then
-    printf 'Set OPENROCKET_ORIGIN to the deployed HTTPS origin and AUTH_SECRET to a stable secret before deploying accounts.\n' >&2
-    exit 1
-fi
-
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 for command in git npm node java; do
     command -v "$command" >/dev/null || { printf 'Required command not found: %s\n' "$command" >&2; exit 1; }
 done
+if ! "$dry_run"; then
+    if [[ -f "$repo_dir/.env" ]]; then
+        deploy_origin_override=${OPENROCKET_ORIGIN:-}
+        deploy_secret_override=${AUTH_SECRET:-}
+        set -a
+        # This is the operator's local shell environment file, never committed or copied to the build worktree.
+        source "$repo_dir/.env"
+        set +a
+        if [[ -n "$deploy_origin_override" ]]; then export OPENROCKET_ORIGIN="$deploy_origin_override"; fi
+        if [[ -n "$deploy_secret_override" ]]; then export AUTH_SECRET="$deploy_secret_override"; fi
+        unset deploy_origin_override deploy_secret_override
+    fi
+    if ! node "$repo_dir/web/app/scripts/deploy-cloudflare.mjs" --check; then
+        printf 'Save these settings in %s/.env (see .env.example), or export them before deploying.\n' "$repo_dir" >&2
+        exit 1
+    fi
+fi
 if ! git -C "$repo_dir" diff --quiet HEAD --; then
     printf 'Commit your tracked changes before deploying. This script builds the latest local commit.\n' >&2
     exit 1
