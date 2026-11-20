@@ -276,3 +276,10 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .native-editor-footer { flex-wrap: wrap; }
   .component-mass { flex: 1 0 100%; }
 }
+
+.collaboration-bar { padding: 0.4rem 1rem; background: #193b4b; color: #e5f3fa; font-size: 0.875rem; flex-shrink: 0; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; background: #0009; }
+.join-dialog { margin: auto; width: min(28rem, calc(100vw - 2rem)); padding: 1.5rem; background: #252b32; border: 1px solid #71808f; border-radius: 0.5rem; }
+.join-dialog h2 { margin-top: 0; }
+.join-dialog form { display: grid; gap: 0.75rem; }
+.join-dialog input { font-size: 1rem; padding: 0.5rem; }

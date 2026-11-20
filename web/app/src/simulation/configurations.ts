@@ -69,7 +69,7 @@ function newSimulation(id: string, name: string) {
     Object.entries(fields).map(([key, value]) => `<${key}>${value}</${key}>`).join('') +
     `<wind model="average"><speed>${settings.wind}</speed><direction>${Math.PI / 2}</direction><standarddeviation>${settings.windDeviation}</standarddeviation></wind><atmosphere model="isa"/><gravity model="wgs"/></conditions></simulation>`;
 }
-export async function createConfiguration(archive: ExpandedArchive, name: string, mountId: string, motorKey: string, delay: string) {
+export async function createConfiguration(archive: ExpandedArchive, name: string, mountId: string, motorKey: string, delay: string, fetchCurve: typeof fetch = fetch) {
   validName(name);
   if (archive.mode !== 'editable') throw new Error('This archive is read-only');
   const root = archive.parsed.components[0], configurations = root.children.filter(n => n.name === 'motorconfiguration');
@@ -86,5 +86,5 @@ export async function createConfiguration(archive: ExpandedArchive, name: string
   const simulation = newSimulation(id, `Simulation ${number}`);
   spans.push(lists.length ? append(archive, lists[0], simulation) : { start: root.end, end: root.end, text: `<simulations>${simulation}</simulations>` });
   const candidate = await publish(archive, spans, [...archive.identity.simulations, { id: crypto.randomUUID() }]);
-  return { archive: await assignMotor(candidate, id, mountId, motorKey, delay), configurationId: id };
+  return { archive: await assignMotor(candidate, id, mountId, motorKey, delay, fetchCurve), configurationId: id };
 }

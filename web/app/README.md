@@ -1,4 +1,10 @@
-# Local rocket editor
+# Browser editor and shared-file POC
+
+For coediting, run `npm run build:app --prefix web`, then `npm run preview:cloudflare --prefix web` from the repository root. Open `http://127.0.0.1:8787` in two browsers and enter usernames. Everyone joins one shared rocket; accepted edits save automatically and appear in the other browser. New/Open replaces the file for everyone. No accounts, application logging or version history are included. Use Download .ork to keep a separate copy; simulations and unit/selection choices remain local.
+
+The [coediting run and validation record](../../docs/web-app/coediting-poc.md) describes conflicts, reconnects and current limitations, including stale component drafts and conservative conflicts. Run `npm run test:coediting --prefix web` for the isolated two-browser/restart test. This supersedes the local-only descriptions below when using Wrangler. Plain Vite retains the existing local editor and its desktop acceptance workflow.
+
+## Browser-local workflow
 
 This implements the bounded P01–P04 editor from [the POC plan](../../docs/web-app/poc-plan.md). It runs in one browser with one in-memory archive, without login, credentials or a backend. React/TypeScript/Vite supplies the UI; the pinned Java reducer and archive codec run in a dedicated browser Web Worker. Java and Node are development/build tools, not physics services.
 

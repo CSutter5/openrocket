@@ -20,6 +20,7 @@ export interface DocumentView {
   simulations: import('./simulation/saved').SavedSimulation[];
 }
 export type Action =
+  | { type: 'sync'; bytes: Uint8Array; filename: string; identity: import('@openrocket/contracts').IdentitySidecar }
   | { type: 'new' }
   | { type: 'addComponent'; expectedHash: string; selectedId: string; componentType: string; position: 'after' | 'end' }
   | { type: 'componentProperty'; expectedHash: string; id: string; key: number; value: string; attributes: Record<string, string> }
@@ -36,4 +37,4 @@ export type Action =
   | { type: 'deleteConfiguration'; expectedHash: string; configurationId: string }
   | { type: 'flightSnapshot'; expectedHash: string; configurationId: string; simulationId?: string; integrator: import('./simulation/provenance').Integrator }
   | { type: 'export' };
-export interface Reply { view: DocumentView; notice: string; selectedId?: string; bytes?: Uint8Array; snapshot?: import('./simulation/provenance').FlightSnapshot }
+export interface Reply { view: DocumentView; notice: string; configurationId?: string; selectedId?: string; bytes?: Uint8Array; snapshot?: import('./simulation/provenance').FlightSnapshot }

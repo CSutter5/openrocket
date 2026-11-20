@@ -45,6 +45,9 @@ try {
   page.on('request', request => requests.push(request.url()));
   page.on('worker', worker => workers.push(worker.url()));
   await page.goto(url);
+  await page.getByLabel('Username', { exact: true }).fill('Cloudflare smoke');
+  await page.getByRole('button', { name: 'Join shared file', exact: true }).click();
+  await page.locator('.session-label').filter({ hasText: 'Connected' }).waitFor();
   await openSample(page, 'Open explicit tube sample');
   await openProperties(page);
   await page.getByRole('button', { name: 'Tube bodytube', exact: true }).click();

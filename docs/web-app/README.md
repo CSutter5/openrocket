@@ -1,5 +1,7 @@
 # OpenRocket web application plan
 
+The November 20 follow-up adds the authorized [one shared-file coediting POC](coediting-poc.md) (ADR-26): username-only joining, trusted shared commands and current-draft persistence, without accounts, application logging or version history. Earlier local-only and collaboration deferrals below describe the preceding milestones.
+
 Status: bounded local editor POC and GP passed, November 18, 2026. The user subsequently authorized the drawing/units extension and the bounded local [browser simulation workflow](browser-simulation.md); see ADR-16/17. The November 19 request additionally authorizes [Cloudflare static hosting preparation](cloudflare-deployment.md), explicitly stopping before deployment (ADR-19). See [acceptance evidence](poc-acceptance.md) and the [local run guide](../../web/app/README.md). The user has deferred accounts, authentication and 100% desktop feature compatibility until after the POC. Follow the [POC scope, ordered packets and GP acceptance gate](poc-plan.md). Existing G1 proofs are reusable evidence; G1 remains held for the broader product and does not block these explicitly authorized slices.
 
 ## Scope and constraints

@@ -116,6 +116,8 @@ Exit: representative designs can be created/edited/imported/exported and opened 
 
 ### T07 — Collaboration agent: shared commands and durable recovery
 
+The November 20 request authorizes the bounded [one shared-file coediting POC](coediting-poc.md), without the full packet's account/history prerequisites. ADR-26 records its conservative concurrency and recovery contract; this does not pass all of G3.
+
 Depends on T05/T06 and the trusted reducer from T01. Own future `web/worker/repositories/`, WebSocket protocol, collaboration client, and recovery tests. Use one repository object per design with branch subscriptions. Implement persisted command order/deduplication, transactional draft state, optimistic reconciliation, field preconditions, atomic graph edits, presence, reconnect/resync, undo conflicts, authorization, backpressure, schema negotiation, and hibernation recovery.
 
 Exit: G3 proves two independent browsers editing one document, same-field and structural conflicts, disconnect/reconnect, duplicate/reordered messages, slow clients, object eviction, and deployment restart. No acknowledged command is lost or applied twice. Export the jointly edited file and verify it in desktop. Describe the retry/compaction window and stale-client recovery behavior explicitly.

@@ -2,6 +2,8 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
+The November 20 follow-up authorizes [one shared-file coediting POC](coediting-poc.md) (ADR-26), with username prompts and no accounts, logging or version history. Use the app's Wrangler preview for collaboration; plain Vite remains local. Read its conservative concurrency, current-draft persistence and stale-dialog limits before changing transport. This supersedes earlier local-only deferrals for this bounded slice.
+
 The latest screenshot-guided follow-up adds [desktop-style component dialogs and individual field units](component-dialogs.md) (ADR-25), with atomic OK/Cancel and the existing scalar editor under Advanced. The parts library is excluded. Read its units, optional-field and native-verification boundaries before changing the dialogs.
 
 The preceding follow-up enables [editable imported properties and component tree actions](component-editing.md) (ADR-24), and reduces/unletters the CG/CP symbols. Read its raw-field, stage-reference and desktop-deletion verification boundaries before changing editor commands.

@@ -2,7 +2,7 @@ import { exportArchive, importArchive, sha256, type ExpandedArchive } from '@ope
 import { replaceSpans, simulationStatusChanges } from '../../../packages/ork-format/src/radius.js';
 import { catalogMotor, loadMotorCurve } from './motor-catalog.ts';
 const escape = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-export async function assignMotor(archive: ExpandedArchive, configurationId: string, mountId: string, key: string, delay: string) {
+export async function assignMotor(archive: ExpandedArchive, configurationId: string, mountId: string, key: string, delay: string, fetchCurve: typeof fetch = fetch) {
   if (archive.mode !== 'editable') throw new Error('Preservation-only archives cannot change motors');
   if (!archive.parsed.components[0]?.children.some(n => n.name === 'motorconfiguration' && n.attributes.configid?.value === configurationId)) throw new Error('Unknown motor configuration');
   const component = archive.parsed.components.find(n => n.id === mountId), mounts = component?.children.filter(n => n.name === 'motormount') ?? [];
@@ -28,7 +28,7 @@ export async function assignMotor(archive: ExpandedArchive, configurationId: str
     if (mount.selfClosing) throw new Error('Incomplete motor mount settings');
     replacements.push({ start: mount.contentEnd, end: mount.contentEnd, text: `<motor configid="${escape(configurationId)}">` + Object.entries(fields).map(([name, value]) => `<${name}>${escape(value)}</${name}>`).join('') + '</motor>' });
   }
-  const bytes = await loadMotorCurve(motor), path = `thrustcurves/${motor.digest}.rse`;
+  const bytes = await loadMotorCurve(motor, fetchCurve), path = `thrustcurves/${motor.digest}.rse`;
   const existing = archive.entries.find(e => e.path === path);
   if (existing && existing.sha256 !== motor.sha256) {
     for (const ref of archive.parsed.nodes.filter(n => n.name === 'motor' && n.parent?.name === 'motormount' && !refs.includes(n))) {

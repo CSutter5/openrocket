@@ -1,5 +1,7 @@
 # Cloudflare browser editor hosting
 
+The November 20 [coediting POC](coediting-poc.md) supersedes this historical assets-only configuration: the current app config includes a Worker entry point and one `SharedRocket` Durable Object binding/migration. Local preview now prompts for usernames and shares a persisted current draft. A later deployment would provision this object; it is no longer a static-only deployment. No deployment is performed by the coediting task. The commands below remain applicable, while the original no-API/no-storage statements describe ADR-19's earlier milestone.
+
 The November 19, 2026 request authorizes preparing the existing browser editor for Cloudflare, with an explicit stop before deployment. This is the static hosting slice of T04 described in ADR-19. The app still owns one in-memory document per browser; imports, edits and flight jobs run locally. Hosting does not add accounts, cloud saves, collaboration or server simulation. G1 and the broader release gates remain held.
 
 ## Prepare without deploying

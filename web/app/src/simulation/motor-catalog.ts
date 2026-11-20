@@ -13,8 +13,8 @@ export function catalogMotor(key: string) {
   if (!motor) throw new Error('Unknown catalog motor');
   return motor;
 }
-export async function loadMotorCurve(motor: CatalogMotor) {
-  const response = await fetch(`/motors/${motor.sha256}.rse`);
+export async function loadMotorCurve(motor: CatalogMotor, fetchCurve: typeof fetch = fetch) {
+  const response = await fetchCurve(`/motors/${motor.sha256}.rse`);
   if (!response.ok) throw new Error(`Motor curve unavailable (${motor.designation}); retry after the catalog assets are available`);
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (await sha256(bytes) !== motor.sha256) throw new Error('Motor catalog curve hash mismatch');

@@ -14,6 +14,7 @@
     "test:app": "npm test --workspace @openrocket/local-editor",
     "prepare:cloudflare": "npm run build --workspace @openrocket/engine-proof && npm run check:cloudflare --workspace @openrocket/local-editor",
     "preview:cloudflare": "npm run preview:cloudflare --workspace @openrocket/local-editor",
+    "test:coediting": "npm run test:coediting --workspace @openrocket/local-editor",
     "test:cloudflare": "npm run test:cloudflare --workspace @openrocket/local-editor"
   },
   "devDependencies": {
