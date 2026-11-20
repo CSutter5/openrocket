@@ -3,6 +3,7 @@ import type { Action } from './model';
 export interface SharedSnapshot { bytes: number[]; identity: IdentitySidecar; filename: string }
 export interface SharedState { token: string; snapshot: SharedSnapshot }
 export type SharedMessage =
+  | { type: 'deleted' }
   | { type: 'access'; canEdit: boolean; username: string }
   | { type: 'state'; state: SharedState; requestId?: string; notice?: string; configurationId?: string; selectedId?: string }
   | { type: 'presence'; users: string[] }

@@ -3,7 +3,7 @@ import { LIMITS, componentNames, renameComponent, exportArchive } from '@openroc
 import { newRocket } from '../src/components';
 import { createDocumentSession } from '../src/document-session';
 import { sharedActions, type SharedCommand, type SharedState } from '../src/coediting';
-import { authentication } from './auth';
+import { accountSession } from './access';
 import type { Env, SocketIdentity } from './env';
 const chunkSize = 64 * 1024;
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
@@ -50,6 +50,18 @@ export class SharedRocket {
   async fetch(request: CF.Request) {
     return this.serial(async () => {
       const url = new URL(request.url);
+      if (url.pathname === '/delete-rocket' && request.method === 'POST') {
+        const actor = await accountSession(this.env, request.headers), id = request.headers.get('X-Rocket-Id');
+        if (!actor) return CFResponse.json({ error: 'Sign in to delete a rocket' }, { status: 401 });
+        const rocket = await this.env.DB.prepare('SELECT owner_id AS ownerId FROM rocket WHERE id=?').bind(id).first<{ ownerId: string }>();
+        if (!rocket) return CFResponse.json({ error: 'Rocket not found' }, { status: 404 });
+        if (actor.user.mustChangePassword || actor.user.id !== rocket.ownerId && !actor.user.isAdmin) return CFResponse.json({ error: 'Only the owner or administrator can delete this rocket' }, { status: 403 });
+        await this.env.DB.prepare('UPDATE rocket SET deleted_at=? WHERE id=?').bind(Date.now(), id).run();
+        for (const socket of this.ctx.getWebSockets()) { this.send(socket, { type: 'deleted' });socket.close(1008, 'Rocket deleted'); }
+        await this.ctx.storage.deleteAll();this.state = undefined;
+        await this.env.DB.prepare('DELETE FROM rocket WHERE id=?').bind(id).run();
+        return CFResponse.json({ deleted: true });
+      }
       // Only the API's trusted binding calls these paths; public routes forward socket URLs.
       if (url.pathname === '/initialize-upload' && request.method === 'POST') {
         if (this.state) return CFResponse.json({ error: 'Rocket already initialized' }, { status: 409 });
@@ -67,7 +79,9 @@ export class SharedRocket {
       if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new CFResponse('WebSocket required', { status: 426 });
       const rocketId = request.headers.get('X-Rocket-Id');
       if (!rocketId) return new CFResponse('Rocket not found', { status: 404 });
-      const session = await authentication(this.env).api.getSession({ headers: request.headers as unknown as Headers });
+      const activeRocket = await this.env.DB.prepare('SELECT rocket.id FROM rocket JOIN user ON user.id=rocket.owner_id WHERE rocket.id=? AND rocket.deleted_at IS NULL AND user.deleting=0').bind(rocketId).first();
+      if (!activeRocket) return new CFResponse('Rocket not found', { status: 404 });
+      const session = await accountSession(this.env, request.headers);
       const identity: SocketIdentity = { rocketId, username: session?.user.username ?? 'Visitor', ...(session ? { sessionId: session.session.id, userId: session.user.id } : {}) };
       if (!this.state) {
         const rocket = await this.env.DB.prepare('SELECT name, slug FROM rocket WHERE id=?').bind(rocketId).first<{ name: string; slug: string }>();
@@ -81,7 +95,7 @@ export class SharedRocket {
       const pair = new Pair();
       this.ctx.acceptWebSocket(pair[1]);
       pair[1].serializeAttachment(identity);
-      pair[1].send(JSON.stringify({ type: 'access', canEdit: !!session, username: identity.username }));
+      pair[1].send(JSON.stringify({ type: 'access', canEdit: !!session && !session.user.mustChangePassword, username: identity.username }));
       pair[1].send(JSON.stringify({ type: 'state', state: this.state }));
       this.presence();
       return new CFResponse(null, { status: 101, webSocket: pair[0] });
@@ -97,7 +111,7 @@ export class SharedRocket {
   }
   private async requireEditor(socket: CF.WebSocket) {
     const identity = socket.deserializeAttachment() as SocketIdentity;
-    const active = identity.sessionId && await this.env.DB.prepare('SELECT session.id FROM session JOIN user ON session.user_id=user.id JOIN rocket ON rocket.id=? WHERE session.id=? AND session.user_id=? AND session.expires_at>?')
+    const active = identity.sessionId && await this.env.DB.prepare('SELECT session.id FROM session JOIN user ON session.user_id=user.id JOIN rocket ON rocket.id=? JOIN user AS owner ON owner.id=rocket.owner_id LEFT JOIN app_admin ON app_admin.user_id=user.id WHERE session.id=? AND session.user_id=? AND session.expires_at>? AND user.deleting=0 AND owner.deleting=0 AND rocket.deleted_at IS NULL AND COALESCE(app_admin.must_change_password,0)=0')
       .bind(identity.rocketId, identity.sessionId, identity.userId, Date.now()).first();
     if (!active) {
       this.send(socket, { type: 'access', canEdit: false, username: identity.username });
@@ -108,7 +122,8 @@ export class SharedRocket {
   async webSocketMessage(socket: CF.WebSocket, message: string | ArrayBuffer) {
     return this.serial(async () => {
       let requestId = '';
-      const before = this.state!;
+      const before = this.state;
+      if (!before) { this.send(socket, { type: 'deleted' });socket.close(1008, 'Rocket deleted');return; }
       try {
         if (typeof message !== 'string' || message.length > LIMITS.upload * 4 + 100000) throw new Error('Invalid or oversized command');
         const command = JSON.parse(message) as SharedCommand;

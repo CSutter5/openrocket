@@ -16,7 +16,8 @@
     "preview:cloudflare": "npm run preview:cloudflare --workspace @openrocket/local-editor",
     "test:coediting": "npm run test:coediting --workspace @openrocket/local-editor",
     "test:cloudflare": "npm run test:cloudflare --workspace @openrocket/local-editor",
-    "test:accounts": "npm run test:accounts --workspace @openrocket/local-editor"
+    "test:accounts": "npm run test:accounts --workspace @openrocket/local-editor",
+    "test:management": "npm run test:management --workspace @openrocket/local-editor"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

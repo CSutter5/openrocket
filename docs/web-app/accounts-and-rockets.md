@@ -1,5 +1,7 @@
 # Accounts and public rockets
 
+The subsequent [administrator and deletion record](admin-and-deletion.md) supersedes this milestone's deletion/admin deferrals and dropdown creation UI. The storage and public editing contracts below remain in effect.
+
 The November 20, 2026 follow-up authorizes accounts and multiple rockets owned by each account. The user explicitly chose public viewing and editing by every signed-in account; per-rocket sharing permissions remain future work. This supersedes the username-only room and account deferrals for this bounded increment (ADR-27). It does not add account administration, private documents or version history, or pass the broader G1/G2–G7 gates.
 
 ## Data and ownership

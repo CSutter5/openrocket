@@ -31,7 +31,7 @@ try {
   assert.equal(sessionCookie.httpOnly, true);assert.equal(sessionCookie.sameSite, 'Lax');
   await owner.goto(url);
   assert.equal(await owner.locator('.new-rocket').getByLabel('URL name', { exact: true }).count(), 0);
-  assert.equal(await owner.locator('.new-rocket').textContent().then(text => text.includes('/alice/')), false);
+  assert.equal(await owner.getByRole('form', { name: 'Start from scratch' }).textContent().then(text => text.includes('/alice/')), false);
   const first = await createRocket(owner, url, 'alice', 'Alpha rocket');
   await owner.getByRole('button', { name: 'Alpha rocket rocket', exact: true }).waitFor();
   assert.equal(await owner.locator('.filename').textContent(), 'alpha-rocket.ork');
@@ -110,9 +110,13 @@ try {
   const opaque = new Uint8Array([1, 9, 20, 26, 0, 255]);
   const upload = zipSync({ ...Object.fromEntries(source.entries.map(entry => [entry.path, entry.bytes])), 'opaque.bin': opaque });
   await owner.goto(url);
-  await owner.getByLabel('Start with', { exact: true }).selectOption('upload');
+  const dropped = await owner.evaluateHandle(bytes => { const transfer = new DataTransfer();transfer.items.add(new File([new Uint8Array(bytes)], 'Dropped rocket.ork', { type: 'application/octet-stream' }));return transfer; }, Array.from(upload));
+  await owner.locator('.rocket-drop').dispatchEvent('drop', { dataTransfer: dropped });
+  assert.equal(await owner.getByLabel('Uploaded rocket name', { exact: true }).inputValue(), 'Dropped rocket');
+  await owner.getByText('Selected: Dropped rocket.ork', { exact: true }).waitFor();
+  await owner.getByLabel('Uploaded rocket name', { exact: true }).fill('');
   await owner.getByLabel('Rocket file (.ork)', { exact: true }).setInputFiles({ name: 'Imported rocket.ork', mimeType: 'application/octet-stream', buffer: Buffer.from(upload) });
-  assert.equal(await owner.getByLabel('Rocket name', { exact: true }).inputValue(), 'Imported rocket');
+  assert.equal(await owner.getByLabel('Uploaded rocket name', { exact: true }).inputValue(), 'Imported rocket');
   await owner.setViewportSize({ width: 390, height: 844 });
   assert.equal(await owner.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   const createBounds = await owner.getByRole('button', { name: 'Upload rocket', exact: true }).boundingBox();
@@ -127,7 +131,7 @@ try {
   assert.deepEqual(await download(visitor), Buffer.from(upload));
   const directoryCount = (await (await owner.context().request.get(url + '/api/rockets')).json()).rockets.length;
   assert.equal(directoryCount, 6);
-  await owner.goto(url);await owner.getByLabel('Start with', { exact: true }).selectOption('upload');
+  await owner.goto(url);
   await owner.getByLabel('Rocket file (.ork)', { exact: true }).setInputFiles({ name: 'bad.ork', mimeType: 'application/octet-stream', buffer: Buffer.from([0, 1, 2]) });
   await owner.getByRole('button', { name: 'Upload rocket', exact: true }).click();
   await owner.getByRole('alert').waitFor();assert.equal(new URL(owner.url()).pathname, '/');

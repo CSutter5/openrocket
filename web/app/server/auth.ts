@@ -16,7 +16,7 @@ export function authentication(env: Env) {
     session: { expiresIn: 7 * 24 * 3600, cookieCache: { enabled: false } },
     advanced: { useSecureCookies: env.AUTH_BASE_URL.startsWith('https:') },
     telemetry: { enabled: false },
-    plugins: [username({ minUsernameLength: 3, maxUsernameLength: 32, usernameValidator: validUsername,
+    plugins: [username({ minUsernameLength: 3, maxUsernameLength: 32, usernameValidator: value => value === 'admin' || validUsername(value),
       usernameNormalization: value => value.toLowerCase(), validationOrder: { username: 'post-normalization' } })],
   });
 }

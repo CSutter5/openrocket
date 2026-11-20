@@ -2,7 +2,9 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
-The latest creation follow-up removes path fields from New rocket and adds validated `.ork` upload as a newly owned rocket (ADR-28). Read [the creation/upload publication contract](accounts-and-rockets.md#creation-and-upload-follow-up) before changing creation: uploaded bytes are persisted before public D1 metadata appears, and duplicate names get internal URL suffixes.
+The latest follow-up adds [two creation cards, confirmed owner deletion and a protected administrator](admin-and-deletion.md) (ADR-29). The user requested a new `admin` login with temporary password `admin`, requiring a change before any writes or management operations. Read the singleton bootstrap, session-reset race, immutable deletion ID and D1/DO cleanup boundaries before changing these flows. No app deployment is included.
+
+The preceding creation follow-up removes path fields from New rocket and adds validated `.ork` upload as a newly owned rocket (ADR-28). Read [the creation/upload publication contract](accounts-and-rockets.md#creation-and-upload-follow-up) before changing creation: uploaded bytes are persisted before public D1 metadata appears, and duplicate names get internal URL suffixes.
 
 The subsequent November 20 request adds [accounts and multiple public owned rockets](accounts-and-rockets.md) (ADR-27). All signed-in accounts may coedit any rocket; visitors are readers. Account/ownership metadata uses a real Cloudflare D1 binding, with one Durable Object per rocket. The remote D1 database is created/migrated, but the app is not deployed. Read the new run/secret setup and old-singleton migration limits before changing account or route behavior.
 

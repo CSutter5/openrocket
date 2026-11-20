@@ -5,6 +5,7 @@ export const user = sqliteTable('user', {
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull(), image: text('image'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(), updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
   username: text('username').notNull().unique(), displayUsername: text('display_username'),
+  deleting: integer('deleting', { mode: 'boolean' }).notNull().default(false),
 });
 export const session = sqliteTable('session', {
   id: text('id').primaryKey(), expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(), token: text('token').notNull().unique(),

@@ -16,7 +16,8 @@
     "test:coediting": "npm run check:cloudflare && node test/coediting.mjs",
     "test:accounts": "npm run check:cloudflare && node test/accounts.mjs",
     "migrate:local": "wrangler d1 migrations apply DB --local",
-    "migrate:remote": "wrangler d1 migrations apply DB --remote"
+    "migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "test:management": "npm run check:cloudflare && node test/management.mjs"
   },
   "dependencies": {
     "@openrocket/contracts": "0.0.0",

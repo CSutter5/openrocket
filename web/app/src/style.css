@@ -299,3 +299,16 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .rocket-list article > a { display: grid; gap: .35rem; text-decoration: none; }
 .rocket-list article > a strong { font-size: 1.1rem; }
 .rocket-list article > a span { color: var(--muted); overflow-wrap: anywhere; }
+
+.rocket-create-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+.rocket-create-grid .new-rocket { max-width: none; margin: 0; align-content: start; }
+.rocket-create-grid .new-rocket p { margin: 0 0 .4rem; }
+.rocket-drop { display: grid; gap: .5rem; padding: 1rem; border: 2px dashed #71808f; border-radius: .35rem; overflow-wrap: anywhere; }
+.rocket-drop input { width: 100%; padding: 0; }
+.management-actions { display: flex; gap: .65rem; align-items: center; flex-wrap: wrap; }
+.danger-button { border-color: #c48d64; color: #ffd4ad; }
+.admin-table-scroll { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th, .admin-table td { padding: .75rem; text-align: left; border-bottom: 1px solid var(--border); }
+.admin-panel h2 { margin-top: 1.5rem; }
+@media (max-width: 700px) { .rocket-create-grid { grid-template-columns: minmax(0, 1fr); } .rocket-list article { align-items: start; flex-wrap: wrap; } }

@@ -40,6 +40,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
   useEffect(() => {
     const unsubscribe = subscribeCollaboration((status, reply) => {
       setCollaboration(status);
+      if (status.phase === 'deleted') setError('This rocket was deleted. Return to All rockets.');
       if (reply) {
         const id = selection.current.document?.components[selection.current.selected]?.id;
         const found = reply.view.components.findIndex(c => c.id === id);
@@ -48,7 +49,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
       }
     });
     setBusy(true);
-    void (sharedRocket ? connectShared(sharedRocket.username, sharedRocket.slug) : openSample('rocket-sample.ork'))
+    void (sharedRocket ? connectShared(sharedRocket.username, sharedRocket.slug, sharedRocket.id) : openSample('rocket-sample.ork'))
       .catch(failure => setError(message(failure))).finally(() => setBusy(false));
     return unsubscribe;
   }, []);
@@ -178,7 +179,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
         {tabs.map(([id, label], index) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={tab === id} aria-controls={`panel-${id}`} tabIndex={tab === id ? 0 : -1} onKeyDown={event => tabKey(event, index)} onClick={() => setTab(id)}>{label}</button>)}
       </div>
     </header>
-    {shared && collaboration.phase !== 'local' && <div className="collaboration-bar" aria-label="Collaborators">{collaboration.phase === 'connected' ? `${readOnly ? 'Viewing · Sign in to edit · ' : ''}Connected (${collaboration.users.length}): ${collaboration.users.join(', ')}` : 'Connecting to the shared file… Editing will resume when connected.'}</div>}
+    {shared && collaboration.phase !== 'local' && <div className="collaboration-bar" aria-label="Collaborators">{collaboration.phase === 'connected' ? `${readOnly ? 'Viewing · Sign in to edit · ' : ''}Connected (${collaboration.users.length}): ${collaboration.users.join(', ')}` : collaboration.phase === 'deleted' ? 'Rocket deleted' : 'Connecting to the shared file… Editing will resume when connected.'}</div>}
     <main>
       {error && <p role="alert" className="error app-error">{error}</p>}
       {document && <>
