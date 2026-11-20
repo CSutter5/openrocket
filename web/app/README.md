@@ -6,6 +6,8 @@ Production accounts, sessions and ownership metadata use Cloudflare D1; each roc
 
 The one-time migration creates username `admin` with temporary password `admin`. Sign in on the home page and set a new password of at least eight characters before using the account. Then open Admin panel or `/admin/` to list users/rockets, delete either, or revoke ordinary users' sessions. Only this protected administrator account can access the panel. Later migrations/previews never reset its password. See the [administrator and deletion contract](../../docs/web-app/admin-and-deletion.md).
 
+Owners can Rename rocket from its library entry or editor header; existing share links remain valid. Account settings lets any signed-in user change their password using the current password and signs out their other sessions. Run `npm run test:account-settings --prefix web` for these browser and authorization checks; see the [name/password contract](../../docs/web-app/account-settings.md).
+
 The [account run and verification record](../../docs/web-app/accounts-and-rockets.md) describes auth, URLs, concurrency, storage and deployment setup. Run `npm run test:accounts --prefix web`, `npm run test:coediting --prefix web`, `npm run test:management --prefix web` or `npm run test:cloudflare --prefix web` for their separate checks. Deployment now requires a stable `AUTH_SECRET` and `OPENROCKET_ORIGIN`; `./deploy-cloudflare.sh --dry-run` still stops before remote changes. No app deployment was performed for this increment. Plain Vite retains the local-only workflow below.
 
 ## Browser-local workflow

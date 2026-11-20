@@ -1,8 +1,7 @@
 import type * as CF from '@cloudflare/workers-types';
 import type { Env } from './env';
-import { authentication } from './auth';
-import { accountSession } from './access';
-import { body, fail, json } from './http';
+import { accountSession, changePassword } from './access';
+import { fail, json } from './http';
 export function deleteRocket(env: Env, id: string, headers: CF.Headers) {
   const forwarded = new Headers(headers as unknown as Headers);forwarded.set('X-Rocket-Id', id);
   return env.SHARED_ROCKET.getByName(`rocket:${id}`).fetch(new Request('https://room.internal/delete-rocket', { method: 'POST', headers: forwarded }) as unknown as CF.Request);
@@ -14,18 +13,7 @@ export async function adminApi(request: CF.Request, env: Env): Promise<CF.Respon
   const path = new URL(request.url).pathname;
   if (request.method !== 'GET' && request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
   if (path === '/api/admin/password' && request.method === 'POST') {
-    const data = await body(request);
-    if (typeof data.currentPassword !== 'string' || typeof data.newPassword !== 'string') return fail('Current and new passwords are required', 400);
-    const changed = await authentication(env).api.changePassword({ headers: request.headers as unknown as Headers,
-      body: { currentPassword: data.currentPassword, newPassword: data.newPassword, revokeOtherSessions: true }, asResponse: true });
-    if (!changed.ok) return changed as unknown as CF.Response;
-    const result = await changed.clone().json() as { token: string };
-    if (!result.token) return fail('Password changed; sign in again to complete setup', 503);
-    await env.DB.batch([
-      env.DB.prepare('DELETE FROM session WHERE user_id=? AND token<>?').bind(session.user.id, result.token),
-      env.DB.prepare('UPDATE app_admin SET must_change_password=0, credential_version=credential_version+1 WHERE user_id=?').bind(session.user.id),
-    ]);
-    return changed as unknown as CF.Response;
+    return changePassword(request, env);
   }
   if (session.user.mustChangePassword) return fail('Change your temporary password before using admin tools', 403);
   if (path === '/api/admin/users' && request.method === 'GET') {

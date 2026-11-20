@@ -5,7 +5,7 @@ import type { Env } from './env';
 import type { PublicRocket as Rocket } from '../src/accounts';
 export { SharedRocket } from './room';
 import { CFResponse, json, fail, body, readBody } from './http';
-import { accountSession } from './access';
+import { accountSession, changePassword } from './access';
 import { adminApi, deleteRocket } from './management';
 const authPaths = new Set(['/sign-up/email', '/sign-in/username', '/get-session', '/sign-out']);
 const slugPattern = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
@@ -16,17 +16,17 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
   if (path.startsWith('/api/auth/')) {
     const route = path.slice('/api/auth'.length);
     if (!authPaths.has(route)) return fail('Account operation unavailable', 404);
-    let adminVersion: number | undefined;
+    let credential: { userId: string; password: string } | null = null;
     if (request.method === 'POST') {
       if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
       const data = await body(request.clone());
-      if (route === '/sign-in/username' && typeof data.username === 'string' && data.username.toLowerCase() === 'admin') adminVersion = (await env.DB.prepare('SELECT credential_version FROM app_admin WHERE id=1').first<{ credential_version: number }>())?.credential_version;
+      if (route === '/sign-in/username' && typeof data.username === 'string') credential = await env.DB.prepare("SELECT account.user_id AS userId, account.password FROM account JOIN user ON user.id=account.user_id WHERE user.username=? AND account.provider_id='credential'").bind(data.username.toLowerCase()).first();
       if (route === '/sign-up/email' && (typeof data.username !== 'string' || !validUsername(data.username.toLowerCase()))) return fail('Use a username of 3–32 letters, digits, hyphens or underscores, starting with a letter', 400);
     }
     const response = await authentication(env).handler(request as unknown as Request);
-    if (adminVersion !== undefined && response.ok) {
-      const current = await env.DB.prepare('SELECT credential_version FROM app_admin WHERE id=1').first<{ credential_version: number }>();
-      if (current?.credential_version !== adminVersion) {
+    if (credential && response.ok) {
+      const current = await env.DB.prepare("SELECT password FROM account WHERE user_id=? AND provider_id='credential'").bind(credential.userId).first<{ password: string }>();
+      if (current?.password !== credential.password) {
         const signedIn = await response.clone().json() as { token: string };
         await env.DB.prepare('DELETE FROM session WHERE token=?').bind(signedIn.token).run();
         return fail('Password changed during sign-in. Sign in again.', 401);
@@ -34,6 +34,7 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
     }
     return response as unknown as CF.Response;
   }
+  if (path === '/api/account/password' && request.method === 'POST') return changePassword(request, env);
   if (path.startsWith('/api/admin/')) return adminApi(request, env);
   if (path === '/api/session') {
     const session = await accountSession(env, request.headers);
@@ -95,10 +96,23 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
       if (staged && !published) await room.fetch(`https://room.internal/discard-upload?rocketId=${rocket.id}`, { method: 'POST' });
     }
   }
-  const match = /^\/api\/rockets\/([a-z][a-z0-9_-]{2,31})\/([a-z0-9_-]{1,80})(\/socket)?$/.exec(path);
+  const match = /^\/api\/rockets\/([a-z][a-z0-9_-]{2,31})\/([a-z0-9_-]{1,80})(\/(?:socket|rename))?$/.exec(path);
   if (match) {
     const rocket = await env.DB.prepare(rocketQuery + ' WHERE user.username=? AND rocket.slug=?' + (request.method === 'DELETE' ? '' : ' AND rocket.deleted_at IS NULL AND user.deleting=0')).bind(match[1], match[2]).first<Rocket>();
     if (!rocket) return fail('Rocket not found', 404);
+    if (match[3] === '/rename' && request.method === 'POST') {
+      if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
+      const session = await accountSession(env, request.headers);
+      if (!session) return fail('Sign in to rename a rocket', 401);
+      if (session.user.mustChangePassword || session.user.id !== rocket.ownerId && !session.user.isAdmin) return fail('Only the owner or administrator can rename this rocket', 403);
+      const data = await body(request);
+      if (data.rocketId !== rocket.id || data.expectedName !== rocket.name) return fail('Rocket changed. Reload before renaming it.', 409);
+      if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 100 || /[\x00-\x1f\x7f]/.test(data.name)) return fail('Enter a rocket name of 1–100 characters', 400);
+      const name = data.name.trim();
+      const changed = await env.DB.prepare('UPDATE rocket SET name=? WHERE id=? AND name=? AND deleted_at IS NULL AND EXISTS (SELECT 1 FROM user WHERE id=rocket.owner_id AND deleting=0)').bind(name, rocket.id, rocket.name).run();
+      if (!changed.meta.changes) return fail('Rocket changed. Reload before renaming it.', 409);
+      return json({ rocket: { ...rocket, name } });
+    }
     if (request.method === 'DELETE' && !match[3]) {
       if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
       const session = await accountSession(env, request.headers);
@@ -107,14 +121,14 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
       if (url.searchParams.get('rocketId') !== rocket.id) return fail('Rocket changed. Reload before deleting it.', 409);
       return deleteRocket(env, rocket.id, request.headers);
     }
-    if (match[3]) {
+    if (match[3] === '/socket') {
       if (url.searchParams.has('rocketId') && url.searchParams.get('rocketId') !== rocket.id) return fail('Rocket not found', 404);
       if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
       const forwarded = new Request(request.url, request as unknown as Request);
       forwarded.headers.set('X-Rocket-Id', rocket.id);
       return env.SHARED_ROCKET.getByName(`rocket:${rocket.id}`).fetch(forwarded as unknown as CF.Request);
     }
-    if (request.method === 'GET') return json({ rocket });
+    if (request.method === 'GET' && !match[3]) return json({ rocket });
   }
   return fail('Not found', 404);
 }

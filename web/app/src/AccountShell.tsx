@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LIMITS } from '@openrocket/ork-format';
 import { accountRequest, rocketPath, type AccountUser, type PublicRocket } from './accounts';
 import { ConfirmAction } from './ConfirmAction';
-import { AdminPanel, PasswordSetup } from './AdminPanel';
+import { AdminPanel } from './AdminPanel';
+import { AccountSettings } from './AccountSettings';
+import { RenameRocket } from './RenameRocket';
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 function AccountForm({ signup, close }: { signup: boolean; close: () => void }) {
   const [username, setUsername] = useState(''), [email, setEmail] = useState(''), [password, setPassword] = useState('');
@@ -31,6 +33,7 @@ function RocketLibrary({ user, owner }: { user: AccountUser | null; owner?: stri
   const [rockets, setRockets] = useState<PublicRocket[]>([]), [loaded, setLoaded] = useState(false);
   const [name, setName] = useState(''), [uploadName, setUploadName] = useState(''), [file, setFile] = useState<File>();
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [pendingDelete, setPendingDelete] = useState<PublicRocket>();
+  const [pendingRename, setPendingRename] = useState<PublicRocket>();
   async function load() { const result = await accountRequest<{ rockets: PublicRocket[] }>('/api/rockets' + (owner ? `?owner=${encodeURIComponent(owner)}` : ''));setRockets(result.rockets);setLoaded(true); }
   useEffect(() => { void load().catch(error => setError(failure(error))); }, [owner]);
   function choose(selected?: File) { setFile(selected);if (selected && !uploadName.trim()) setUploadName(selected.name.replace(/\.ork$/i, '').slice(0, 100)); }
@@ -69,9 +72,10 @@ function RocketLibrary({ user, owner }: { user: AccountUser | null; owner?: stri
     <div className="rocket-list" aria-label="Public rockets">{rockets.map(rocket => <article key={rocket.id}>
       <a href={rocketPath(rocket)}><strong>{rocket.name}</strong><span>{rocketPath(rocket)}</span></a>
       <div className="management-actions"><span>by <a href={rocket.username === 'admin' ? '/?owner=admin' : `/${rocket.username}/`}>{rocket.username}</a></span>
-        {user && (user.id === rocket.ownerId || user.isAdmin) && <button className="danger-button" onClick={() => setPendingDelete(rocket)}>Delete rocket</button>}
+        {user && (user.id === rocket.ownerId || user.isAdmin) && <><button onClick={() => setPendingRename(rocket)}>Rename rocket</button><button className="danger-button" onClick={() => setPendingDelete(rocket)}>Delete rocket</button></>}
       </div>
     </article>)}</div>
+    {pendingRename && <RenameRocket rocket={pendingRename} close={() => setPendingRename(undefined)} renamed={async () => { await load(); }}/>}
     {pendingDelete && <ConfirmAction title="Delete rocket" confirm="Delete rocket" close={() => setPendingDelete(undefined)} action={async () => { await accountRequest(`/api/rockets/${pendingDelete.username}/${pendingDelete.slug}?rocketId=${pendingDelete.id}`, undefined, 'DELETE');await load(); }}>
       <p>Are you sure you want to permanently delete “{pendingDelete.name}”?</p><p>This cannot be undone. Connected editors will lose access.</p>
     </ConfirmAction>}
@@ -82,8 +86,10 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
   const [user, setUser] = useState<AccountUser | null>(null), [ready, setReady] = useState(false);
   const [form, setForm] = useState<'signin' | 'signup'>(), [error, setError] = useState('');
   const [rocket, setRocket] = useState<PublicRocket>(), [deleteCurrent, setDeleteCurrent] = useState(false);
+  const [renameCurrent, setRenameCurrent] = useState(false);
   const parts = location.pathname.split('/').filter(Boolean), owner = parts[0] || new URLSearchParams(location.search).get('owner') || undefined;
   const adminPage = location.pathname === '/admin/';
+  const settingsPage = location.pathname === '/' && new URLSearchParams(location.search).get('account') === 'settings';
   useEffect(() => {
     void (async () => {
       const session = await accountRequest<{ user: AccountUser | null }>('/api/session');setUser(session.user);
@@ -98,11 +104,13 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
   return <>
     <nav className="account-bar" aria-label="Account">
       <a href="/">All rockets</a>{user && !user.mustChangePassword && <a href={user.username === 'admin' ? '/?owner=admin' : `/${user.username}/`}>My rockets</a>}{user?.isAdmin && !user.mustChangePassword && <a href="/admin/">Admin panel</a>}
-      {rocket && <span className="rocket-owner">{rocketPath(rocket)}</span>}
-      {rocket && user && !user.mustChangePassword && (user.id === rocket.ownerId || user.isAdmin) && <button className="danger-button" onClick={() => setDeleteCurrent(true)}>Delete rocket</button>}
+      {user && !user.mustChangePassword && <a href="/?account=settings">Account settings</a>}
+      {rocket && <span className="rocket-owner"><strong>{rocket.name}</strong> · {rocketPath(rocket)}</span>}
+      {rocket && user && !user.mustChangePassword && (user.id === rocket.ownerId || user.isAdmin) && <><button onClick={() => setRenameCurrent(true)}>Rename rocket</button><button className="danger-button" onClick={() => setDeleteCurrent(true)}>Delete rocket</button></>}
       <div>{user ? <><span>Signed in as {user.username}</span><button onClick={() => void signOut()}>Sign out</button></> : <><button onClick={() => setForm('signin')}>Sign in</button><button onClick={() => setForm('signup')}>Create account</button></>}</div>
     </nav>
-    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <PasswordSetup/> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
+    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <AccountSettings initial/> : settingsPage ? user ? <AccountSettings/> : <p role="alert">Sign in to change your password.</p> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
+    {renameCurrent && rocket && <RenameRocket rocket={rocket} close={() => setRenameCurrent(false)} renamed={setRocket}/>}
     {deleteCurrent && rocket && <ConfirmAction title="Delete rocket" confirm="Delete rocket" close={() => setDeleteCurrent(false)} action={async () => { await accountRequest(`/api/rockets/${rocket.username}/${rocket.slug}?rocketId=${rocket.id}`, undefined, 'DELETE');location.assign('/'); }}>
       <p>Are you sure you want to permanently delete “{rocket.name}”?</p><p>This cannot be undone. Connected editors will lose access.</p>
     </ConfirmAction>}
