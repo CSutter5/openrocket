@@ -210,3 +210,10 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .flight-toolbar label { flex-direction: column; align-items: start; gap: 0; }
   .flight-toolbar select { width: 130px; padding: .15rem .4rem; }
 }
+.imported-properties { margin: .75rem 0; }
+.imported-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: .65rem; padding-top: .5rem; }
+.imported-property fieldset { min-width: 0; height: 100%; border: 1px solid var(--border); padding: .6rem; }
+.imported-property legend { padding: 0 .3rem; }
+.imported-property label { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .45rem; }
+.imported-property input, .imported-property select, .imported-property textarea { width: 100%; min-width: 0; }
+.imported-property textarea { resize: vertical; background: #252930; color: #e0e4ec; font: inherit; }

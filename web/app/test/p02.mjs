@@ -70,14 +70,15 @@ try {
     await page.getByLabel('Open local .ork').setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(text)});
     await page.getByRole('button',{name:'Tube bodytube',exact:true}).click();
     assert.equal(await page.getByLabel('BodyTube outer radius (m)',{exact:true}).isDisabled(),true);
-    await page.getByText(reason,{exact:false}).first().waitFor();
+    if(name==='automatic.ork') assert.equal(await page.getByLabel('radius value',{exact:true}).isEnabled(),true);
+    else await page.getByText(reason,{exact:false}).first().waitFor();
     assert.deepEqual(await downloadBytes(),Buffer.from(text));
     if(name==='future.ork') assert.equal(await page.getByLabel('Component name',{exact:true}).isDisabled(),true);
   }
   assert.deepEqual(errors,[]);
   await writeFile(resolve(output,'interactions.json'),JSON.stringify({outcome:'passed',browser:browser.version(),dedicatedWorker:true,
     checks:['selection and keyboard activation','escaped rename','radius growth','thickness clamp','intrinsic mass/local CG and SVG update',
-      'no-op name/radius','empty/NaN/zero/negative/oversized number rejection','unsupported stage and automatic-radius graph',
+      'no-op name/radius','empty/NaN/zero/negative/oversized number rejection','legacy quick-control boundaries and editable raw automatic radius',
       'preservation-only version','malformed replacement retention','byte-identical downloads after invalid edits and failed replacement'],pageErrors:errors},null,2)+'\n');
   await page.screenshot({path:resolve(output,'read-only.png'),fullPage:true});
   console.log('P02 Chromium: Java Worker, rename, radius/mass/CG/SVG, no-op, invalid numbers, keyboard selection, read-only component, rejected import and recovery passed');

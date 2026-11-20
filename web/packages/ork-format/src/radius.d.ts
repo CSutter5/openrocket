@@ -32,6 +32,7 @@ export interface RingState {
 }
 export interface AutomaticRingTubeState extends PresetTubeState { ring: RingState; sibling?: Record<string, unknown> }
 export function tubeRadiusInput(archive: ExpandedArchive, id: string): TubeRadiusInput;
+export function validateTubeRadiusEdit(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): void;
 export function radiusSimulationEffects(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): { index: number; before: string; after: 'outdated' }[];
 export function applyTubeRadius(archive: ExpandedArchive, input: TubeRadiusInput, effects: IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState): Promise<ExpandedArchive>;
 export interface ProofPreset { key: string; type: string; manufacturer: string; partno: string; digest: string }

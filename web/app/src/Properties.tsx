@@ -1,25 +1,30 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LIMITS } from '@openrocket/ork-format';
 import type { Action, ComponentView } from './model';
+import { ImportedProperties } from './ImportedProperties';
 import { TubeProperties } from './TubeProperties';
 import { Schematic } from './Schematic';
 import { displayLength, lengthInput, lengthLabel, type LengthUnit } from './units';
 import { useLengthInput } from './useLengthInput';
 
-export function Properties({ component, editable, busy, edit, unit }: {
-  component: ComponentView; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
+export function Properties({ component, expectedHash, editable, busy, edit, unit }: {
+  component: ComponentView; expectedHash: string; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
 }) {
   const [name, setName] = useState(component.name ?? '');
   const radius = useLengthInput(component.tube?.state.radius ?? NaN, unit);
   const [numberError, setNumberError] = useState(false);
   const tube = component.tube;
+  const imported = <ImportedProperties component={component} expectedHash={expectedHash} editable={editable} busy={busy} edit={edit}/>;
+  const nameEditor = <form onSubmit={event => { event.preventDefault(); edit({ type: 'rename', id: component.id!, expected: component.name!, value: name }); }}>
+      <label>Component name<input value={name} maxLength={LIMITS.name} disabled={busy || !editable} onChange={e => setName(e.target.value)}/></label>
+      <button disabled={busy || !editable}>Apply name</button>
+    </form>;
   return <>
     <h2>{component.name || '(unnamed)'}</h2>
     <p className="component-kind">{component.type} · {editable ? 'Supported properties' : 'Read-only archive'}</p>
-    <div className="property-fields"><form onSubmit={event => { event.preventDefault(); edit({ type: 'rename', id: component.id!, expected: component.name!, value: name }); }}>
-      <label>Component name<input value={name} maxLength={LIMITS.name} disabled={busy || !editable} onChange={e => setName(e.target.value)}/></label>
-      <button disabled={busy || !editable}>Apply name</button>
-    </form>
+    {!tube && nameEditor}
+    {!tube && imported}
+    <div className="property-fields" hidden={!tube}>{tube && nameEditor}
     <form noValidate onSubmit={event => {
       event.preventDefault();
       const value = radius.metres;
@@ -43,10 +48,7 @@ export function Properties({ component, editable, busy, edit, unit }: {
       </dl>
       {'ring' in tube.state && <p>Automatic ring: outer radius {lengthLabel(tube.state.ring.outerRadius, unit)}; inner radius {lengthLabel(tube.state.ring.innerRadius, unit)}; intrinsic mass {tube.state.ring.mass} kg; local CG {lengthLabel(tube.state.ring.cg, unit)}.</p>}
     </section>}
-    <details className="preview"><summary>Selected tube measurements and local schematic</summary><Schematic unit={unit} component={component}/></details>
-    <details><summary>Imported properties · other values are read-only</summary>
-      <p className="muted">Raw archive values are shown as stored, without inferred units or whole-rocket validation. Unsupported properties are preserved.</p>
-      <dl>{component.properties.map((p, i) => <React.Fragment key={i}><dt>{p.name}</dt><dd>{p.value}</dd></React.Fragment>)}</dl>
-    </details>
+    <details className="preview" hidden={!tube}><summary>Selected tube measurements and local schematic</summary><Schematic unit={unit} component={component}/></details>
+    {tube && imported}
   </>;
 }

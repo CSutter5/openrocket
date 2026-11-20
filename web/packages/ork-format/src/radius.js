@@ -243,6 +243,9 @@ export async function replaceSpans(archive, replacements) {
   return { ...imported, original: archive.original.slice(), changed: true };
 }
 
+/** Validate the established tube edit constraints without computing result-status changes. */
+export function validateTubeRadiusEdit(archive, input, effects) { validateEdit(archive, input, effects); }
+
 /** Explicit document effects to include with full-archive-hash command preconditions. */
 export function radiusSimulationEffects(archive, input, effects) {
   validateEdit(archive, input, effects);

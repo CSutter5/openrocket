@@ -51,7 +51,7 @@ export function drawingInput(archive: ExpandedArchive) {
       const method = positions[0].attributes.method.value.toUpperCase();
       if (!['TOP', 'MIDDLE', 'BOTTOM'].includes(method)) throw new Error('unsupported fin position');
       rows.push([n.name, parent, scalar(n, 'rootchord'), scalar(n, 'tipchord'), scalar(n, 'sweeplength'), scalar(n, 'height'),
-        scalar(n, 'fincount'), scalar(n, 'rotation'), method, numeric(positions[0].text.trim(), 'fin offset')].join(';'));
+        scalar(n, 'fincount'), scalar(n, 'rotation') * Math.PI / 180, method, numeric(positions[0].text.trim(), 'fin offset')].join(';'));
       componentIndices.push(nodes.indexOf(n));
     } catch (error) { omitted.push(`${n.label ?? n.name}: ${String(error)}`); }
   }

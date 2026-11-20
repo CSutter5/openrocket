@@ -1,5 +1,5 @@
 import { sha256, componentNames, renameComponent, importArchive, exportArchive, type ExpandedArchive } from '@openrocket/ork-format';
-import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
+import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, validateTubeRadiusEdit, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
 import { tubePropertyInput, applyTubeProperty } from '../../packages/ork-format/src/tube-properties.js';
 import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
 import { createConfiguration, renameConfiguration, deleteConfiguration } from './simulation/configurations';
@@ -8,6 +8,8 @@ import { assignMotor } from './simulation/assign-motor';
 import { motors, resolveCatalogMotors } from './simulation/motor-catalog';
 import { stability } from '../../engine-adapter/build/generated/teavm/js/openrocket-g1-engine.js';
 import { importedInput } from './simulation/imported';
+import { editComponentTree } from './component-tree';
+import { editComponentProperty } from './component-properties';
 import { addComponent, newRocket } from './components';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
@@ -60,8 +62,8 @@ async function describe(current: ExpandedArchive, name: string, lastExport: stri
     components: componentNames(current).map((component, index) => {
       const node = nodes[index];
       const view: DocumentView['components'][number] = { ...component, parent: nodes.indexOf(node.parent?.parent!),
-        properties: node.children.filter(n => !n.children.length && !['name', 'id'].includes(n.name))
-          .map(n => ({ name: n.name, value: n.text.slice(0, 200) || '(empty)' })) };
+        properties: node.children.map((n, key) => ({ n, key })).filter(({ n }) => !n.children.length && !['name', 'id', 'subcomponents'].includes(n.name))
+          .map(({ n, key }) => ({ key, name: n.name, value: n.text, attributes: Object.fromEntries(Object.entries(n.attributes).map(([key, v]) => [key, v.value])) })) };
       try {
         const input = tubeRadiusInput(current, component.id ?? '');
         const state = intrinsic(input, input.radius).after;
@@ -117,7 +119,22 @@ async function execute(action: Action): Promise<Reply> {
   let candidate = archive, nextConfigurationId = selectedConfigurationId, notice = 'No change; accepted document retained.';
   if (['createConfiguration', 'renameConfiguration', 'deleteConfiguration'].includes(action.type) && archive.identity.archiveHash !== (action as { expectedHash: string }).expectedHash) throw new Error('Document changed before configuration edit; try again');
   let selectedId: string | undefined;
-  if (action.type === 'addComponent') {
+  if (action.type === 'componentProperty' || action.type === 'componentTree') {
+    if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before component edit; try again');
+    if (action.type === 'componentProperty') {
+      candidate = await editComponentProperty(archive, action.id, action.key, action.value, action.attributes);
+      const component = archive.parsed.components.find(n => n.id === action.id);
+      if (candidate !== archive && component?.name === 'bodytube' && component.children[action.key]?.name === 'radius' && Number.isFinite(Number(action.value))) {
+        let input: TubeRadiusInput | undefined;
+        try { input = tubeRadiusInput(archive, action.id); } catch { /* Raw archive fields also cover automatic tubes outside the original radius controls. */ }
+        if (input) validateTubeRadiusEdit(archive, input, intrinsic(input, Number(action.value)).after);
+      }
+      if (candidate !== archive) notice = 'Component property updated.';
+    } else {
+      const edited = await editComponentTree(archive, action.id, action.operation);
+      candidate = edited.archive;selectedId = edited.id;notice = 'Component tree updated.';
+    }
+  } else if (action.type === 'addComponent') {
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before component creation; try again');
     const created = await addComponent(archive, action.selectedId, action.componentType, action.position);
     candidate = created.archive; selectedId = created.id; notice = 'Component created. Affected stored results are outdated; series retained.';

@@ -8,6 +8,7 @@ import { MotorSelector } from './MotorSelector';
 import { ComponentIcon, ComponentPalette, MotorConfigurations, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
 import { lengthUnits, type LengthUnit } from './units';
+import { treeControls, type TreeOperation } from './component-tree';
 import { additionTarget } from './components';
 import { FlightPanel } from './simulation/FlightPanel';
 import './style.css';
@@ -36,7 +37,8 @@ function App() {
   async function perform(action: Action) {
     setBusy(true); setError('');
     try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice);
-      if (reply.selectedId) { setSelected(reply.view.components.findIndex(c => c.id === reply.selectedId)); setEditor(true); }
+      if (reply.selectedId) { setSelected(reply.view.components.findIndex(c => c.id === reply.selectedId)); if (action.type === 'addComponent') setEditor(true); }
+      if (action.type === 'componentTree') setEditor(false);
       if (action.type === 'new') { setSelected(1); setEditor(false); }
       return true; }
     catch (failure) { setError(`Edit rejected; accepted document retained. ${message(failure)}`); return false; }
@@ -74,7 +76,7 @@ function App() {
     const children = components.map((n, i) => ({ n, i })).filter(({ n }) => n.parent === parent);
     if (!children.length) return null;
     return <ul>{children.map(({ n, i }) => <li key={i}>
-      <button disabled={busy} aria-label={`${n.name || '(unnamed)'} ${n.type}`} aria-pressed={selected === i} onClick={() => { setSelected(i); setError(''); }} onDoubleClick={() => setEditor(true)}>
+      <button data-component-id={n.id} disabled={busy} aria-label={`${n.name || '(unnamed)'} ${n.type}`} aria-pressed={selected === i} onClick={() => { setSelected(i); setError(''); }} onDoubleClick={() => setEditor(true)}>
         <ComponentIcon type={n.type}/><span>{n.name || '(unnamed)'}</span>
       </button>{tree(i)}
     </li>)}</ul>;
@@ -91,6 +93,10 @@ function App() {
   }
   async function insertComponent(action: PendingComponent, position: 'after' | 'end') {
     if (await perform({ ...action, position })) setInsertion(undefined);
+  }
+  const controls = treeControls(components, selected);
+  function treeAction(operation: TreeOperation) {
+    if (document && component?.id) void perform({ type: 'componentTree', expectedHash: document.hash, id: component.id, operation });
   }
   const tabs = [['design', 'Rocket design'], ['motors', 'Motors & Configuration'], ['simulations', 'Flight simulations']];
   function tabKey(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -137,11 +143,11 @@ function App() {
           <section id="panel-design" role="tabpanel" aria-labelledby="tab-design" hidden={tab !== 'design'} className="design-panel">
             <nav aria-label="Component tree" className="component-tree"><h2>Rocket</h2>{tree()}</nav>
             <div className="tree-actions">
-              <button disabled title="Component reordering is not supported yet">Move up</button>
-              <button disabled title="Component reordering is not supported yet">Move down</button>
+              <button disabled={busy || document.mode !== 'editable' || !controls.up} onClick={() => treeAction('up')}>Move up</button>
+              <button disabled={busy || document.mode !== 'editable' || !controls.down} onClick={() => treeAction('down')}>Move down</button>
               <button disabled={busy || !component} onClick={() => setEditor(true)}>Edit</button>
-              <button disabled title="Component duplication is not supported yet">Duplicate</button>
-              <button disabled title="Component deletion is not supported yet">Delete</button>
+              <button disabled={busy || document.mode !== 'editable' || !controls.duplicate || components.length >= 64} onClick={() => treeAction('duplicate')}>Duplicate</button>
+              <button disabled={busy || document.mode !== 'editable' || !controls.delete} onClick={() => treeAction('delete')}>Delete</button>
             </div>
             <ComponentPalette components={components} selected={selected} disabled={busy || document.mode !== 'editable' || components.length >= 64} create={createComponent}/>
           </section>
@@ -166,11 +172,11 @@ function App() {
         </div>
         <RocketDrawing unit={unit} drawing={document.drawing} stability={document.stability} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }} edit={() => setEditor(true)}/>
         <details className="document-info" open={document.mode === 'preservation'}><summary>Document information · {components.length} components{document.diagnostics.length ? ` · ${document.diagnostics.length} notices` : ''}</summary>
-          <p>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
+          <p>{document.mode === 'editable' ? 'Component properties and tree editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
           {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
         </details>
         {editor && component && <WindowPanel title="Component editor" close={() => { setEditor(false); }}>
-          <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
+          <Properties key={`${selected}:${document.hash}`} component={component} expectedHash={document.hash} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
           <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
         </WindowPanel>}
         {insertion && <WindowPanel title="Insert component" close={() => setInsertion(undefined)}><p>Where should the new component be added?</p><div className="window-footer"><button onClick={() => setInsertion(undefined)}>Cancel</button><button disabled={busy} onClick={() => insertComponent(insertion, 'after')}>Insert after selected component</button><button disabled={busy} onClick={() => insertComponent(insertion, 'end')}>Add to the end</button></div></WindowPanel>}
@@ -181,7 +187,7 @@ function App() {
     {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
       <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
       <p>Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session. Flight results stay in the session and are not written to downloads.</p>
-      <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Names and supported tube dimensions can be edited. 3D, accounts and collaboration are not yet available.</p>
+      <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Edit component values in Imported properties; move, duplicate or delete components with the tree controls. 3D, accounts and collaboration are not yet available.</p>
       <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
     </WindowPanel>}
   </>;

@@ -2,7 +2,7 @@ import type { TubeRadiusInput, IntrinsicTubeState, PresetTubeState, AutomaticRin
 export type Intrinsic = IntrinsicTubeState | PresetTubeState | AutomaticRingTubeState;
 export interface ComponentView {
   id?: string; name?: string; type: string; parent: number;
-  properties: { name: string; value: string }[];
+  properties: { key: number; name: string; value: string; attributes: Record<string, string> }[];
   tube?: { input: TubeRadiusInput; state: Intrinsic };
   radiusReason?: string;
   extraProperties?: boolean; extraPropertiesReason?: string;
@@ -21,6 +21,8 @@ export interface DocumentView {
 export type Action =
   | { type: 'new' }
   | { type: 'addComponent'; expectedHash: string; selectedId: string; componentType: string; position: 'after' | 'end' }
+  | { type: 'componentProperty'; expectedHash: string; id: string; key: number; value: string; attributes: Record<string, string> }
+  | { type: 'componentTree'; expectedHash: string; id: string; operation: 'up' | 'down' | 'duplicate' | 'delete' }
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }
   | { type: 'radius'; id: string; expected: number; value: number }

@@ -15,6 +15,38 @@ public class ComponentDefaultsExporter {
         NoseCone.class, BodyTube.class, Transition.class, TrapezoidFinSet.class, EllipticalFinSet.class, FreeformFinSet.class,
         TubeFinSet.class, RailButton.class, LaunchLug.class, InnerTube.class, TubeCoupler.class, CenteringRing.class,
         Bulkhead.class, EngineBlock.class, Parachute.class, Streamer.class, ShockCord.class, MassComponent.class);
+    static Object privateField(Object object, String name) throws Exception {
+        var field = object.getClass().getDeclaredField(name);field.setAccessible(true);return field.get(object);
+    }
+    static Map<String,Object> fields(Class<?> type) throws Exception {
+        var config = Class.forName("info.openrocket.core.file.openrocket.importt.DocumentConfig");
+        var field = config.getDeclaredField("setters");field.setAccessible(true);
+        var setters = (Map<?,?>)field.get(null);
+        Map<String,Object> result = new TreeMap<>();
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            for (var entry : setters.entrySet()) {
+                String key = entry.getKey().toString(), prefix = current.getSimpleName() + ":";
+                if (!key.startsWith(prefix) || result.containsKey(key.substring(prefix.length()))) continue;
+                Object setter = entry.getValue();Map<String,Object> rule = new LinkedHashMap<>();
+                rule.put("kind",setter == null ? "text" : setter.getClass().getSimpleName());
+                if (setter != null && setter.getClass().getSimpleName().equals("EnumSetter")) {
+                    var enumType = (Class<?>)privateField(setter,"enumClass");
+                    rule.put("values",Arrays.stream(enumType.getEnumConstants()).map(v -> ((Enum<?>)v).name().toLowerCase(Locale.ROOT).replace("_", "")).toList());
+                }
+                if (setter != null && setter.getClass().getSimpleName().equals("ClusterConfigurationSetter")) {
+                    rule.put("values",Arrays.stream(ClusterConfiguration.CONFIGURATIONS).map(ClusterConfiguration::getXMLName).toList());
+                }
+                if (setter != null && setter.getClass().getSimpleName().equals("MaterialSetter")) {
+                    rule.put("materialType",((info.openrocket.core.material.Material.Type)privateField(setter,"type")).name().toLowerCase(Locale.ROOT));
+                }
+                if (setter != null && setter.getClass().getSimpleName().equals("DoubleSetter")) {
+                    rule.put("special",privateField(setter,"specialString"));rule.put("separator",privateField(setter,"separator"));
+                }
+                result.put(key.substring(prefix.length()),rule);
+            }
+        }
+        return result;
+    }
     public static void main(String[] args) throws Exception {
         System.setProperty("openrocket.bypass.presets", "true");
         System.setProperty("openrocket.bypass.motors", "true");
@@ -40,7 +72,7 @@ public class ComponentDefaultsExporter {
                 var rocket = new Rocket();rocket.addChild(new AxialStage());rocket.addChild(component);
                 row.put("additionalStageXml",String.join("\n",info.openrocket.core.file.openrocket.savers.AxialStageSaver.getElements(component)));
             }
-            row.put("parents",compatible);row.put("body",component instanceof BodyComponent);rows.put(tag,row);
+            row.put("fields",fields(type));row.put("parents",compatible);row.put("body",component instanceof BodyComponent);rows.put(tag,row);
         }
         Files.writeString(Path.of(args[0]),new Gson().toJson(rows)+"\n");
         System.out.println("Exported " + rows.size() + " native component defaults and compatibility rules");

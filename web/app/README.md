@@ -111,6 +111,13 @@ The [saved simulation and bundled motor record](../../docs/web-app/saved-simulat
 
 ## Creating components and displaying stability
 
-Use File → New for an empty rocket, or select a component in an imported design and choose a compatible part in Add new component. The web palette uses native defaults/compatibility for all 21 types. Body parts offer insert-after/end when appropriate; the new component opens in the existing editor. Name and supported explicit tube editing remain the available property controls; this does not add full desktop dialogs. Native CG/CP markers follow the selected configuration where the static model is supported. Freeform fins, multistage/pod graphs and unrepresented fields show unavailable centers. See [the creation/stability record](../../docs/web-app/component-creation.md) for the preserved archive contract and limits.
+Use File → New for an empty rocket, or select a component in an imported design and choose a compatible part in Add new component. The web palette uses native defaults/compatibility for all 21 types. Body parts offer insert-after/end when appropriate; the new component opens in the editor with editable Imported properties. Native CG/CP markers follow the selected configuration where the static model is supported. Freeform fins, multistage/pod graphs and unrepresented fields show unavailable centers. See [the creation/stability record](../../docs/web-app/component-creation.md) for the preserved archive contract and limits.
 
 Simulation units and Graph altitude units offer mm, cm, m, km, in, ft, yd and mi. The drawing and dimension controls follow the same selection. Changes convert presentation and leave archive bytes and calculated results intact. The normal app build now also generates native component defaults into ignored `build/components/`; no extra dependency or runtime JVM is required.
+
+
+## Editing component values and structure
+
+The component editor's Imported properties panel now edits every displayed scalar and its existing attributes. It opens automatically for parts outside the explicit-tube quick controls, including newly created automatic BodyTubes. Values use archive units (meters, degrees, kilograms); apply each property separately. Enumeration/boolean selectors and numeric validation use the native field definitions. Component IDs and nested XML remain protected. Existing drawing/flight support limits still apply to a design after raw archive edits.
+
+Move up/down reorders adjacent siblings, Duplicate appends a copy including children with fresh IDs, and Delete removes the selected subtree. The rocket root and last axial stage are protected. Configuration stage flags track stage identities; stage zero is activated if deletion would leave no active stage, matching desktop reload. Saved series, settings and assets stay preserved. See [the editing and deletion verification record](../../docs/web-app/component-editing.md).
