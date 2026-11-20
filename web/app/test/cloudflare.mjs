@@ -72,7 +72,9 @@ try {
   assert.deepEqual(await download(), edited);
 
   await openSample(page, 'Open flight-ready sample');
+  await page.getByRole('status').filter({ hasText: 'Archive opened.' }).waitFor();
   await closeProperties(page);
+  await page.getByRole('dialog', { name: 'Component editor', exact: true }).waitFor({ state: 'detached' });
   await flights(page);
   await page.getByRole('tab', { name: 'Motors & Configuration', exact: true }).click();
   await page.getByRole('button', { name: 'New configuration', exact: true }).click();
