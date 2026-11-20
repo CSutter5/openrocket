@@ -39,3 +39,5 @@ export const PROOF_PRESETS: readonly ProofPreset[];
 
 export function field(archive: ExpandedArchive, component: XmlNode, name: string): { node: XmlNode; raw: string; text: string };
 export function numeric(text: string, name: string): number;
+export function replaceSpans(archive: ExpandedArchive, replacements: { start: number; end: number; text: string }[]): Promise<ExpandedArchive>;
+export function simulationStatusChanges(archive: ExpandedArchive, affected: (node: XmlNode) => boolean): { index: number; before: string; after: string; start: number; end: number }[];

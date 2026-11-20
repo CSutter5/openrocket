@@ -1,3 +1,4 @@
+import { cachedMotorCurve } from './motor-catalog.ts';
 import sampleProfile from './profile.json' with {type:'json'};
 import catalog from './motors.json' with {type:'json'};
 import { SaxesParser } from 'saxes';
@@ -102,7 +103,9 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
               const entry=archive.entries.find(e=>e.path===`thrustcurves/${digest}.rse`);
               if(pinned){curves.set(digest,{bytes:new TextEncoder().encode(pinned.rse),hash:pinned.sha256});catalogReferences.push(digest);}
               else if(entry&&digest===sampleProfile.motor.digest&&entry.sha256!==sampleProfile.motor.sha256)throw new Error('Changed synthetic motor curve');
-              else if(entry)curves.set(digest,{bytes:entry.bytes,hash:entry.sha256});else throw new Error('Missing embedded motor curve');
+              else if(entry)curves.set(digest,{bytes:entry.bytes,hash:entry.sha256});
+              else if(cachedMotorCurve(digest)){curves.set(digest,cachedMotorCurve(digest)!);catalogReferences.push(digest);}
+              else throw new Error('Missing embedded or available catalog motor curve');
               if(id===configurationId)selectedMotor=one(m,'designation').text.trim();
             }
           } else {attributes(m,[]);scalar(m);add(m,`${i}/motormount/${m.name}`);}

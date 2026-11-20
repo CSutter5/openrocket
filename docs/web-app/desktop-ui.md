@@ -1,5 +1,7 @@
 # Desktop-style browser workspace
 
+The later [selected-simulation and full motor picker follow-up](saved-simulations-and-motors.md) supersedes the configuration/catalog/settings limits below for its authorized local slice. This record retains the earlier implementation and verification history.
+
 The November 19, 2026 user request authorizes restyling the existing browser editor to match the supplied desktop OpenRocket screenshots: design, motors/configuration, flight simulations, component editor and motor selector. This is presentation and interaction work within the existing local editor; the engine, archive projection, catalogs and hosting boundaries are unchanged. No deployment or push is authorized.
 
 The workspace uses a dark desktop palette, compact menus and controls, three keyboard-accessible tabs, component tree and original desktop component icons. The exterior drawing remains below every tab, with fit/zoom, units and synchronized session configuration selection. Its SVG viewport follows the canvas aspect ratio and uniformly scales the existing Java polygons to fit; it does not stretch the rocket. Component properties open in a modeless dialog through Edit or a double-click; Escape/Close dismiss it and restore focus. Each existing Apply action commits its field independently; closing discards unapplied drafts. The modeless window allows component selection, imports, units and downloads while editing.

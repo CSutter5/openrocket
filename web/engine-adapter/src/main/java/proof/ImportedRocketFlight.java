@@ -170,5 +170,5 @@ public final class ImportedRocketFlight {
         var builder=new ThrustCurveMotor.Builder().setManufacturer(Manufacturer.getManufacturer(text(p+"@mfg"))).setDesignation(text(p+"@code")).setMotorType(type).setDiameter(num(p+"@dia")/1000).setLength(num(p+"@len")/1000).setStandardDelays(delays).setTimePoints(t).setThrustPoints(f).setCGPoints(c).setDigest("unverified");
         var m=builder.build();m=builder.setDigest(MotorDigest.digestMotor(m)).build();if(!MotorDigest.isDigestCompatible(m,expected))throw new IllegalArgumentException("Embedded motor digest mismatch");return builder.setDigest(expected).build();
     }
-    public static String run(String input,boolean rk6)throws Exception{var model=new ImportedRocketFlight(input);Simulation s=new Simulation(model.rocket);s.setFlightConfigurationId(model.selected);return ImportedFlight.simulate(model.rocket,model.selectedMotor,s,rk6,600);}
+    public static String run(String input,boolean rk6)throws Exception{var model=new ImportedRocketFlight(input);Simulation s=new Simulation(model.rocket);s.setFlightConfigurationId(model.selected);return model.fields.containsKey("run/timestep") ? ImportedFlight.simulate(model.rocket,model.selectedMotor,s,rk6,SavedFlightOptions.conditions(model.fields,s)) : ImportedFlight.simulate(model.rocket,model.selectedMotor,s,rk6,600);}
 }

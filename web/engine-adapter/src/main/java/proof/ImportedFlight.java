@@ -109,6 +109,9 @@ public final class ImportedFlight {
         conditions.setWindModel(wind); conditions.setAerodynamicCalculator(new BarrowmanCalculator());
         conditions.setMassCalculator(new MassCalculator()); conditions.setTimeStep(0.05);
         conditions.setMaxSimulationTime(maxTime); conditions.setRandomSeed(42);
+        return simulate(rocket,motor,simulation,rk6,conditions);
+    }
+    public static String simulate(Rocket rocket, ThrustCurveMotor motor, Simulation simulation, boolean rk6, SimulationConditions conditions) throws Exception {
         RigidBody mass = MassCalculator.calculateStructure(rocket.getSelectedConfiguration());
         CoordinateIF cp = new BarrowmanCalculator().getCP(rocket.getSelectedConfiguration(),new FlightConditions(rocket.getSelectedConfiguration()),new WarningSet());
         BasicEventSimulationEngine engine = new BasicEventSimulationEngine(); engine.simulate(conditions);

@@ -1,3 +1,4 @@
+import { resolveCatalogMotors } from './motor-catalog.ts';
 import { sha256, type ExpandedArchive, type XmlNode } from '@openrocket/ork-format';
 import { numeric } from '../../../packages/ork-format/src/radius.js';
 import { importedInput, resolvedImportedInput } from './imported.ts';
@@ -78,6 +79,7 @@ export function flightSupport(archive: ExpandedArchive, configurationId?: string
   }
 }
 export async function flightInput(archive: ExpandedArchive, configurationId?: string): Promise<FlightInput> {
+  await resolveCatalogMotors(archive);
   const support = flightSupport(archive, configurationId); if (!support.supported) throw new Error(support.reason);
   if (support.kind === 'imported') return resolvedImportedInput(archive, configurationId);
   const fields = records(archive);

@@ -31,8 +31,8 @@ function App() {
   }, [document?.dirty]);
   async function perform(action: Action) {
     setBusy(true); setError('');
-    try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice); }
-    catch (failure) { setError(`Edit rejected; accepted document retained. ${message(failure)}`); }
+    try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice); return true; }
+    catch (failure) { setError(`Edit rejected; accepted document retained. ${message(failure)}`); return false; }
     finally { setBusy(false); }
   }
   async function open(load: () => Promise<Uint8Array>, filename: string) {
@@ -155,14 +155,14 @@ function App() {
           <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
           <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
         </WindowPanel>}
-        {motorSelector && <MotorSelector key={document.identitySidecarHash} document={document} busy={busy} select={id => { selectConfiguration(id); setMotorSelector(false); }} close={() => setMotorSelector(false)}/>}
+        {motorSelector && <MotorSelector key={document.identitySidecarHash} document={document} busy={busy} select={id => { selectConfiguration(id); setMotorSelector(false); }} close={() => setMotorSelector(false)} assign={(configurationId, mountId, motorKey, delay) => perform({ type: 'assignMotor', expectedHash: document.hash, configurationId, mountId, motorKey, delay })}/>}
       </>}
       <div className="status-bar"><p role="status">{busy ? 'Working…' : notice}</p><span data-testid="dirty">{document?.dirty ? 'Changed since import / export' : 'No changes since import / export'}</span></div>
     </main>
     {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
       <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
       <p>Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session. Flight results stay in the session and are not written to downloads.</p>
-      <p>Supported tube dimensions and names can be edited. Structural editing, a full motor catalog, 3D, accounts and collaboration are not yet available.</p>
+      <p>Supported tube dimensions and names can be edited. Structural editing, 3D, accounts and collaboration are not yet available.</p>
       <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
     </WindowPanel>}
   </>;

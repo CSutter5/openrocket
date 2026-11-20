@@ -165,3 +165,14 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .selector-layout aside { border-left: 0; border-top: 1px solid var(--border); padding: .5rem 0 0; }
   .drawing-title { flex-wrap: wrap; } .drawing-canvas { height: 260px; }
 }
+.simulation-table tbody tr { cursor: pointer; }
+.simulation-table tr[aria-selected=true] { outline: 1px solid #9bc3fb; outline-offset: -1px; }
+.flight-graph { width: min(1000px, calc(100vw - 32px)); }
+.flight-graph .flight-plot { max-width: none; }
+.picker-tabs { display: flex; gap: .5rem; margin-bottom: .75rem; }
+.picker-tabs button[aria-pressed=true] { background: #345f94; border-color: #9bc3fb; }
+.catalog-filters, .catalog-assignment { display: flex; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
+.catalog-filters label, .catalog-assignment label { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
+.catalog-table { height: 300px; }
+.catalog-table tr { cursor: pointer; }
+.catalog-pagination { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: .5rem 0; }

@@ -2,10 +2,13 @@ import { sha256, componentNames, renameComponent, importArchive, exportArchive, 
 import { tubeRadiusInput, applyTubeRadius, radiusSimulationEffects, type TubeRadiusInput } from '../../packages/ork-format/src/radius.js';
 import { tubePropertyInput, applyTubeProperty } from '../../packages/ork-format/src/tube-properties.js';
 import { tubePropertyEdit, radiusEdit, presetRadiusEdit, automaticRingRadiusEdit, siblingRingRadiusEdit } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+import { assignMotor } from './simulation/assign-motor';
+import { resolveCatalogMotors } from './simulation/motor-catalog';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
 import { flightSupport, flightConfigurations } from './simulation/input';
+import { savedSimulations, savedSimulation } from './simulation/saved';
 import { bindFlight } from './simulation/provenance';
 
 let archive: ExpandedArchive | undefined;
@@ -25,7 +28,9 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
 }
 async function describe(current: ExpandedArchive, name: string, lastExport: string, configurationId: string | undefined): Promise<DocumentView> {
   const nodes = current.parsed.components;
+  try { await resolveCatalogMotors(current); } catch { /* File inspection remains available when catalog assets are unavailable. */ }
   return {
+    motorMounts: nodes.filter(n => n.id && ['bodytube', 'innertube'].includes(n.name) && n.children.some(c => c.name === 'motormount')).map(n => ({ id: n.id!, name: n.label ?? n.name })),
     flightSupport: flightSupport(current, configurationId), flightConfigurations: flightConfigurations(current), flightConfigurationId: configurationId, drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
     identitySidecarHash: await sha256(new TextEncoder().encode(JSON.stringify(current.identity))),
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
@@ -46,8 +51,7 @@ async function describe(current: ExpandedArchive, name: string, lastExport: stri
       }
       return view;
     }),
-    simulations: current.parsed.simulations.map(n => ({ name: n.children.find(c => c.name === 'name')?.text ?? '(unnamed)',
-      status: n.attributes.status?.value ?? 'unspecified' })),
+    simulations: savedSimulations(current).map(s => ({ ...s, support: flightSupport(current, s.configurationId) })),
   };
 }
 function failure(error: unknown) {
@@ -72,9 +76,10 @@ async function execute(action: Action): Promise<Reply> {
     return { view, notice: 'Session flight configuration selected. Archive and stored results retained.' };
   }
   if (action.type === 'flightSnapshot') {
-    if (action.configurationId !== selectedConfigurationId) throw new Error('Flight configuration changed before snapshot; run again');
+    if (!action.simulationId && action.configurationId !== selectedConfigurationId) throw new Error('Flight configuration changed before snapshot; run again');
     if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before simulation snapshot; run again');
-    const bound = await bindFlight(archive, action.integrator, action.configurationId);
+    if (action.simulationId && savedSimulation(archive, action.simulationId).configurationId !== action.configurationId) throw new Error('Saved simulation configuration mismatch');
+    const bound = await bindFlight(archive, action.integrator, action.configurationId, action.simulationId);
     const exported = await exportArchive(archive);
     return { view: await describe(archive, filename, exportHash, selectedConfigurationId), notice: 'Exact accepted archive captured for simulation.',
       snapshot: { bytes: exported.bytes, identity: exported.identity, provenance: bound.provenance, inputHash: bound.inputHash } };
@@ -86,7 +91,11 @@ async function execute(action: Action): Promise<Reply> {
     return { view, bytes: exported.bytes, notice: 'Download prepared locally. Check your browser downloads; this is not cloud or durable save confirmation.' };
   }
   let candidate = archive, notice = 'No change; accepted document retained.';
-  if (action.type === 'rename') {
+  if (action.type === 'assignMotor') {
+    if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before motor assignment; choose again');
+    candidate = await assignMotor(archive, action.configurationId, action.mountId, action.motorKey, action.delay);
+    if (candidate !== archive) notice = 'Motor assigned to the selected configuration. Affected stored results are outdated; existing series retained.';
+  } else if (action.type === 'rename') {
     const component = componentNames(archive).find(c => c.id === action.id);
     if (!component || component.name !== action.expected) throw new Error('Name changed; select the component again');
     if (action.value !== component.name) {
