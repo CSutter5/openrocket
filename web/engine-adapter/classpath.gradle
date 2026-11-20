@@ -1,7 +1,7 @@
 gradle.projectsEvaluated {
     def core = rootProject.project(':core')
     core.tasks.register('g1EngineClasspath') {
-        dependsOn core.tasks.named('compileJava')
+        dependsOn core.tasks.named('classes')
         doLast {
             def output = new File(rootProject.projectDir, 'web/engine-adapter/build/reference-classpath.txt')
             output.parentFile.mkdirs()
