@@ -1,5 +1,7 @@
 # OpenRocket web application plan
 
+The latest November 20 follow-up adds [rocket sharing permissions](sharing.md) (ADR-32), replacing blanket signed-in editing with Restricted/Public visibility, explicit Viewer/Editor grants, download controls, live revocation and stable-URL ownership transfer. New rockets default to Restricted; existing rockets retain Public visibility and require explicit Editor grants for collaborators.
+
 The subsequent November 20 request adds [D1 accounts and multiple public owned rockets](accounts-and-rockets.md) (ADR-27): public `/<username>/<slug>/` URLs, public readers and editing by every signed-in account. A dedicated remote Cloudflare D1 database is created/migrated; the app has not been deployed. This supersedes the earlier username-only account deferral for the new slice.
 
 The November 20 follow-up adds the authorized [one shared-file coediting POC](coediting-poc.md) (ADR-26): username-only joining, trusted shared commands and current-draft persistence, without accounts, application logging or version history. Earlier local-only and collaboration deferrals below describe the preceding milestones.

@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 import { zipSync } from 'fflate';
 import { importArchive } from '../../packages/ork-format/src/index.js';
 import { openSample, openProperties } from './workspace.mjs';
-import { cloudflareFixture, register, createRocket, editorReady, rawSocket } from './cloudflare-fixture.mjs';
+import { cloudflareFixture, register, createRocket, editorReady, rawSocket, shareRocket } from './cloudflare-fixture.mjs';
 const app = resolve(import.meta.dirname, '..'), host = await cloudflareFixture(8791), { url } = host;
 let browser;
 async function download(page) {
@@ -19,7 +19,10 @@ try {
   const a = await browser.newPage(), b = await browser.newPage(), errors = [];
   for (const page of [a, b]) page.on('pageerror', error => errors.push(error.message));
   await register(a, url, 'alice');const path = await createRocket(a, url, 'alice', 'coedit');
-  await register(b, url, 'bob');await b.goto(url + path);await editorReady(b);
+  await register(b, url, 'bob');
+  await shareRocket(a, url, path, { operation: 'visibility', visibility: 'public', publicDownload: true });
+  await shareRocket(a, url, path, { operation: 'member', username: 'bob', role: 'editor', canDownload: true });
+  await b.goto(url + path);await editorReady(b);
   assert.equal((await fetch(url + '/api/rockets/alice/coedit/socket', { headers: { Origin: 'https://elsewhere.test' } })).status, 403);
   await a.getByLabel('Collaborators', { exact: true }).filter({ hasText: 'alice' }).filter({ hasText: 'bob' }).waitFor();
   await openSample(a, 'Open explicit tube sample');

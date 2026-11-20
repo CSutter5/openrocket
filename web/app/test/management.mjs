@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword } from './cloudflare-fixture.mjs';
+import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword, shareRocket } from './cloudflare-fixture.mjs';
 const host = await cloudflareFixture(8794), { url } = host;
 let browser;
 async function api(page, path, method = 'GET', data, origin = url) { return page.context().request.fetch(url + path, { method, headers: { Origin: origin }, ...(data === undefined ? {} : { data }) }); }
@@ -24,6 +24,7 @@ try {
   for (const page of [alice, bob, admin, guest]) page.on('pageerror', error => errors.push(error.message));
   assert.equal((await api(guest, '/api/auth/sign-up/email', 'POST', { username: 'admin', email: 'claim@example.test', name: 'Admin', password: testPassword })).status(), 400);
   await register(alice, url, 'alice');const first = await createRocket(alice, url, 'alice', 'Alpha');
+  await shareRocket(alice, url, first, { operation: 'visibility', visibility: 'public', publicDownload: true });
   const aliceUser = (await (await api(alice, '/api/session')).json()).user;
   const firstRecord = (await (await api(alice, '/api/rockets/alice/alpha')).json()).rocket;
   await alice.goto(url);const cards = alice.locator('.rocket-create-grid');
@@ -38,6 +39,7 @@ try {
   const mobileUpload = await cards.getByRole('form', { name: 'Upload a rocket', exact: true }).boundingBox();
   assert.ok(mobileScratch.y + mobileScratch.height < mobileUpload.y + 2);await alice.setViewportSize({ width: 1280, height: 720 });
   await register(bob, url, 'bob');const beta = await createRocket(bob, url, 'bob', 'Beta');
+  await shareRocket(bob, url, beta, { operation: 'visibility', visibility: 'public', publicDownload: true });
   const bobUser = (await (await api(bob, '/api/session')).json()).user;
   assert.equal((await api(guest, '/admin/')).status(), 403);
   assert.equal((await api(bob, '/admin/')).status(), 403);

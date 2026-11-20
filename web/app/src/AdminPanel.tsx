@@ -12,10 +12,10 @@ export function AdminPanel() {
   useEffect(() => { void load().catch(error => setError(error instanceof Error ? error.message : String(error))); }, []);
   async function perform() {
     if (!pending) return;
-    await accountRequest(pending.rocket ? `/api/rockets/${pending.rocket.username}/${pending.rocket.slug}?rocketId=${pending.rocket.id}` : `/api/admin/users/${pending.user!.id}${pending.kind === 'sessions' ? '/sessions' : ''}`, undefined, 'DELETE');
+    await accountRequest(pending.rocket ? `/api/rockets${rocketPath(pending.rocket).slice(0, -1)}?rocketId=${pending.rocket.id}` : `/api/admin/users/${pending.user!.id}${pending.kind === 'sessions' ? '/sessions' : ''}`, undefined, 'DELETE');
     await load();
   }
-  return <section className="rocket-library admin-panel"><h1>Admin panel</h1><p>Manage accounts and public rockets.</p>
+  return <section className="rocket-library admin-panel"><h1>Admin panel</h1><p>Manage accounts and rockets.</p>
     {error && <p role="alert" className="error">{error}</p>}
     <h2>Users</h2><div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Rockets</th><th>Actions</th></tr></thead><tbody>{users.map(user => <tr key={user.id} data-user-id={user.id}>
       <td>{user.username}{user.adminId ? ' · Administrator' : user.deleting ? ' · Deletion pending' : ''}</td><td>{user.email}</td><td>{user.rocketCount}</td><td>{user.adminId ? <span>Protected account</span> : <div className="management-actions">

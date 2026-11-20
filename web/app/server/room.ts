@@ -5,6 +5,8 @@ import { createDocumentSession } from '../src/document-session';
 import { sharedActions, type SharedCommand, type SharedState } from '../src/coediting';
 import { accountSession } from './access';
 import type { Env, SocketIdentity } from './env';
+import { manageSharing, rocketAccess, sharingState, socketAccess } from './sharing';
+import { fail } from './http';
 const chunkSize = 64 * 1024;
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 // Workers provide these globals; aliases keep browser and server types separate.
@@ -50,6 +52,22 @@ export class SharedRocket {
   async fetch(request: CF.Request) {
     return this.serial(async () => {
       const url = new URL(request.url);
+      const requestedId = request.headers.get('X-Rocket-Id');
+      if (url.pathname === '/sharing' && requestedId && ['GET', 'POST'].includes(request.method)) {
+        const response = await manageSharing(request, this.env, requestedId);
+        if (response.ok && request.method === 'POST') {
+          const { rocket } = await sharingState(this.env, requestedId);
+          for (const socket of this.ctx.getWebSockets()) if (await this.refreshAccess(socket)) this.send(socket, { type: 'metadata', rocket });
+          this.presence();
+        }
+        return response;
+      }
+      if (url.pathname === '/download' && request.method === 'GET' && requestedId) {
+        const actor = await accountSession(this.env, request.headers);
+        if (!(await rocketAccess(this.env, requestedId, actor?.user ?? null)).canDownload) return fail('The owner has not allowed downloads for you', 403);
+        if (!this.state) return fail('Open the rocket before downloading it', 409);
+        return new CFResponse(new Uint8Array(this.state.snapshot.bytes), { headers: { 'Content-Type': 'application/octet-stream', 'Cache-Control': 'no-store' } });
+      }
       if (url.pathname === '/delete-rocket' && request.method === 'POST') {
         const actor = await accountSession(this.env, request.headers), id = request.headers.get('X-Rocket-Id');
         if (!actor) return CFResponse.json({ error: 'Sign in to delete a rocket' }, { status: 401 });
@@ -79,9 +97,9 @@ export class SharedRocket {
       if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new CFResponse('WebSocket required', { status: 426 });
       const rocketId = request.headers.get('X-Rocket-Id');
       if (!rocketId) return new CFResponse('Rocket not found', { status: 404 });
-      const activeRocket = await this.env.DB.prepare('SELECT rocket.id FROM rocket JOIN user ON user.id=rocket.owner_id WHERE rocket.id=? AND rocket.deleted_at IS NULL AND user.deleting=0').bind(rocketId).first();
-      if (!activeRocket) return new CFResponse('Rocket not found', { status: 404 });
       const session = await accountSession(this.env, request.headers);
+      const access = await rocketAccess(this.env, rocketId, session?.user ?? null);
+      if (!access.canView) return new CFResponse('Rocket not found', { status: 404 });
       const identity: SocketIdentity = { rocketId, username: session?.user.username ?? 'Visitor', ...(session ? { sessionId: session.session.id, userId: session.user.id } : {}) };
       if (!this.state) {
         const rocket = await this.env.DB.prepare('SELECT name, slug FROM rocket WHERE id=?').bind(rocketId).first<{ name: string; slug: string }>();
@@ -92,10 +110,12 @@ export class SharedRocket {
         const state = { token: crypto.randomUUID(), snapshot: await this.session.snapshot() };
         await this.persist(state); this.state = state;
       }
+      const currentAccess = await socketAccess(this.env, identity);
+      if (!currentAccess.canView) return new CFResponse('Rocket not found', { status: 404 });
       const pair = new Pair();
       this.ctx.acceptWebSocket(pair[1]);
       pair[1].serializeAttachment(identity);
-      pair[1].send(JSON.stringify({ type: 'access', canEdit: !!session && !session.user.mustChangePassword, username: identity.username }));
+      pair[1].send(JSON.stringify({ type: 'access', ...currentAccess, username: identity.username }));
       pair[1].send(JSON.stringify({ type: 'state', state: this.state }));
       this.presence();
       return new CFResponse(null, { status: 101, webSocket: pair[0] });
@@ -105,18 +125,23 @@ export class SharedRocket {
     try { socket.send(JSON.stringify(message)); } catch { /* Reconnect receives the latest durable draft. */ }
   }
   private presence(excluded?: CF.WebSocket) {
-    const sockets = this.ctx.getWebSockets().filter(socket => socket !== excluded);
+    const sockets = this.ctx.getWebSockets().filter(socket => socket !== excluded && socket.readyState === 1);
     const users = sockets.map(socket => (socket.deserializeAttachment() as SocketIdentity).username);
     for (const socket of sockets) this.send(socket, { type: 'presence', users });
   }
+  private async refreshAccess(socket: CF.WebSocket) {
+    if (socket.readyState !== 1) return null;
+    const identity = socket.deserializeAttachment() as SocketIdentity;
+    let access;
+    try { access = await socketAccess(this.env, identity); }
+    catch { socket.close(1011, 'Access check unavailable');return null; }
+    if (!access.canView) { this.send(socket, { type: 'revoked' });socket.close(1008, 'Access revoked');return null; }
+    this.send(socket, { type: 'access', ...access, username: identity.username });
+    return access;
+  }
   private async requireEditor(socket: CF.WebSocket) {
     const identity = socket.deserializeAttachment() as SocketIdentity;
-    const active = identity.sessionId && await this.env.DB.prepare('SELECT session.id FROM session JOIN user ON session.user_id=user.id JOIN rocket ON rocket.id=? JOIN user AS owner ON owner.id=rocket.owner_id LEFT JOIN app_admin ON app_admin.user_id=user.id WHERE session.id=? AND session.user_id=? AND session.expires_at>? AND user.deleting=0 AND owner.deleting=0 AND rocket.deleted_at IS NULL AND COALESCE(app_admin.must_change_password,0)=0')
-      .bind(identity.rocketId, identity.sessionId, identity.userId, Date.now()).first();
-    if (!active) {
-      this.send(socket, { type: 'access', canEdit: false, username: identity.username });
-      throw new Error('Sign in to edit this public rocket');
-    }
+    if (!(await this.refreshAccess(socket))?.canEdit) throw new Error('Sign in with an account that has editor access to this rocket');
     return identity;
   }
   async webSocketMessage(socket: CF.WebSocket, message: string | ArrayBuffer) {
@@ -139,12 +164,14 @@ export class SharedRocket {
         await this.requireEditor(socket);
         await this.persist(state); this.state = state;
         const username = identity.username;
-        for (const peer of this.ctx.getWebSockets()) this.send(peer, { type: 'state', state,
+        for (const peer of this.ctx.getWebSockets()) if (await this.refreshAccess(peer)) this.send(peer, { type: 'state', state,
           ...(peer === socket ? { requestId, notice: reply.notice, selectedId: reply.selectedId, configurationId: reply.configurationId } : { notice: `${username} updated the shared file.` }) });
       } catch (error) {
         await this.restore(before);
-        this.send(socket, { type: 'state', state: before });
-        this.send(socket, { type: 'rejected', requestId, error: failure(error) });
+        if (await this.refreshAccess(socket)) {
+          this.send(socket, { type: 'state', state: before });
+          this.send(socket, { type: 'rejected', requestId, error: failure(error) });
+        }
       }
     });
   }

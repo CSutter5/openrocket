@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword } from './cloudflare-fixture.mjs';
+import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword, shareRocket } from './cloudflare-fixture.mjs';
 const host = await cloudflareFixture(8795), { url } = host;
 let browser;
 const nextPassword = 'changed-account-password-2026';
@@ -10,6 +10,7 @@ try {
   const owner = await browser.newPage(), other = await browser.newPage(), guest = await browser.newPage(), old = await browser.newPage(), racing = await browser.newPage(), errors = [];
   for (const page of [owner, other, guest, old]) page.on('pageerror', error => errors.push(error.message));
   await register(owner, url, 'alice');const path = await createRocket(owner, url, 'alice', 'Original');
+  await shareRocket(owner, url, path, { operation: 'visibility', visibility: 'public', publicDownload: true });
   const record = (await (await api(owner, '/api/rockets/alice/original', undefined, 'GET')).json()).rocket;
   await rawSocket(owner, 'archive');const bytes = await owner.evaluate(() => window.archive.state.snapshot.bytes);
   await register(other, url, 'bob');

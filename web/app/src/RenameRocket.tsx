@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { accountRequest, type PublicRocket } from './accounts';
+import { accountRequest, rocketPath, type PublicRocket } from './accounts';
 export function RenameRocket({ rocket, close, renamed }: { rocket: PublicRocket; close: () => void; renamed: (rocket: PublicRocket) => Promise<void> | void }) {
   const dialog = useRef<HTMLDialogElement>(null), [name, setName] = useState(rocket.name), [busy, setBusy] = useState(false), [error, setError] = useState('');
   useEffect(() => { dialog.current?.showModal(); }, []);
   async function save(event: React.FormEvent) {
     event.preventDefault();setBusy(true);setError('');
     try {
-      const result = await accountRequest<{ rocket: PublicRocket }>(`/api/rockets/${rocket.username}/${rocket.slug}/rename`, { rocketId: rocket.id, expectedName: rocket.name, name });
+      const result = await accountRequest<{ rocket: PublicRocket }>(`/api/rockets${rocketPath(rocket)}rename`, { rocketId: rocket.id, expectedName: rocket.name, name });
       await renamed(result.rocket);close();
     } catch (error) { setError(error instanceof Error ? error.message : String(error));setBusy(false); }
   }

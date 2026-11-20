@@ -18,7 +18,8 @@
     "migrate:local": "wrangler d1 migrations apply DB --local",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
     "test:management": "npm run check:cloudflare && node test/management.mjs",
-    "test:account-settings": "npm run check:cloudflare && node test/account-settings.mjs"
+    "test:account-settings": "npm run check:cloudflare && node test/account-settings.mjs",
+    "test:sharing": "npm run check:cloudflare && node test/sharing-migration.mjs && node test/sharing.mjs"
   },
   "dependencies": {
     "@openrocket/contracts": "0.0.0",

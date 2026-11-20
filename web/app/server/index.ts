@@ -7,9 +7,9 @@ export { SharedRocket } from './room';
 import { CFResponse, json, fail, body, readBody } from './http';
 import { accountSession, changePassword } from './access';
 import { adminApi, deleteRocket } from './management';
+import { rocketQuery, rocketAccess } from './sharing';
 const authPaths = new Set(['/sign-up/email', '/sign-in/username', '/get-session', '/sign-out']);
 const slugPattern = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
-const rocketQuery = 'SELECT rocket.id, rocket.name, rocket.slug, rocket.owner_id AS ownerId, user.username FROM rocket JOIN user ON rocket.owner_id=user.id';
 async function api(request: CF.Request, env: Env): Promise<CF.Response> {
   const url = new URL(request.url), path = url.pathname;
   if (path === '/api/coedit') return json({ enabled: true, accounts: true });
@@ -42,8 +42,10 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
   }
   if (path === '/api/rockets' && request.method === 'GET') {
     const owner = url.searchParams.get('owner');
-    const query = env.DB.prepare(rocketQuery + ' WHERE rocket.deleted_at IS NULL AND user.deleting=0' + (owner ? ' AND user.username=?' : '') + ' ORDER BY rocket.created_at DESC, rocket.id');
-    const rockets = await (owner ? query.bind(owner) : query).all<Rocket>();
+    const session = await accountSession(env, request.headers), userId = session?.user.id ?? '';
+    const query = env.DB.prepare(rocketQuery + " WHERE rocket.deleted_at IS NULL AND user.deleting=0 AND (rocket.visibility='public' OR rocket.owner_id=? OR EXISTS (SELECT 1 FROM rocket_member WHERE rocket_id=rocket.id AND user_id=?) OR ?=1)" + (owner ? ' AND user.username=?' : '') + ' ORDER BY rocket.created_at DESC, rocket.id');
+    const bindings = [userId, userId, Number(!!session?.user.isAdmin && !session.user.mustChangePassword), ...(owner ? [owner] : [])];
+    const rockets = await query.bind(...bindings).all<Rocket>();
     return json({ rockets: rockets.results });
   }
   if (path === '/api/rockets' && request.method === 'POST') {
@@ -67,7 +69,7 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
     if (data.slug !== undefined && (typeof data.slug !== 'string' || data.slug.length > 80 || !slugPattern.test(data.slug))) return fail('Use a URL name of lowercase letters, digits, hyphens or underscores', 400);
     const automatic = data.slug === undefined;
     const base = automatic ? data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80).replace(/^-|-$/g, '') || 'rocket' : data.slug as string;
-    const rocket: Rocket = { id: crypto.randomUUID(), name: data.name.trim(), slug: base, ownerId: session.user.id, username: session.user.username! };
+    const rocket: Rocket = { id: crypto.randomUUID(), name: data.name.trim(), slug: base, ownerId: session.user.id, username: session.user.username, routeUsername: session.user.username, visibility: 'restricted', publicDownload: 0, sharingVersion: 0 };
     const room = env.SHARED_ROCKET.getByName(`rocket:${rocket.id}`);
     let staged = false, published = false;
     try {
@@ -77,15 +79,15 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
         if (!initialized.ok) return fail((await initialized.json() as { error: string }).error, initialized.status);
         staged = true;
       }
-      const existing = automatic ? (await env.DB.prepare('SELECT slug FROM rocket WHERE owner_id=?').bind(rocket.ownerId).all<{ slug: string }>()).results : [];
+      const existing = automatic ? (await env.DB.prepare('SELECT slug FROM rocket WHERE route_username=?').bind(rocket.routeUsername).all<{ slug: string }>()).results : [];
       const taken = new Set(existing.map(row => row.slug));let number = 1;
       for (;;) {
         if (automatic) {
           while (taken.has(rocket.slug)) { const suffix = `-${++number}`;rocket.slug = base.slice(0, 80 - suffix.length).replace(/-$/, '') + suffix; }
         }
-        try { const inserted = await env.DB.prepare('INSERT INTO rocket(id, owner_id, name, slug, created_at) SELECT ?, id, ?, ?, ? FROM user WHERE id=? AND deleting=0').bind(rocket.id, rocket.name, rocket.slug, Date.now(), rocket.ownerId).run();if (!inserted.meta.changes) return fail('Account is unavailable', 401);break; }
+        try { const inserted = await env.DB.prepare('INSERT INTO rocket(id, owner_id, name, slug, created_at, route_username) SELECT ?, id, ?, ?, ?, ? FROM user WHERE id=? AND deleting=0').bind(rocket.id, rocket.name, rocket.slug, Date.now(), rocket.routeUsername, rocket.ownerId).run();if (!inserted.meta.changes) return fail('Account is unavailable', 401);break; }
         catch (error) {
-          if (!await env.DB.prepare('SELECT id FROM rocket WHERE owner_id=? AND slug=?').bind(rocket.ownerId, rocket.slug).first()) throw error;
+          if (!await env.DB.prepare('SELECT id FROM rocket WHERE route_username=? AND slug=?').bind(rocket.routeUsername, rocket.slug).first()) throw error;
           if (!automatic) return fail('You already have a rocket at that URL', 409);
           taken.add(rocket.slug);
         }
@@ -96,10 +98,22 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
       if (staged && !published) await room.fetch(`https://room.internal/discard-upload?rocketId=${rocket.id}`, { method: 'POST' });
     }
   }
-  const match = /^\/api\/rockets\/([a-z][a-z0-9_-]{2,31})\/([a-z0-9_-]{1,80})(\/(?:socket|rename))?$/.exec(path);
+  const match = /^\/api\/rockets\/([a-z][a-z0-9_-]{2,31})\/([a-z0-9_-]{1,80})(\/(?:socket|rename|sharing|download))?$/.exec(path);
   if (match) {
-    const rocket = await env.DB.prepare(rocketQuery + ' WHERE user.username=? AND rocket.slug=?' + (request.method === 'DELETE' ? '' : ' AND rocket.deleted_at IS NULL AND user.deleting=0')).bind(match[1], match[2]).first<Rocket>();
+    const rocket = await env.DB.prepare(rocketQuery + ' WHERE rocket.route_username=? AND rocket.slug=?' + (request.method === 'DELETE' ? '' : ' AND rocket.deleted_at IS NULL AND user.deleting=0')).bind(match[1], match[2]).first<Rocket>();
     if (!rocket) return fail('Rocket not found', 404);
+    if (request.method !== 'GET' || match[3] === '/socket') {
+      if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
+    }
+    const actor = await accountSession(env, request.headers);
+    const access = await rocketAccess(env, rocket.id, actor?.user ?? null);
+    if (!access.canView && request.method !== 'DELETE') return fail('Rocket not found or access unavailable. Sign in if this rocket was shared with you.', 404);
+    if ((match[3] === '/sharing' && ['GET', 'POST'].includes(request.method)) || (match[3] === '/download' && request.method === 'GET')) {
+      if (url.searchParams.get('rocketId') !== rocket.id) return fail('Rocket changed. Reload and try again.', 409);
+      const forwarded = new Request(`https://room.internal${match[3]}`, request as unknown as Request);
+      forwarded.headers.set('X-Rocket-Id', rocket.id);
+      return env.SHARED_ROCKET.getByName(`rocket:${rocket.id}`).fetch(forwarded as unknown as CF.Request);
+    }
     if (match[3] === '/rename' && request.method === 'POST') {
       if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
       const session = await accountSession(env, request.headers);
@@ -109,7 +123,7 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
       if (data.rocketId !== rocket.id || data.expectedName !== rocket.name) return fail('Rocket changed. Reload before renaming it.', 409);
       if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 100 || /[\x00-\x1f\x7f]/.test(data.name)) return fail('Enter a rocket name of 1–100 characters', 400);
       const name = data.name.trim();
-      const changed = await env.DB.prepare('UPDATE rocket SET name=? WHERE id=? AND name=? AND deleted_at IS NULL AND EXISTS (SELECT 1 FROM user WHERE id=rocket.owner_id AND deleting=0)').bind(name, rocket.id, rocket.name).run();
+      const changed = await env.DB.prepare('UPDATE rocket SET name=? WHERE id=? AND name=? AND (owner_id=? OR ?=1) AND deleted_at IS NULL AND EXISTS (SELECT 1 FROM user WHERE id=rocket.owner_id AND deleting=0)').bind(name, rocket.id, rocket.name, session.user.id, Number(session.user.isAdmin)).run();
       if (!changed.meta.changes) return fail('Rocket changed. Reload before renaming it.', 409);
       return json({ rocket: { ...rocket, name } });
     }

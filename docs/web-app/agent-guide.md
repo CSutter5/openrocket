@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The latest request adds [rocket sharing permissions](sharing.md) (ADR-32): Restricted defaults, Public viewing, explicit Viewer/Editor grants and download flags, live revocation/downgrades, and confirmed ownership transfer with stable share URLs. Read its migration, former-owner Editor access, socket/broadcast checks and export limitations before changing account or collaboration behavior. Earlier blanket signed-in editing is superseded. No deployment or remote migration is included.
+
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
 The latest deployment-error fix adds [persistent local deployment settings](cloudflare-deployment.md#persistent-deployment-settings). The root helper loads ignored `.env` before its clean worktree build and validates settings early. This checkout has the user's supplied Workers origin and a newly generated private stable secret saved with mode 0600. Preserve that file and never print or commit its secret. No app deployment is included in this fix.

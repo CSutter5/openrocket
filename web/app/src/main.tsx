@@ -36,11 +36,13 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
   const selection = useRef({ document, selected });
   selection.current = { document, selected };
   const shared = !!sharedRocket;
-  const [collaboration, setCollaboration] = useState<CollaborationStatus>({ phase: 'local', username: '', users: [], canEdit: false });
+  const [collaboration, setCollaboration] = useState<CollaborationStatus>({ phase: 'local', username: '', users: [], canEdit: false, canDownload: false });
   useEffect(() => {
     const unsubscribe = subscribeCollaboration((status, reply) => {
       setCollaboration(status);
       if (status.phase === 'deleted') setError('This rocket was deleted. Return to All rockets.');
+      if (status.phase === 'revoked' || status.phase === 'deleted') { setDocument(undefined);setEditorOpen(false);setMotorSelector(undefined);setInsertion(undefined); }
+      if (status.phase === 'revoked') setError('Access to this rocket is no longer available. Return to All rockets or sign in again.');
       if (reply) {
         const id = selection.current.document?.components[selection.current.selected]?.id;
         const found = reply.view.components.findIndex(c => c.id === id);
@@ -49,7 +51,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
       }
     });
     setBusy(true);
-    void (sharedRocket ? connectShared(sharedRocket.username, sharedRocket.slug, sharedRocket.id) : openSample('rocket-sample.ork'))
+    void (sharedRocket ? connectShared(sharedRocket.routeUsername, sharedRocket.slug, sharedRocket.id) : openSample('rocket-sample.ork'))
       .catch(failure => setError(message(failure))).finally(() => setBusy(false));
     return unsubscribe;
   }, []);
@@ -94,6 +96,13 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
   async function download() {
     setBusy(true); setError('');
     try {
+      if (sharedRocket) {
+        const response = await fetch(`/api/rockets/${sharedRocket.routeUsername}/${sharedRocket.slug}/download?rocketId=${sharedRocket.id}`);
+        if (!response.ok) throw new Error((await response.json()).error);
+        const url = URL.createObjectURL(await response.blob()), link = window.document.createElement('a');
+        link.href = url;link.download = (document?.filename ?? sharedRocket.slug).replace(/\.ork$/i, '') + '-edited.ork';
+        link.click();setTimeout(() => URL.revokeObjectURL(url), 1000);setNotice('Shared rocket downloaded.');return;
+      }
       const reply = await request({ type: 'export' });
       const url = URL.createObjectURL(new Blob([reply.bytes!.slice().buffer as ArrayBuffer], { type: 'application/octet-stream' }));
       const link = window.document.createElement('a');
@@ -171,7 +180,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
             return new Uint8Array(await file.arrayBuffer());
           }, file.name);
         }}/></label>
-        <button disabled={blocked || !document} onClick={download}>Download .ork</button>
+        <button disabled={blocked || !document || shared && !collaboration.canDownload} title={shared && !collaboration.canDownload ? 'The owner has not allowed downloads for you' : undefined} onClick={download}>Download .ork</button>
         <strong className="filename">{document?.filename ?? 'Opening rocket…'}</strong>
         <span className="session-label" role={shared ? 'status' : undefined}>{shared ? `${collaboration.phase === 'connected' ? 'Connected' : collaboration.phase === 'reconnecting' ? 'Reconnecting…' : 'Connecting…'}${collaboration.username ? ` · ${collaboration.username}` : ''}` : 'Local session'}</span>
       </div>
@@ -179,7 +188,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
         {tabs.map(([id, label], index) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={tab === id} aria-controls={`panel-${id}`} tabIndex={tab === id ? 0 : -1} onKeyDown={event => tabKey(event, index)} onClick={() => setTab(id)}>{label}</button>)}
       </div>
     </header>
-    {shared && collaboration.phase !== 'local' && <div className="collaboration-bar" aria-label="Collaborators">{collaboration.phase === 'connected' ? `${readOnly ? 'Viewing · Sign in to edit · ' : ''}Connected (${collaboration.users.length}): ${collaboration.users.join(', ')}` : collaboration.phase === 'deleted' ? 'Rocket deleted' : 'Connecting to the shared file… Editing will resume when connected.'}</div>}
+    {shared && collaboration.phase !== 'local' && <div className="collaboration-bar" aria-label="Collaborators">{collaboration.phase === 'connected' ? `${readOnly ? 'Viewing · Editor access required to make changes · ' : ''}Connected (${collaboration.users.length}): ${collaboration.users.join(', ')}` : collaboration.phase === 'deleted' ? 'Rocket deleted' : collaboration.phase === 'revoked' ? 'Rocket access revoked' : 'Connecting to the shared file… Editing will resume when connected.'}</div>}
     <main>
       {error && <p role="alert" className="error app-error">{error}</p>}
       {document && <>
@@ -232,7 +241,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
     </main>
     {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
       <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
-      <p>{shared ? 'Everyone with an account can edit this public rocket. Changes save automatically; Open replaces this rocket for everyone. New rocket opens your rocket list. Download an .ork to keep a separate copy. This rocket belongs to its owner; version history is not included.' : 'Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session.'} Flight results stay in this browser and are not written to downloads.</p>
+      <p>{shared ? 'The owner controls viewing, editing and downloads through Share. Changes save automatically; Open replaces this rocket for everyone. New rocket opens your rocket list. Version history is not included.' : 'Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session.'} Flight results stay in this browser and are not written to downloads.</p>
       <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Use the property tabs and individual unit selectors, then OK to save or Cancel to discard. Additional archive values remain under Advanced. Move, duplicate or delete components with the tree controls. 3D is not yet available.</p>
       <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
     </WindowPanel>}

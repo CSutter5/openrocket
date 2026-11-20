@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { zipSync } from 'fflate';
 import { importArchive, LIMITS } from '../../packages/ork-format/src/index.js';
 import { chromium } from 'playwright';
-import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword } from './cloudflare-fixture.mjs';
+import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword, shareRocket } from './cloudflare-fixture.mjs';
 import { openSample, openProperties } from './workspace.mjs';
 const host = await cloudflareFixture(8792), { url } = host;
 let browser;
@@ -37,8 +37,10 @@ try {
   assert.equal(await owner.locator('.filename').textContent(), 'alpha-rocket.ork');
   await openSample(owner, 'Open explicit tube sample');await owner.getByRole('button', { name: 'Tube bodytube', exact: true }).waitFor();
   const original = await download(owner);
+  await shareRocket(owner, url, first, { operation: 'visibility', visibility: 'public', publicDownload: true });
   const second = await createRocket(owner, url, 'alice', 'Beta rocket');
   const secondBytes = await download(owner);
+  await shareRocket(owner, url, second, { operation: 'visibility', visibility: 'public', publicDownload: true });
   assert.equal((await owner.context().request.get(url + first.slice(0, -1), { maxRedirects: 0 })).status(), 308);
   assert.equal((await post(owner.context(), '/api/rockets', { name: 'Duplicate', slug: 'alpha-rocket' })).status(), 409);
   assert.equal((await post(owner.context(), '/api/rockets', { name: 'Unsafe', slug: '../other' })).status(), 400);
@@ -49,6 +51,8 @@ try {
   const forgedOwner = await post(collaborator.context(), '/api/rockets', { name: 'Bob rocket', slug: 'alpha-rocket', ownerId: alice.id });
   assert.equal(forgedOwner.status(), 201);
   const bobRocket = (await forgedOwner.json()).rocket;assert.equal(bobRocket.username, 'bob');assert.notEqual(bobRocket.ownerId, alice.id);
+  await shareRocket(collaborator, url, '/bob/alpha-rocket/', { operation: 'visibility', visibility: 'public', publicDownload: true });
+  await shareRocket(owner, url, first, { operation: 'member', username: 'bob', role: 'editor', canDownload: true });
   const directory = await (await visitor.context().request.get(url + '/api/rockets')).json();
   assert.equal(directory.rockets.length, 3);assert.equal(JSON.stringify(directory).includes('@example.test'), false);
   const mine = await (await visitor.context().request.get(url + '/api/rockets?owner=alice')).json();assert.equal(mine.rockets.length, 2);
@@ -92,6 +96,7 @@ try {
   await visitor.setViewportSize({ width: 1280, height: 720 });
   await visitor.screenshot({ path: resolve(import.meta.dirname, '../build/public-rocket.png') });
   await owner.goto(url + '/alice/');await owner.getByRole('heading', { name: "alice's rockets", exact: true }).waitFor();
+  await owner.locator('.rocket-list article').first().waitFor();
   assert.equal(await owner.locator('.rocket-list article').count(), 2);
   await owner.screenshot({ path: resolve(import.meta.dirname, '../build/account-rockets.png') });
   await host.stop();await host.start();
@@ -127,6 +132,7 @@ try {
   await owner.waitForURL(url + '/alice/imported-rocket/');await editorReady(owner);
   assert.equal(await owner.locator('.filename').textContent(), 'Imported rocket.ork');
   assert.deepEqual(await download(owner), Buffer.from(upload));
+  await shareRocket(owner, url, '/alice/imported-rocket/', { operation: 'visibility', visibility: 'public', publicDownload: true });
   await visitor.goto(url + '/alice/imported-rocket/');await editorReady(visitor);
   assert.deepEqual(await download(visitor), Buffer.from(upload));
   const directoryCount = (await (await owner.context().request.get(url + '/api/rockets')).json()).rockets.length;

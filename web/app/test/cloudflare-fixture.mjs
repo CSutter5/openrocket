@@ -53,6 +53,12 @@ export async function editorReady(page) {
   await page.locator('.session-label').filter({ hasText: 'Connected' }).waitFor();
   await page.locator('.component-tree button').first().waitFor();
 }
+export async function shareRocket(page, url, path, operation) {
+  const current = await page.context().request.get(url + '/api/rockets' + path.slice(0, -1));
+  assert.equal(current.status(), 200);const { rocket } = await current.json();
+  const response = await page.context().request.post(url + '/api/rockets' + path + `sharing?rocketId=${rocket.id}`, { headers: { Origin: url }, data: { rocketId: rocket.id, expectedVersion: rocket.sharingVersion, ...operation } });
+  assert.equal(response.status(), 200, await response.text());return response.json();
+}
 export async function rawSocket(page, key, path) {
   const socketPath = path ?? `/api/rockets${new URL(page.url()).pathname}socket`;
   return page.evaluate(async ({ key, socketPath }) => {

@@ -21,7 +21,7 @@ export async function adminApi(request: CF.Request, env: Env): Promise<CF.Respon
     return json({ users: result.results });
   }
   if (path === '/api/admin/rockets' && request.method === 'GET') {
-    const result = await env.DB.prepare('SELECT rocket.id, rocket.name, rocket.slug, rocket.owner_id AS ownerId, rocket.deleted_at AS deletedAt, user.username FROM rocket JOIN user ON user.id=rocket.owner_id ORDER BY rocket.created_at DESC, rocket.id').all();
+    const result = await env.DB.prepare('SELECT rocket.id, rocket.name, rocket.slug, rocket.owner_id AS ownerId, rocket.route_username AS routeUsername, rocket.visibility, rocket.deleted_at AS deletedAt, user.username FROM rocket JOIN user ON user.id=rocket.owner_id ORDER BY rocket.created_at DESC, rocket.id').all();
     return json({ rockets: result.results });
   }
   const target = /^\/api\/admin\/users\/([^/]+)(\/sessions)?$/.exec(path);

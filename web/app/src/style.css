@@ -288,6 +288,13 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .account-bar a, .rocket-library a { color: #a6ceff; }
 .account-bar > div { display: flex; align-items: center; gap: .75rem; margin-left: auto; }
 .rocket-owner { color: var(--muted); overflow-wrap: anywhere; }
+.sharing-dialog { width: min(38rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; }
+.sharing-dialog fieldset { border: 0; padding: 0; min-width: 0; }
+.sharing-dialog select { width: 100%; padding: .45rem; }
+.sharing-dialog .sharing-check { display: flex; flex-direction: row; align-items: center; gap: .5rem; margin: .65rem 0; }
+.sharing-dialog .sharing-check input { width: auto; }
+.sharing-members { list-style: none; padding: 0; }
+.sharing-members li { padding: .75rem 0; border-bottom: 1px solid var(--border); }
 .rocket-library { overflow: auto; padding: 1rem max(1rem, calc((100vw - 70rem) / 2)); flex: 1; min-height: 0; }
 .rocket-library h1 { font-size: 1.75rem; }
 .new-rocket { display: grid; gap: .65rem; padding: 1.25rem; margin: 1.5rem 0; max-width: 35rem; border: 1px solid var(--border); border-radius: .4rem; background: #292e36; }

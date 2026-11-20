@@ -24,8 +24,8 @@ function localRequest(action: Action): Promise<Reply> {
   });
 }
 
-export interface CollaborationStatus { phase: 'local' | 'joining' | 'connected' | 'reconnecting' | 'deleted'; username: string; users: string[]; canEdit: boolean }
-let collaboration: CollaborationStatus = { phase: 'local', username: '', users: [], canEdit: false };
+export interface CollaborationStatus { phase: 'local' | 'joining' | 'connected' | 'reconnecting' | 'deleted' | 'revoked'; username: string; users: string[]; canEdit: boolean; canDownload: boolean }
+let collaboration: CollaborationStatus = { phase: 'local', username: '', users: [], canEdit: false, canDownload: false };
 let state: SharedState | undefined, socket: WebSocket | undefined;
 let messages = Promise.resolve();
 const sharedPending = new Map<string, { resolve: (reply: Reply) => void; reject: (error: Error) => void }>();
@@ -42,11 +42,11 @@ export async function collaborationAvailable() {
   return (await response.json()).enabled === true;
 }
 export function connectShared(owner: string, slug: string, rocketId: string): Promise<void> {
-  collaboration = { phase: 'joining', username: '', users: [], canEdit: false }; publish();
+  collaboration = { phase: 'joining', username: '', users: [], canEdit: false, canDownload: false }; publish();
   return new Promise(resolve => {
-    function deleted() {
-      state = undefined;collaboration = { ...collaboration, phase: 'deleted', canEdit: false, users: [] };
-      for (const pending of sharedPending.values()) pending.reject(new Error('This rocket was deleted'));
+    function unavailable(phase: 'deleted' | 'revoked') {
+      state = undefined;collaboration = { ...collaboration, phase, canEdit: false, canDownload: false, users: [] };
+      for (const pending of sharedPending.values()) pending.reject(new Error(phase === 'deleted' ? 'This rocket was deleted' : 'Access to this rocket was revoked'));
       sharedPending.clear();publish();resolve();
     }
     function connect() {
@@ -59,8 +59,9 @@ export function connectShared(owner: string, slug: string, rocketId: string): Pr
         messages = messages.then(async () => {
           if (socket !== connection) return;
           const message = JSON.parse(event.data) as SharedMessage;
-          if (message.type === 'deleted') { deleted();connection.close();return; }
-          if (message.type === 'access') { collaboration = { ...collaboration, canEdit: message.canEdit, username: message.username };publish();return; }
+          if (message.type === 'deleted' || message.type === 'revoked') { unavailable(message.type);connection.close();return; }
+          if (message.type === 'metadata') { window.dispatchEvent(new CustomEvent('rocket-metadata', { detail: message.rocket }));return; }
+          if (message.type === 'access') { collaboration = { ...collaboration, canEdit: message.canEdit, canDownload: message.canDownload, username: message.username };publish();return; }
           if (message.type === 'presence') { collaboration = { ...collaboration, users: message.users }; publish(); return; }
           if (message.type === 'rejected') {
             sharedPending.get(message.requestId)?.reject(new Error(message.error)); sharedPending.delete(message.requestId); return;
@@ -79,14 +80,14 @@ export function connectShared(owner: string, slug: string, rocketId: string): Pr
         }).catch(() => connection.close());
       };
       connection.onclose = () => {
-        if (socket !== connection || collaboration.phase === 'deleted') return;
+        if (socket !== connection || collaboration.phase === 'deleted' || collaboration.phase === 'revoked') return;
         state = undefined;
-        collaboration = { ...collaboration, phase: 'reconnecting', users: [] }; publish();
+        collaboration = { ...collaboration, phase: 'reconnecting', canEdit: false, canDownload: false, users: [] }; publish();
         for (const pending of sharedPending.values()) pending.reject(new Error('Connection lost. The edit may have been saved; review the shared file after reconnecting.'));
         sharedPending.clear();
         setTimeout(async () => {
-          if (collaboration.phase === 'deleted' || socket !== connection) return;
-          try { const response = await fetch(`/api/rockets/${owner}/${slug}`);if (response.status === 404 || response.ok && (await response.json()).rocket.id !== rocketId) { deleted();return; } } catch { /* Retry the connection when the network returns. */ }
+          if (collaboration.phase === 'deleted' || collaboration.phase === 'revoked' || socket !== connection) return;
+          try { const response = await fetch(`/api/rockets/${owner}/${slug}`);if (response.status === 404 || response.ok && (await response.json()).rocket.id !== rocketId) { unavailable('revoked');return; } } catch { /* Retry the connection when the network returns. */ }
           connect();
         }, 1000);
       };
@@ -96,9 +97,11 @@ export function connectShared(owner: string, slug: string, rocketId: string): Pr
   });
 }
 export function request(action: Action): Promise<Reply> {
+  if (collaboration.phase === 'revoked' || collaboration.phase === 'deleted') return Promise.reject(new Error('This rocket is no longer available'));
+  if (collaboration.phase !== 'local' && action.type === 'export') return Promise.reject(new Error('Use the shared rocket download endpoint'));
   if (collaboration.phase === 'local' || !sharedActions.has(action.type)) return localRequest(action);
   if (collaboration.phase !== 'connected' || !state || socket?.readyState !== WebSocket.OPEN) return Promise.reject(new Error('Wait for the shared file to reconnect.'));
-  if (!collaboration.canEdit) return Promise.reject(new Error('Sign in to edit this public rocket'));
+  if (!collaboration.canEdit) return Promise.reject(new Error('Editor access is required to change this rocket'));
   const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
     sharedPending.set(requestId, { resolve, reject });
