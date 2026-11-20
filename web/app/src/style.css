@@ -88,7 +88,7 @@ svg .ruler-number { font-size: 7px; fill: #b6bfcb; }
 .rocket-drawing polygon:focus-visible { outline: none; stroke: #e9b85f; stroke-width: 4px; }
 .drawing-selection { flex: none; border-top: 1px solid #3c424c; padding: .4rem .9rem; font-size: .9rem; }
 .rocket-drawing > details { flex: none; max-height: 35%; overflow: auto; padding: 0 .9rem; }
-.rocket-drawing > p:not(.drawing-selection) { padding: 1rem; }
+.rocket-drawing > p:not(.drawing-selection):not(.stability-values) { padding: 1rem; }
 summary { cursor: pointer; padding: .4rem 0; }
 details p { margin: .4rem 0; }
 .document-info { flex: none; max-height: 20dvh; overflow: auto; font-size: .9rem; color: var(--muted); padding: .25rem .5rem; }
@@ -190,7 +190,7 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .flight-panel { height: 100%; display: flex; flex-direction: column; }
 .flight-panel .simulation-table { flex: 1; min-height: 0; max-height: none; }
 @media (max-width: 850px) { .motor-picker-layout { display: block; } .motor-picker-main .catalog-table { flex: none; height: 26dvh; } .motor-picker-filters { overflow: visible; } }
-@media (max-height: 650px) { .drawing-selection { display: none; } }
+@media (max-height: 650px) { .drawing-selection, .stability-values { display: none; } }
 @media (max-height: 500px) and (min-width: 651px) {
   main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; column-gap: .5rem; }
   .app-error { grid-area: 1 / 1 / 2 / 3; }
@@ -202,6 +202,7 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
   .status-bar { grid-area: 4 / 2 / 5 / 3; min-width: 0; }
 }
 
+.stability-values { flex: none; max-height: 4.5rem; overflow: auto; padding: .3rem .9rem; font-size: .875rem; }
 .flight-toolbar label { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
 @media (max-height: 650px) {
   .flight-toolbar { gap: .35rem; margin-bottom: 0; padding: .3rem; }

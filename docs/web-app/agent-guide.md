@@ -2,6 +2,8 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
+The latest follow-up enables [component creation, CG/CP markers and simulation units](component-creation.md) (ADR-23). All palette types can be created; detailed component editors, drawings and static calculations retain the explicit limits in that record. Read it before changing structural commands or stability projection.
+
 The latest layout follow-up makes the app fit the browser viewport with internal panel scrolling. Read [the viewport fitting record](desktop-ui.md#viewport-fitting) before changing workspace heights or dialog overflow.
 
 The latest configuration follow-up removes the manual/session simulation UI, makes motor selection catalog-only with native-style filters, and adds atomic configuration creation (including a saved simulation), rename and deletion. Read [the configuration controls record](configuration-controls.md) and ADR-22 before changing these contracts. Earlier manual-flight UI descriptions are historical; the engine proof path remains available internally.

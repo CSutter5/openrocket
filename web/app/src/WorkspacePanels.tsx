@@ -1,23 +1,27 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import type { DocumentView } from './model';
+import type { ComponentView, DocumentView } from './model';
+import { additionTarget } from './components';
 
 const icons = import.meta.glob('../../../swing/src/main/resources/pix/componenticons/*-large.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
-const iconNames: Record<string, string> = { rocket: 'stage', trapezoidfinset: 'trapezoidfin', masscomponent: 'mass_dark', shockcord: 'shockcord_dark', parachute: 'parachute_dark', streamer: 'streamer_dark', podset: 'pods_dark', parallelstage: 'boosters' };
+const iconNames: Record<string, string> = { rocket: 'stage', trapezoidfinset: 'trapezoidfin', masscomponent: 'mass_dark', parallelstage: 'boosters', ellipticalfinset: 'ellipticalfin_dark', freeformfinset: 'freeformfin_dark', tubefinset: 'tubefin', launchlug: 'launchlug_dark', shockcord: 'shockcord_dark', parachute: 'parachute_dark', streamer: 'streamer_dark', podset: 'pods_dark' };
 export function ComponentIcon({ type }: { type: string }) {
   const name = iconNames[type] ?? type;
   const src = icons[`../../../swing/src/main/resources/pix/componenticons/${name}-large.png`];
   return src ? <img className="component-icon" src={src} alt=""/> : <span className="component-icon unknown-icon" aria-hidden="true">◇</span>;
 }
 const groups = [
-  { name: 'Assembly components', parts: [['stage', 'Stage'], ['boosters', 'Boosters'], ['podset', 'Pods']] },
-  { name: 'Body components and fin sets', parts: [['nosecone', 'Nose cone'], ['bodytube', 'Body tube'], ['transition', 'Transition'], ['trapezoidfinset', 'Trapezoidal'], ['ellipticalfin_dark', 'Elliptical'], ['freeformfin_dark', 'Freeform'], ['tubefin', 'Tube fins'], ['railbutton', 'Rail button'], ['launchlug_dark', 'Launch lug']] },
+  { name: 'Assembly components', parts: [['stage', 'Stage'], ['parallelstage', 'Boosters'], ['podset', 'Pods']] },
+  { name: 'Body components and fin sets', parts: [['nosecone', 'Nose cone'], ['bodytube', 'Body tube'], ['transition', 'Transition'], ['trapezoidfinset', 'Trapezoidal'], ['ellipticalfinset', 'Elliptical'], ['freeformfinset', 'Freeform'], ['tubefinset', 'Tube fins'], ['railbutton', 'Rail button'], ['launchlug', 'Launch lug']] },
   { name: 'Inner components', parts: [['innertube', 'Inner tube'], ['tubecoupler', 'Tube coupler'], ['centeringring', 'Centering ring'], ['bulkhead', 'Bulkhead'], ['engineblock', 'Engine block']] },
   { name: 'Mass components', parts: [['parachute', 'Parachute'], ['streamer', 'Streamer'], ['shockcord', 'Shock cord'], ['masscomponent', 'Mass component']] },
 ];
-export function ComponentPalette() {
+export function ComponentPalette({ components, selected, disabled, create }: { components: ComponentView[]; selected: number; disabled: boolean; create: (type: string) => void }) {
   return <section className="component-palette" aria-label="Add new component"><h2>Add new component</h2>
-    {groups.map(group => <div className="palette-group" key={group.name}><h3>{group.name}</h3><div className="palette-items">{group.parts.map(([type, label]) => <button key={type} disabled title="Adding components is not supported in the web editor yet"><ComponentIcon type={type}/><span>{label}</span></button>)}</div></div>)}
-    <p className="muted palette-note">Component creation is not available yet. Select an existing component and choose Edit.</p>
+    {groups.map(group => <div className="palette-group" key={group.name}><h3>{group.name}</h3><div className="palette-items">{group.parts.map(([type, label]) => {
+      const target = additionTarget(components, selected, type);
+      return <button key={type} disabled={disabled || !target} title={target ? `Add ${label} to ${components[target.parent]?.name}` : 'Select a compatible parent component'} onClick={() => create(type)}><ComponentIcon type={type}/><span>{label}</span></button>;
+    })}</div></div>)}
+    <p className="muted palette-note">Select a compatible parent to add a component.</p>
   </section>;
 }
 // Modeless so the drawing, file controls and component selection remain usable.

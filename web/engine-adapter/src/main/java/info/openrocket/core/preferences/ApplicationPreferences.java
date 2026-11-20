@@ -17,6 +17,11 @@ import info.openrocket.core.util.GeodeticComputationStrategy;
  */
 public class ApplicationPreferences {
 
+    /** Native RailButton defaults read the bundled catalog; browser preferences remain immutable. */
+    public java.util.Set<Material> getUserMaterials() { return java.util.Set.of(); }
+    public void addUserMaterial(Material material) { throw new UnsupportedOperationException("Immutable browser materials"); }
+    public void removeUserMaterial(Material material) { throw new UnsupportedOperationException("Immutable browser materials"); }
+
     /** OpenRocket default: Mach number used for override-CD computations. */
     public double getDefaultMach() {
         return 0.3;

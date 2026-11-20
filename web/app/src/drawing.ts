@@ -35,7 +35,7 @@ export function drawingInput(archive: ExpandedArchive) {
       const shape = read(n, 'shape').toUpperCase();
       if (!['CONICAL', 'OGIVE', 'ELLIPSOID', 'POWER', 'PARABOLIC', 'HAACK'].includes(shape)) throw new Error('Unknown shell profile.');
       if (n.name === 'nosecone' && boolean(optional(n, 'isflipped', 'false')) !== 'false') throw new Error('Flipped nose cones are not yet drawn.');
-      values = [n.name, length, shape, scalar(n, 'shapeparameter'),
+      values = [n.name, length, shape, numeric(optional(n, 'shapeparameter', ['CONICAL', 'ELLIPSOID'].includes(shape) ? '0' : ''), 'shapeparameter'),
         ...(n.name === 'transition' ? radius(n, 'foreradius') : []), ...radius(n, 'aftradius'),
         ...(n.name === 'transition' ? [boolean(optional(n, 'shapeclipped', 'true'))] : [])];
     }

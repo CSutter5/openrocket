@@ -6,6 +6,9 @@ import { createConfiguration, renameConfiguration, deleteConfiguration } from '.
 import { numeric } from '../../packages/ork-format/src/radius.js';
 import { assignMotor } from './simulation/assign-motor';
 import { motors, resolveCatalogMotors } from './simulation/motor-catalog';
+import { stability } from '../../engine-adapter/build/generated/teavm/js/openrocket-g1-engine.js';
+import { importedInput } from './simulation/imported';
+import { addComponent, newRocket } from './components';
 import { rocketDrawing } from './drawing';
 import type { Action, DocumentView, Intrinsic, Reply } from './model';
 
@@ -31,7 +34,11 @@ function intrinsic(tube: TubeRadiusInput, value: number): { before: Intrinsic; a
 async function describe(current: ExpandedArchive, name: string, lastExport: string, configurationId: string | undefined): Promise<DocumentView> {
   const nodes = current.parsed.components;
   try { await resolveCatalogMotors(current); } catch { /* File inspection remains available when catalog assets are unavailable. */ }
+  let centers: DocumentView['stability'];
+  try { centers = JSON.parse(stability(importedInput(current, configurationId, true).model)); }
+  catch (error) { centers = { cg: null, cp: null, reason: failure(error) }; }
   return {
+    stability: centers,
     motorMounts: nodes.filter(n => n.id && ['bodytube', 'innertube'].includes(n.name) && n.children.some(c => c.name === 'motormount')).map(n => {
       let diameter: number | undefined, length: number | undefined;
       const value = (name: string) => numeric(n.children.find(c => c.name === name)?.text.trim() ?? '', name);
@@ -74,14 +81,15 @@ function failure(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 async function execute(action: Action): Promise<Reply> {
-  if (action.type === 'import') {
-    const candidate = await importArchive(action.bytes);
+  if (action.type === 'import' || action.type === 'new') {
+    const candidate = action.type === 'new' ? await newRocket() : await importArchive(action.bytes);
+    const importedFilename = action.type === 'new' ? 'Untitled.ork' : action.filename;
     // Build the view before publication, so a failed replacement retains the accepted archive.
     const configurationId = flightConfigurations(candidate).find(c => c.isDefault)?.id;
-    const view = await describe(candidate, action.filename, candidate.identity.archiveHash, configurationId);
+    const view = await describe(candidate, importedFilename, candidate.identity.archiveHash, configurationId);
     selectedConfigurationId = configurationId;
-    archive = candidate; filename = action.filename; exportHash = candidate.identity.archiveHash;
-    return { view, notice: 'Archive opened. Original upload retained in memory.' };
+    archive = candidate; filename = importedFilename; exportHash = candidate.identity.archiveHash;
+    return { view, notice: action.type === 'new' ? 'New rocket created.' : 'Archive opened. Original upload retained in memory.' };
   }
   if (!archive) throw new Error('Open an archive first');
   if (action.type === 'flightConfiguration') {
@@ -108,7 +116,12 @@ async function execute(action: Action): Promise<Reply> {
   }
   let candidate = archive, nextConfigurationId = selectedConfigurationId, notice = 'No change; accepted document retained.';
   if (['createConfiguration', 'renameConfiguration', 'deleteConfiguration'].includes(action.type) && archive.identity.archiveHash !== (action as { expectedHash: string }).expectedHash) throw new Error('Document changed before configuration edit; try again');
-  if (action.type === 'createConfiguration') {
+  let selectedId: string | undefined;
+  if (action.type === 'addComponent') {
+    if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before component creation; try again');
+    const created = await addComponent(archive, action.selectedId, action.componentType, action.position);
+    candidate = created.archive; selectedId = created.id; notice = 'Component created. Affected stored results are outdated; series retained.';
+  } else if (action.type === 'createConfiguration') {
     const created = await createConfiguration(archive, action.name, action.mountId, action.motorKey, action.delay);
     candidate = created.archive; nextConfigurationId = created.configurationId; notice = 'Configuration and linked simulation created.';
   } else if (action.type === 'renameConfiguration') {
@@ -148,7 +161,7 @@ async function execute(action: Action): Promise<Reply> {
   }
   const view = await describe(candidate, filename, exportHash, nextConfigurationId);
   archive = candidate; selectedConfigurationId = nextConfigurationId;
-  return { view, notice };
+  return { view, notice, selectedId };
 }
 // Serialize asynchronous codec operations; never publish an intermediate candidate.
 let queue = Promise.resolve();

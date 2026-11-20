@@ -12,12 +12,15 @@ export interface DocumentView {
   flightConfigurations: import('./simulation/input').FlightConfigurationChoice[];
   flightConfigurationId?: string;
   motorMounts: { id: string; name: string; diameter?: number; length?: number; usedGroups: number[]; assignments: { configurationId: string; motorKey?: string; delay: string }[] }[];
+  stability: { cg: number | null; cp: number | null; reason?: string };
   drawing: import('./drawing').Drawing;
   filename: string; mode: 'editable' | 'preservation'; diagnostics: string[];
   identitySidecarHash: string; hash: string; dirty: boolean; components: ComponentView[];
   simulations: import('./simulation/saved').SavedSimulation[];
 }
 export type Action =
+  | { type: 'new' }
+  | { type: 'addComponent'; expectedHash: string; selectedId: string; componentType: string; position: 'after' | 'end' }
   | { type: 'import'; bytes: Uint8Array; filename: string }
   | { type: 'rename'; id: string; expected: string; value: string }
   | { type: 'radius'; id: string; expected: number; value: number }
@@ -29,4 +32,4 @@ export type Action =
   | { type: 'deleteConfiguration'; expectedHash: string; configurationId: string }
   | { type: 'flightSnapshot'; expectedHash: string; configurationId: string; simulationId?: string; integrator: import('./simulation/provenance').Integrator }
   | { type: 'export' };
-export interface Reply { view: DocumentView; notice: string; bytes?: Uint8Array; snapshot?: import('./simulation/provenance').FlightSnapshot }
+export interface Reply { view: DocumentView; notice: string; selectedId?: string; bytes?: Uint8Array; snapshot?: import('./simulation/provenance').FlightSnapshot }

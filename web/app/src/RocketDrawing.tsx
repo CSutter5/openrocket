@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ComponentView } from './model';
+import type { ComponentView, DocumentView } from './model';
 import type { Drawing } from './drawing';
 import {displayLength, lengthLabel, type LengthUnit} from './units';
-export function RocketDrawing({ drawing, components, selected, select, busy, unit, edit }: {
-  drawing: Drawing; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit; edit: () => void;
+export function RocketDrawing({ drawing, stability, components, selected, select, busy, unit, edit }: {
+  drawing: Drawing; stability: DocumentView['stability']; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit; edit: () => void;
 }) {
   const [zoom, setZoom] = useState(1);
   const canvas = useRef<HTMLDivElement>(null);
@@ -39,8 +39,14 @@ export function RocketDrawing({ drawing, components, selected, select, busy, uni
             <title>{component.name} · {component.type}</title>
           </polygon>;
         })}
+        {([['cg', stability.cg, '#56b4e9'], ['cp', stability.cp, '#e69f00']] as const).map(([kind, value, color]) => value != null && Number.isFinite(value) && <g key={kind} data-testid={`rocket-${kind}`} data-position={value} transform={`translate(${x(value)} 150)`} pointerEvents="none" aria-label={`${kind === 'cg' ? 'Center of gravity' : 'Center of pressure'}: ${lengthLabel(value, unit)}`}>
+          <circle r="9" fill="#171a20" stroke={color} strokeWidth="2"/>
+          {kind === 'cg' ? <path d="M-9 0H9M0-9V9M0 0H9A9 9 0 0 0 0-9ZM0 0H-9A9 9 0 0 0 0 9Z" fill={color} stroke={color}/> : <><circle r="3" fill={color}/><path d="M-13 0H-9M9 0H13M0-13V-9M0 9V13" stroke={color} strokeWidth="2"/></>}
+          <text y={kind === 'cg' ? -18 : 29} textAnchor="middle" fill={color}>{kind.toUpperCase()}</text>
+        </g>)}
         </g>
       </svg></div>
+      <p className="stability-values" aria-label="Rocket stability">CG: <strong>{stability.cg == null ? 'Unavailable' : lengthLabel(stability.cg, unit)}</strong> · CP: <strong>{stability.cp == null ? 'Unavailable' : lengthLabel(stability.cp, unit)}</strong> · From rocket origin · Launch mass, selected configuration · CP at Mach 0.3, 0° angle of attack{stability.reason && <span className="muted"> · {stability.reason}</span>}</p>
       <p className="drawing-selection">Selected: <strong>{components[selected]?.name}</strong>. Click to select · Double-click to edit · Enter / Space to select with keyboard.</p>
     </>}
     {!!drawing.omitted.length && <details><summary>Parts omitted from the exterior view ({drawing.omitted.length})</summary><ul>{drawing.omitted.map((text,i) => <li key={i}>{text}</li>)}</ul></details>}

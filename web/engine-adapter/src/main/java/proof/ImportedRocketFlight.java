@@ -17,9 +17,12 @@ public final class ImportedRocketFlight {
     public final List<RocketComponent> components=new ArrayList<>();
     public final List<FlightConfigurationId> configurations=new ArrayList<>();
     public final Rocket rocket;
+    private final boolean analysis;
     public final FlightConfigurationId selected;
     public ThrustCurveMotor selectedMotor;
-    public ImportedRocketFlight(String input) {
+    public ImportedRocketFlight(String input) { this(input, false); }
+    public ImportedRocketFlight(String input, boolean analysis) {
+        this.analysis = analysis;
         if(input.length()>1048576)throw new IllegalArgumentException("Simulation model exceeds limit");
         for(String line:input.split("\n")) {
             if(line.equals("imported-flight-v1"))continue;
@@ -34,6 +37,9 @@ public final class ImportedRocketFlight {
             RocketComponent c=switch(text(i+"/type")) {
                 case "stage"->new AxialStage();case "nosecone"->new NoseCone();case "transition"->new Transition();case "bodytube"->new BodyTube();
                 case "innertube"->new InnerTube();case "trapezoidfinset"->new TrapezoidFinSet();case "parachute"->new Parachute();
+                case "ellipticalfinset"->new EllipticalFinSet();case "tubefinset"->new TubeFinSet();
+                case "launchlug"->new LaunchLug();case "railbutton"->new RailButton();case "streamer"->new Streamer();
+                case "centeringring"->new CenteringRing();case "tubecoupler"->new TubeCoupler();case "engineblock"->new EngineBlock();
                 case "masscomponent"->new MassComponent();case "bulkhead"->new Bulkhead();case "shockcord"->new ShockCord();
                 default->throw new IllegalArgumentException("Unsupported component");
             };
@@ -54,7 +60,7 @@ public final class ImportedRocketFlight {
             if(c instanceof MotorMount mount&&fields.containsKey(prefix+"motormount/overhang"))motors(mount,prefix+"motormount/");
         }
         rocket.setSelectedConfiguration(selected);
-        if(selectedMotor==null)throw new IllegalArgumentException("Selected configuration has no resolved motor");
+        if(!analysis && selectedMotor==null)throw new IllegalArgumentException("Selected configuration has no resolved motor");
     }
     static String decode(String value) {
         StringBuilder out=new StringBuilder();for(int i=0;i<value.length();i++){char c=value.charAt(i);if(c=='\\'){c=value.charAt(++i);c=switch(c){case 't'->'\t';case 'n'->'\n';case 'r'->'\r';default->c;};}out.append(c);}return out.toString();
@@ -65,6 +71,11 @@ public final class ImportedRocketFlight {
     boolean auto(String key){return text(key).equals("auto")||text(key).startsWith("auto ");}
     double dimension(String key){return Double.parseDouble(text(key).replace("auto ",""));}
     Material material(String key) {
+        if (analysis && !fields.containsKey(key+"/@group")) {
+            // Group and shear metadata do not affect launch mass or static CP.
+            return Material.newMaterial(Material.Type.valueOf(text(key+"/@type").toUpperCase()),text(key),num(key+"/@density"),
+                fields.containsKey(key+"/@shearModulus") ? num(key+"/@shearModulus") : 0, null, true, true);
+        }
         MaterialGroup group=null;for(MaterialGroup g:MaterialGroup.ALL_GROUPS)if(g.getDatabaseString().equals(text(key+"/@group")))group=g;
         if(group==null)throw new IllegalArgumentException("Unsupported material group");
         double shear=fields.containsKey(key+"/@shearModulus")?num(key+"/@shearModulus"):0;
@@ -92,10 +103,11 @@ public final class ImportedRocketFlight {
             case "overridesubcomponentscd":c.setSubcomponentsOverriddenCD(bool(key));break;
             case "material":{Material m=material(key);if(c instanceof ExternalComponent e)e.setMaterial(m);else if(c instanceof StructuralComponent s)s.setMaterial(m);else if(c instanceof RecoveryDevice d)d.setMaterial(m);else ((ShockCord)c).setMaterial(m);break;}
             case "finish":((ExternalComponent)c).setFinish(ExternalComponent.Finish.valueOf(value.toUpperCase()));break;
-            case "length":if(c instanceof BodyComponent b)b.setLength(num(key));else ((RingComponent)c).setLength(num(key));break;
-            case "thickness":if(c instanceof FinSet f)f.setThickness(num(key));else if(c instanceof SymmetricComponent s){if(value.equals("filled"))s.setFilled(true);else s.setThickness(num(key),false);}else ((ThicknessRingComponent)c).setThickness(num(key));break;
-            case "radius":{BodyTube b=(BodyTube)c;b.setOuterRadius(dimension(key));b.setOuterRadiusAutomatic(auto(key));break;}
-            case "outerradius":if(c instanceof InnerTube t)t.setOuterRadius(num(key));else {Bulkhead b=(Bulkhead)c;if(!value.equals("auto"))b.setOuterRadius(dimension(key));b.setOuterRadiusAutomatic(auto(key));}break;
+            case "length":if(c instanceof BodyComponent b)b.setLength(num(key));else if(c instanceof TubeFinSet t)t.setLength(num(key));else if(c instanceof LaunchLug l)l.setLength(num(key));else ((RingComponent)c).setLength(num(key));break;
+            case "thickness":if(c instanceof FinSet f)f.setThickness(num(key));else if(c instanceof SymmetricComponent s){if(value.equals("filled"))s.setFilled(true);else s.setThickness(num(key),false);}else if(c instanceof TubeFinSet t)t.setThickness(num(key));else if(c instanceof LaunchLug l)l.setThickness(num(key));else ((ThicknessRingComponent)c).setThickness(num(key));break;
+            case "radius":{if(c instanceof BodyTube b){b.setOuterRadius(dimension(key));b.setOuterRadiusAutomatic(auto(key));}else if(c instanceof TubeFinSet t){if(!value.equals("auto"))t.setOuterRadius(dimension(key));t.setOuterRadiusAutomatic(auto(key));}else ((LaunchLug)c).setOuterRadius(num(key));break;}
+            case "outerradius":if(c instanceof InnerTube t)t.setOuterRadius(num(key));else {RingComponent b=(RingComponent)c;if(!value.equals("auto"))b.setOuterRadius(dimension(key));if(b instanceof Bulkhead v)v.setOuterRadiusAutomatic(auto(key));else if(b instanceof CenteringRing v)v.setOuterRadiusAutomatic(auto(key));else if(b instanceof TubeCoupler v)v.setOuterRadiusAutomatic(auto(key));else if(b instanceof EngineBlock v)v.setOuterRadiusAutomatic(auto(key));}break;
+            case "innerradius":{RingComponent b=(RingComponent)c;if(!value.equals("auto"))b.setInnerRadius(dimension(key));((CenteringRing)b).setInnerRadiusAutomatic(auto(key));break;}
             case "shape":((Transition)c).setShapeType(Transition.Shape.valueOf(value.toUpperCase()));break;
             case "shapeparameter":((Transition)c).setShapeParameter(num(key));break;
             case "shapeclipped":((Transition)c).setClipped(bool(key));break;
@@ -113,27 +125,34 @@ public final class ImportedRocketFlight {
             case "packedlength":((MassObject)c).setLength(num(key));break;
             case "packedradius":{MassObject m=(MassObject)c;if(!value.equals("auto"))m.setRadius(dimension(key));m.setRadiusAutomatic(auto(key));break;}
             case "radialposition":if(c instanceof MassObject m)m.setRadialPosition(num(key));else ((RingComponent)c).setRadialPosition(num(key));break;
-            case "radialdirection":if(c instanceof MassObject m)m.setRadialDirection((num(key)*(Math.PI/180.0)));else ((RingComponent)c).setRadialDirection((num(key)*(Math.PI/180.0)));break;
+            case "radialdirection":if(c instanceof MassObject m)m.setRadialDirection((num(key)*(Math.PI/180.0)));else if(c instanceof LaunchLug l)l.setAngleOffset(Math.toRadians(num(key)));else ((RingComponent)c).setRadialDirection((num(key)*(Math.PI/180.0)));break;
             case "mass":((MassComponent)c).setComponentMass(num(key));break;
             case "masscomponenttype":((MassComponent)c).setMassComponentType(MassComponent.MassComponentType.valueOf(value.toUpperCase()));break;
             case "cordlength":{ShockCord s=(ShockCord)c;if(value.equals("auto"))s.setCordLengthAutomatic(true);else s.setCordLength(num(key));break;}
             case "clusterconfiguration":if(!value.equals("single"))throw new IllegalArgumentException("Clusters unsupported");((InnerTube)c).setClusterConfiguration(ClusterConfiguration.SINGLE);break;
             case "clusterscale":((InnerTube)c).setClusterScale(num(key));break;
             case "clusterrotation":((InnerTube)c).setClusterRotation((num(key)*(Math.PI/180.0)));break;
-            case "instancecount":if(c instanceof FinSet f)f.setFinCount((int)num(key));else ((RadiusRingComponent)c).setInstanceCount((int)num(key));break;
-            case "instanceseparation":((RadiusRingComponent)c).setInstanceSeparation(num(key));break;
-            case "fincount":((FinSet)c).setFinCount((int)num(key));break;
-            case "rotation":((FinSet)c).setBaseRotation((num(key)*(Math.PI/180.0)));break;
-            case "angleoffset":((FinSet)c).setAngleMethod(AngleMethod.valueOf(text(key+"/@method").toUpperCase()));((FinSet)c).setAngleOffset(Math.toRadians(num(key)));break;
-            case "radiusoffset":((FinSet)c).setRadius(RadiusMethod.valueOf(text(key+"/@method").toUpperCase()),num(key));break;
+            case "instancecount":((Instanceable)c).setInstanceCount((int)num(key));break;
+            case "instanceseparation":((LineInstanceable)c).setInstanceSeparation(num(key));break;
+            case "fincount":if(c instanceof TubeFinSet t)t.setFinCount((int)num(key));else ((FinSet)c).setFinCount((int)num(key));break;
+            case "rotation":if(c instanceof TubeFinSet t)t.setBaseRotation(Math.toRadians(num(key)));else ((FinSet)c).setBaseRotation(Math.toRadians(num(key)));break;
+            case "angleoffset":((AnglePositionable)c).setAngleMethod(AngleMethod.valueOf(text(key+"/@method").toUpperCase()));((AnglePositionable)c).setAngleOffset(Math.toRadians(num(key)));break;
+            case "radiusoffset":((RadiusPositionable)c).setRadius(RadiusMethod.valueOf(text(key+"/@method").toUpperCase()),num(key));break;
             case "crosssection":((FinSet)c).setCrossSection(FinSet.CrossSection.valueOf(value.toUpperCase()));break;
             case "cant":((FinSet)c).setCantAngle((num(key)*(Math.PI/180.0)));break;
             case "filletradius":((FinSet)c).setFilletRadius(num(key));break;
             case "filletmaterial":((FinSet)c).setFilletMaterial(material(key));break;
-            case "rootchord":((TrapezoidFinSet)c).setRootChord(num(key));break;
+            case "rootchord":if(c instanceof EllipticalFinSet f)f.setLength(num(key));else ((TrapezoidFinSet)c).setRootChord(num(key));break;
             case "tipchord":((TrapezoidFinSet)c).setTipChord(num(key));break;
             case "sweeplength":((TrapezoidFinSet)c).setSweep(num(key));break;
-            case "height":((TrapezoidFinSet)c).setHeight(num(key));break;
+            case "height":if(c instanceof EllipticalFinSet f)f.setHeight(num(key));else if(c instanceof RailButton r)r.setTotalHeight(num(key));else ((TrapezoidFinSet)c).setHeight(num(key));break;
+            case "outerdiameter":((RailButton)c).setOuterDiameter(num(key));break;
+            case "innerdiameter":((RailButton)c).setInnerDiameter(num(key));break;
+            case "baseheight":((RailButton)c).setBaseHeight(num(key));break;
+            case "flangeheight":((RailButton)c).setFlangeHeight(num(key));break;
+            case "screwheight":((RailButton)c).setScrewHeight(num(key));break;
+            case "striplength":((Streamer)c).setStripLength(num(key));break;
+            case "stripwidth":((Streamer)c).setStripWidth(num(key));break;
             case "cd":if(value.equals("auto"))((RecoveryDevice)c).setCDAutomatic(true);else ((RecoveryDevice)c).setCD(num(key));break;
             case "deployevent":((RecoveryDevice)c).getDeploymentConfigurations().getDefault().setDeployEvent(deploy(value));break;
             case "deployaltitude":((RecoveryDevice)c).getDeploymentConfigurations().getDefault().setDeployAltitude(num(key));break;

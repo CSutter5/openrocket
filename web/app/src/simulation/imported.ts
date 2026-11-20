@@ -36,7 +36,7 @@ const one = (n: XmlNode,key:string) => { const all=n.children.filter(c=>c.name==
 function attributes(n:XmlNode, allowed:string[]) { if(Object.keys(n.attributes).some(k=>!allowed.includes(k)))throw new Error(`Unsupported ${n.name} attributes`); }
 function scalar(n:XmlNode) { if(n.children.length)throw new Error(`Unsupported nested ${n.name}`); }
 const encode=(s:string)=>s.replace(/\\/g,'\\\\').replace(/\t/g,'\\t').replace(/\r/g,'\\r').replace(/\n/g,'\\n');
-export function importedInput(archive: ExpandedArchive, requestedConfigurationId?: string) {
+export function importedInput(archive: ExpandedArchive, requestedConfigurationId?: string, analysis = false) {
   if(archive.mode!=='editable'||archive.parsed.version!=='1.11')throw new Error('Requires an editable format 1.11 archive');
   const nodes=archive.parsed.components;
   if(nodes.length>64||nodes[0]?.name!=='rocket'||nodes.filter(n=>n.name==='stage').length!==1||nodes[1]?.name!=='stage')throw new Error('Requires one direct axial stage and at most 64 components');
@@ -52,20 +52,32 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     if(simulation.children.find(n=>n.name==='calculator')?.text.trim()!=='BarrowmanCalculator')throw new Error('Unsupported imported aerodynamic calculator');
   }
   const configurations=nodes[0].children.filter(n=>n.name==='motorconfiguration');
-  if(configurations.length<1||configurations.length>16)throw new Error('Requires 1–16 defined configurations');
+  if((!analysis && configurations.length<1)||configurations.length>16)throw new Error('Requires 1–16 defined configurations');
   const ids=configurations.map(n=>attr(n,'configid'));
   if(ids.some(id=>!id||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id))||new Set(ids).size!==ids.length)throw new Error('Ambiguous configuration IDs');
-  const selected=configurations.filter(n=>attr(n,'default')==='true');if(selected.length!==1)throw new Error('Requires an explicit default flight configuration');
-  const configurationId=requestedConfigurationId ?? attr(selected[0],'configid')!;
-  if(!ids.includes(configurationId))throw new Error('Unknown selected flight configuration');
+  const selected=configurations.filter(n=>attr(n,'default')==='true');if((configurations.length || !analysis) && selected.length!==1)throw new Error('Requires an explicit default flight configuration');
+  const configurationId=requestedConfigurationId ?? (selected[0] ? attr(selected[0],'configid')! : '00000000-0000-0000-0000-000000000000');
+  if((configurations.length || !analysis) && !ids.includes(configurationId))throw new Error('Unknown selected flight configuration');
   const rows=['imported-flight-v1',`configuration\t${configurationId}`,`count\t${nodes.length}`];
   const materials:unknown[]=[],curves=new Map<string,{bytes:Uint8Array;hash:string}>();let selectedMotor='', mounts=0,recovery=0;const catalogReferences:string[]=[];
   function add(n:XmlNode,path:string) {
     rows.push(`${path}\t${encode(n.text.trim())}`);
     for(const [key,v] of Object.entries(n.attributes))rows.push(`${path}/@${key}\t${encode(v.value)}`);
   }
+  const finFields = `${common} finish material thickness instancecount fincount radiusoffset angleoffset rotation crosssection cant filletradius filletmaterial`;
+  const analysisFields: Record<string, string> = {
+    ellipticalfinset: `${finFields} rootchord height`,
+    tubefinset: `${common} finish material instancecount fincount radiusoffset angleoffset rotation radius length thickness`,
+    launchlug: `${common} finish material instancecount instanceseparation angleoffset radialdirection radius length thickness`,
+    railbutton: `${common} finish material instancecount instanceseparation angleoffset outerdiameter innerdiameter height baseheight flangeheight screwheight`,
+    streamer: `${common} ${mass} cd material deployevent deployaltitude deploydelay deploymentconfiguration striplength stripwidth`,
+    centeringring: `${common} material length radialposition radialdirection outerradius innerradius instancecount instanceseparation`,
+    tubecoupler: `${common} material length radialposition radialdirection outerradius thickness`,
+    engineblock: `${common} material length radialposition radialdirection outerradius thickness`,
+  };
   nodes.forEach((n,i)=>{
-    if(!fields[n.name])throw new Error(`Unsupported component ${n.name}`);
+    const allowed = fields[n.name] ?? (analysis ? analysisFields[n.name] : undefined);
+    if(!allowed)throw new Error(`Unsupported component ${n.name}`);
     const parent=nodes.indexOf(n.parent?.parent!);if(i>0&&(parent<0||parent>=i))throw new Error('Invalid component parent');
     const positions=n.children.filter(c=>['axialoffset','position'].includes(c.name));
     if(positions.length===2&&(attr(positions[0],'method')??attr(positions[0],'type'))!==(attr(positions[1],'method')??attr(positions[1],'type')))throw new Error('Ambiguous axial position methods');
@@ -74,8 +86,12 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     const seen=new Set<string>();
     for(const c of n.children) {
       if(c.name==='subcomponents')continue;
-      if(!fields[n.name].split(' ').includes(c.name))throw new Error(`Unsupported ${n.name}/${c.name}`);
+      if(!allowed.split(' ').includes(c.name))throw new Error(`Unsupported ${n.name}/${c.name}`);
       const repeated=['motorconfiguration','deploymentconfiguration'].includes(c.name);
+      if (analysis && n.name === 'tubefinset' && ['fincount', 'rotation'].includes(c.name) && seen.has(c.name)) {
+        if (n.children.filter(other => other.name === c.name).some(other => other.text.trim() !== c.text.trim())) throw new Error('Ambiguous tube-fin geometry');
+        continue;
+      }
       if(seen.has(c.name)&&!repeated)throw new Error(`Ambiguous ${n.name}/${c.name}`);seen.add(c.name);
       if(c.name==='appearance')continue; // Visual metadata never affects rigid-body flight.
       if(c.name==='motorconfiguration') {
@@ -133,17 +149,23 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       }
       add(c,`${i}/${c.name}`);
     }
-    for(const name of required[n.name].split(' '))one(n,name);
-    if(['nosecone','transition'].includes(n.name)) {
+    if (!analysis) for(const name of required[n.name].split(' '))one(n,name);
+    one(n, 'name');one(n, 'id');
+    if (analysis) {
+      if (!['rocket', 'stage', 'masscomponent'].includes(n.name)) one(n, 'material');
+      if (n.name === 'parachute') one(n, 'linematerial');
+      if (n.children.some(c => c.name === 'filletradius' && numeric(c.text.trim(), 'fillet radius') > 0)) one(n, 'filletmaterial');
+    }
+    if(!analysis && ['nosecone','transition'].includes(n.name)) {
       const shape=one(n,'shape').text.trim();
       if(!['conical','ogive','ellipsoid','power','parabolic','haack'].includes(shape))throw new Error('Unsupported shell shape');
       if(!['conical','ellipsoid'].includes(shape))one(n,'shapeparameter');
       if(['ellipsoid','power','haack'].includes(shape))one(n,'shapeclipped');
     }
-    if(n.name==='innertube'&&one(n,'clusterconfiguration').text.trim()!=='single')throw new Error('Motor clusters are unsupported');
+    if(n.name==='innertube'&&(!analysis || n.children.some(c=>c.name==='clusterconfiguration'))&&one(n,'clusterconfiguration').text.trim()!=='single')throw new Error('Motor clusters are unsupported');
     if(n.name==='parachute')recovery++;
   });
-  if(mounts!==1||!selectedMotor||recovery<1||recovery>2)throw new Error('Requires one resolved motor mount and one or two parachutes');
+  if(!analysis && (mounts!==1||!selectedMotor||recovery<1||recovery>2))throw new Error('Requires one resolved motor mount and one or two parachutes');
   const motorHashes:string[]=[];
   for(const [digest,curve] of curves) {
     const text=new TextDecoder('utf-8',{fatal:true}).decode(curve.bytes);if(/<!DOCTYPE|<!ENTITY/i.test(text))throw new Error('Motor entities are forbidden');

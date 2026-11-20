@@ -10,5 +10,6 @@ declare module '*build/generated/teavm/js/reducer.js' {
 }
 
 declare module '*build/generated/teavm/js/openrocket-g1-engine.js' {
+  export function stability(input: string): string;
   export function simulateArchive(input: string, rk6: boolean): string;
 }

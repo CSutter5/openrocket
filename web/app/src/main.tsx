@@ -8,9 +8,11 @@ import { MotorSelector } from './MotorSelector';
 import { ComponentIcon, ComponentPalette, MotorConfigurations, WindowPanel } from './WorkspacePanels';
 import { RocketDrawing } from './RocketDrawing';
 import { lengthUnits, type LengthUnit } from './units';
+import { additionTarget } from './components';
 import { FlightPanel } from './simulation/FlightPanel';
 import './style.css';
 
+type PendingComponent = Omit<Extract<Action, { type: 'addComponent' }>, 'position'>;
 function message(error: unknown) { return error instanceof Error ? error.message : String(error); }
 function App() {
   const [document, setDocument] = useState<DocumentView>();
@@ -19,6 +21,7 @@ function App() {
   const [tab, setTab] = useState('design');
   const [editor, setEditor] = useState(false);
   const [motorSelector, setMotorSelector] = useState<'assign' | 'create'>();
+  const [insertion, setInsertion] = useState<PendingComponent>();
   const [help, setHelp] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +35,10 @@ function App() {
   }, [document?.dirty]);
   async function perform(action: Action) {
     setBusy(true); setError('');
-    try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice); return true; }
+    try { const reply = await request(action); setDocument(reply.view); setNotice(reply.notice);
+      if (reply.selectedId) { setSelected(reply.view.components.findIndex(c => c.id === reply.selectedId)); setEditor(true); }
+      if (action.type === 'new') { setSelected(1); setEditor(false); }
+      return true; }
     catch (failure) { setError(`Edit rejected; accepted document retained. ${message(failure)}`); return false; }
     finally { setBusy(false); }
   }
@@ -76,6 +82,16 @@ function App() {
   function selectConfiguration(configurationId: string) {
     if (document) void perform({ type: 'flightConfiguration', expectedHash: document.hash, configurationId });
   }
+  function createComponent(type: string) {
+    const target = additionTarget(components, selected, type);
+    if (!target || !document || !component?.id) return;
+    const action: PendingComponent = { type: 'addComponent', expectedHash: document.hash, selectedId: component.id, componentType: type };
+    if (target.after !== undefined && components.some((c, i) => c.parent === target.parent && i > selected)) setInsertion(action);
+    else void insertComponent(action, 'end');
+  }
+  async function insertComponent(action: PendingComponent, position: 'after' | 'end') {
+    if (await perform({ ...action, position })) setInsertion(undefined);
+  }
   const tabs = [['design', 'Rocket design'], ['motors', 'Motors & Configuration'], ['simulations', 'Flight simulations']];
   function tabKey(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
     const next = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : -1;
@@ -88,6 +104,7 @@ function App() {
         <details className="file-menu" onKeyDown={event => {
           if (event.key === 'Escape') { event.currentTarget.removeAttribute('open'); event.currentTarget.querySelector('summary')?.focus(); }
         }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.removeAttribute('open'); }}><summary>File</summary><div className="menu-popup" onClick={event => event.currentTarget.closest('details')?.removeAttribute('open')}>
+          <button disabled={busy} onClick={() => perform({ type: 'new' })}>New</button>
           <button disabled={busy} onClick={() => openSample('rocket-sample.ork')}>Open rocket sample</button>
           <button disabled={busy} onClick={() => openSample('flight-ready.ork')}>Open flight-ready sample</button>
           <button disabled={busy} onClick={() => openSample('explicit-tube.ork')}>Open explicit tube sample</button>
@@ -126,7 +143,7 @@ function App() {
               <button disabled title="Component duplication is not supported yet">Duplicate</button>
               <button disabled title="Component deletion is not supported yet">Delete</button>
             </div>
-            <ComponentPalette/>
+            <ComponentPalette components={components} selected={selected} disabled={busy || document.mode !== 'editable' || components.length >= 64} create={createComponent}/>
           </section>
           <section id="panel-motors" role="tabpanel" aria-labelledby="tab-motors" hidden={tab !== 'motors'}>
             <MotorConfigurations key={document.identitySidecarHash} document={document} busy={busy} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
@@ -147,7 +164,7 @@ function App() {
             {document.flightConfigurations.map(c => <option key={c.id} value={c.id}>{c.label}{c.isDefault ? ' · archived default' : ''}</option>)}
           </select></div>
         </div>
-        <RocketDrawing unit={unit} drawing={document.drawing} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }} edit={() => setEditor(true)}/>
+        <RocketDrawing unit={unit} drawing={document.drawing} stability={document.stability} components={components} selected={selected} busy={busy} select={index => { setSelected(index); setError(''); }} edit={() => setEditor(true)}/>
         <details className="document-info" open={document.mode === 'preservation'}><summary>Document information · {components.length} components{document.diagnostics.length ? ` · ${document.diagnostics.length} notices` : ''}</summary>
           <p>{document.mode === 'editable' ? 'Names and supported tube properties editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
           {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}
@@ -156,6 +173,7 @@ function App() {
           <Properties key={`${selected}:${document.hash}`} component={component} unit={unit} editable={document.mode === 'editable'} busy={busy} edit={perform}/>
           <div className="window-footer"><span>Changes apply individually to this session.</span><button onClick={() => { setEditor(false); }}>Close</button></div>
         </WindowPanel>}
+        {insertion && <WindowPanel title="Insert component" close={() => setInsertion(undefined)}><p>Where should the new component be added?</p><div className="window-footer"><button onClick={() => setInsertion(undefined)}>Cancel</button><button disabled={busy} onClick={() => insertComponent(insertion, 'after')}>Insert after selected component</button><button disabled={busy} onClick={() => insertComponent(insertion, 'end')}>Add to the end</button></div></WindowPanel>}
         {motorSelector && <MotorSelector key={`${document.identitySidecarHash}:${document.flightConfigurationId}:${motorSelector}`} document={document} busy={busy} creating={motorSelector === 'create'} close={() => setMotorSelector(undefined)} assign={(mountId, motorKey, delay, name) => motorSelector === 'create' ? perform({ type: 'createConfiguration', expectedHash: document.hash, name: name!, mountId, motorKey, delay }) : perform({ type: 'assignMotor', expectedHash: document.hash, configurationId: document.flightConfigurationId!, mountId, motorKey, delay })}/>}
       </>}
       <div className="status-bar"><p role="status">{busy ? 'Working…' : notice}</p><span data-testid="dirty">{document?.dirty ? 'Changed since import / export' : 'No changes since import / export'}</span></div>
@@ -163,7 +181,7 @@ function App() {
     {help && <WindowPanel title="About this web editor" close={() => setHelp(false)}>
       <h2>OpenRocket in your browser</h2><p>Open a local .ork file or choose a sample from File. Select a component, then choose Edit or double-click to open its properties.</p>
       <p>Work stays in this browser session. Download your .ork to keep changes; opening another file or reloading discards the session. Flight results stay in the session and are not written to downloads.</p>
-      <p>Supported tube dimensions and names can be edited. Structural editing, 3D, accounts and collaboration are not yet available.</p>
+      <p>Add components using the palette. New parts use OpenRocket defaults and open in the component editor. Names and supported tube dimensions can be edited. 3D, accounts and collaboration are not yet available.</p>
       <div className="window-footer"><button onClick={() => setHelp(false)}>Close</button></div>
     </WindowPanel>}
   </>;

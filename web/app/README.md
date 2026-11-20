@@ -107,3 +107,10 @@ The [import follow-up record](../../docs/web-app/imported-browser-simulation.md)
 
 
 The [saved simulation and bundled motor record](../../docs/web-app/saved-simulations-and-motors.md) documents the current row selection, graph, supported settings and explicit motor-assignment behavior. `test/saved-flights.mjs` is included in acceptance: native desktop options are the oracle for two distinct saved conditions and a new catalog motor. It also verifies all 1942 exported curves with the actual desktop RSE loader, exact curve asset hashes, targeted stored-result invalidation, preserved settings/series/attachments, damaged-asset rejection and missing-configuration refusal. Catalog outputs are regenerated from the bundled database at predev/prebuild and are not checked in. Active multilevel wind and other unrepresented saved settings refuse explicitly; stored graphs remain viewable.
+
+
+## Creating components and displaying stability
+
+Use File → New for an empty rocket, or select a component in an imported design and choose a compatible part in Add new component. The web palette uses native defaults/compatibility for all 21 types. Body parts offer insert-after/end when appropriate; the new component opens in the existing editor. Name and supported explicit tube editing remain the available property controls; this does not add full desktop dialogs. Native CG/CP markers follow the selected configuration where the static model is supported. Freeform fins, multistage/pod graphs and unrepresented fields show unavailable centers. See [the creation/stability record](../../docs/web-app/component-creation.md) for the preserved archive contract and limits.
+
+Simulation units and Graph altitude units offer mm, cm, m, km, in, ft, yd and mi. The drawing and dimension controls follow the same selection. Changes convert presentation and leave archive bytes and calculated results intact. The normal app build now also generates native component defaults into ignored `build/components/`; no extra dependency or runtime JVM is required.

@@ -19,7 +19,7 @@ try {
   const drawingBox = await drawing.boundingBox();
   assert.ok(treeBox.y + treeBox.height < drawingBox.y, 'tree is above the persistent drawing');
   for (const image of await page.locator('.component-icon').all()) assert.ok(await image.evaluate(node => node instanceof HTMLImageElement && node.complete && node.naturalWidth > 0));
-  assert.equal(await page.getByRole('region', { name: 'Add new component' }).getByRole('button', { name: 'Body tube', exact: true }).isDisabled(), true);
+  assert.equal(await page.getByRole('region', { name: 'Add new component' }).getByRole('button', { name: 'Body tube', exact: true }).isDisabled(), false);
   const points = await drawing.locator('polygon').evaluateAll(nodes => nodes.map(n => n.getAttribute('points')));
   const part = drawing.locator('polygon').first(), beforeZoom = await part.boundingBox();
   await drawing.getByRole('button', { name: 'Zoom in', exact: true }).click();
@@ -34,7 +34,7 @@ try {
   await page.keyboard.press('Home');
   assert.equal(await design.getAttribute('aria-selected'), 'true');
   assert.ok(await part.evaluate(node => { const bounds = node.getBoundingClientRect(), canvas = node.closest('.drawing-canvas').getBoundingClientRect(); return bounds.top >= canvas.top && bounds.bottom <= canvas.bottom; }), 'fit keeps the rocket within the canvas');
-  checks.push('desktop layout, original component icons, disabled unsupported palette, zoom, keyboard tabs, persistent drawing');
+  checks.push('desktop layout, original component icons, compatible component palette, zoom, keyboard tabs, persistent drawing');
 
   await page.getByRole('button', { name: 'Body tube bodytube', exact: true }).dblclick();
   const editor = page.getByRole('dialog', { name: 'Component editor', exact: true });
