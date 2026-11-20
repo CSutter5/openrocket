@@ -24,8 +24,8 @@ function localRequest(action: Action): Promise<Reply> {
   });
 }
 
-export interface CollaborationStatus { phase: 'local' | 'joining' | 'connected' | 'reconnecting'; username: string; users: string[] }
-let collaboration: CollaborationStatus = { phase: 'local', username: '', users: [] };
+export interface CollaborationStatus { phase: 'local' | 'joining' | 'connected' | 'reconnecting'; username: string; users: string[]; canEdit: boolean }
+let collaboration: CollaborationStatus = { phase: 'local', username: '', users: [], canEdit: false };
 let state: SharedState | undefined, socket: WebSocket | undefined;
 let messages = Promise.resolve();
 const sharedPending = new Map<string, { resolve: (reply: Reply) => void; reject: (error: Error) => void }>();
@@ -41,19 +41,19 @@ export async function collaborationAvailable() {
   if (!response.headers.get('content-type')?.includes('application/json')) return false;
   return (await response.json()).enabled === true;
 }
-export function connectShared(username: string): Promise<void> {
-  collaboration = { phase: 'joining', username, users: [] }; publish();
+export function connectShared(owner: string, slug: string): Promise<void> {
+  collaboration = { phase: 'joining', username: '', users: [], canEdit: false }; publish();
   return new Promise(resolve => {
     function connect() {
-      const url = new URL('/api/coedit/socket', location.href);
+      const url = new URL(`/api/rockets/${owner}/${slug}/socket`, location.href);
       url.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      url.searchParams.set('username', username);
       const connection = new WebSocket(url);
       socket = connection;
       connection.onmessage = event => {
         messages = messages.then(async () => {
           if (socket !== connection) return;
           const message = JSON.parse(event.data) as SharedMessage;
+          if (message.type === 'access') { collaboration = { ...collaboration, canEdit: message.canEdit, username: message.username };publish();return; }
           if (message.type === 'presence') { collaboration = { ...collaboration, users: message.users }; publish(); return; }
           if (message.type === 'rejected') {
             sharedPending.get(message.requestId)?.reject(new Error(message.error)); sharedPending.delete(message.requestId); return;
@@ -87,6 +87,7 @@ export function connectShared(username: string): Promise<void> {
 export function request(action: Action): Promise<Reply> {
   if (collaboration.phase === 'local' || !sharedActions.has(action.type)) return localRequest(action);
   if (collaboration.phase !== 'connected' || !state || socket?.readyState !== WebSocket.OPEN) return Promise.reject(new Error('Wait for the shared file to reconnect.'));
+  if (!collaboration.canEdit) return Promise.reject(new Error('Sign in to edit this public rocket'));
   const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
     sharedPending.set(requestId, { resolve, reject });

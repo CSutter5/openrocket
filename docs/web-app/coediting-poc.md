@@ -1,5 +1,7 @@
 # One shared rocket POC
 
+The subsequent November 20 [accounts and public rockets](accounts-and-rockets.md) increment (ADR-27) supersedes the username-only singleton, adding D1 ownership and one room per rocket. The transport/preservation evidence below records the original POC; current run commands use account signup and public rocket URLs.
+
 The November 20, 2026 request authorizes a bounded collaboration increment: everyone edits one file and enters a display username. Accounts, authentication, application logging and version history are excluded. This supersedes the local-only restriction for this increment (ADR-26); broader G1/G2–G7 gates remain held. Existing authenticated platform proofs are unchanged.
 
 ## Run and try

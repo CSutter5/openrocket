@@ -104,6 +104,8 @@ Exit: a clean checkout can build desktop and browser outputs independently; loca
 
 ### T05 — Identity/admin agent: accounts and project access
 
+The November 20 follow-up authorizes [D1 accounts and public owned rockets](accounts-and-rockets.md) (ADR-27), with public readers and editing by all signed-in accounts. This bounded slice reuses the proven auth stack and does not implement the complete admin/ACL/recovery packet below.
+
 Depends on T04. Own future `web/worker/auth/`, `web/worker/admin/`, project authorization helpers, and corresponding account/admin UI. Implement login/logout, password/account settings, operator bootstrap/recovery, user listing, role changes, suspend/reactivate, session revocation, and audit records. Implement project creation, owner/editor/viewer membership, sharing, ownership transfer, and last-owner/admin protection. Use the selected auth library; avoid incidental organization/billing features.
 
 Exit: G2 proves two ordinary users and an admin, plus denied unauthenticated, viewer-write, cross-project, suspended-user, and privilege-escalation cases. Test open WebSocket revocation and in-flight races jointly with T07. Permission checks must protect HTTP, WebSockets, files, results, and history rather than only hide UI controls.

@@ -17,6 +17,11 @@ case "${1:-}" in
     *) usage >&2; exit 2 ;;
 esac
 
+if ! "$dry_run" && { [[ -z "${OPENROCKET_ORIGIN:-}" ]] || [[ -z "${AUTH_SECRET:-}" ]]; }; then
+    printf 'Set OPENROCKET_ORIGIN to the deployed HTTPS origin and AUTH_SECRET to a stable secret before deploying accounts.\n' >&2
+    exit 1
+fi
+
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 for command in git npm node java; do
     command -v "$command" >/dev/null || { printf 'Required command not found: %s\n' "$command" >&2; exit 1; }
@@ -52,5 +57,5 @@ if "$dry_run"; then
     printf 'Dry run complete. Nothing was deployed.\n'
 else
     cd web/app
-    node ../node_modules/wrangler/bin/wrangler.js deploy
+    node scripts/deploy-cloudflare.mjs
 fi

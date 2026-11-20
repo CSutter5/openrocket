@@ -1,29 +1,15 @@
 import { openSample, openProperties, closeProperties, flights } from './workspace.mjs';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
-import { setTimeout } from 'node:timers/promises';
 import { chromium } from 'playwright';
+import { cloudflareFixture, register, createRocket } from './cloudflare-fixture.mjs';
 import { importArchive } from '../../packages/ork-format/src/index.js';
 
-const app = resolve(import.meta.dirname, '..'), url = 'http://127.0.0.1:8787';
-const server = spawn(process.execPath, [resolve(app, '../node_modules/wrangler/bin/wrangler.js'),
-  'dev', '--local', '--ip', '127.0.0.1', '--port', '8787'],
-  { cwd: app, env: { ...process.env, WRANGLER_SEND_METRICS: 'false' }, stdio: ['ignore', 'pipe', 'pipe'] });
-let log = '', exited = false, browser;
-server.stdout.on('data', data => { log += data; });
-server.stderr.on('data', data => { log += data; });
-server.on('exit', () => { exited = true; });
+const app = resolve(import.meta.dirname, '..'), host = await cloudflareFixture(8793), { url } = host;
+let browser;
 try {
-  let ready = false;
-  for (let attempt = 0; attempt < 150; attempt++) {
-    assert.equal(exited, false, `Local Wrangler exited: ${log}`);
-    try { ready = log.includes(`Ready on ${url}`) && (await fetch(url)).ok; } catch {}
-    if (ready) break;
-    await setTimeout(100);
-  }
-  assert.ok(ready, `Local Wrangler did not start: ${log}`);
+  await host.start();
   const files = await readdir(resolve(app, 'dist'), { recursive: true, withFileTypes: true });
   for (const file of files.filter(entry => entry.isFile())) {
     const path = resolve(file.parentPath, file.name);
@@ -44,10 +30,8 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => requests.push(request.url()));
   page.on('worker', worker => workers.push(worker.url()));
-  await page.goto(url);
-  await page.getByLabel('Username', { exact: true }).fill('Cloudflare smoke');
-  await page.getByRole('button', { name: 'Join shared file', exact: true }).click();
-  await page.locator('.session-label').filter({ hasText: 'Connected' }).waitFor();
+  await register(page, url, 'cloudflare-smoke');
+  await createRocket(page, url, 'cloudflare-smoke', 'smoke');
   await openSample(page, 'Open explicit tube sample');
   await openProperties(page);
   await page.getByRole('button', { name: 'Tube bodytube', exact: true }).click();
@@ -92,7 +76,8 @@ try {
   await flights(page);
   const panel = page.getByRole('region', { name: 'Flight simulations', exact: true });
   await panel.getByRole('button', { name: 'Run flight', exact: true }).click();
-  await page.getByTestId('flight-status').filter({ hasText: 'Flight completed.' }).waitFor({ timeout: 30000 });
+  try { await page.getByTestId('flight-status').filter({ hasText: 'Flight completed.' }).waitFor({ timeout: 30000 }); }
+  catch (error) { throw new Error(`${error.message} Status: ${await page.getByTestId('flight-status').textContent()}; alerts: ${await page.getByRole('alert').allTextContents()}`); }
   await panel.locator('.simulation-table').getByText('Completed', { exact: true }).waitFor();
   assert.deepEqual(await download(), configured);
   assert.ok(workers.some(worker => worker.includes('/assets/document.worker-')));
@@ -101,5 +86,5 @@ try {
   assert.deepEqual(requests.filter(request => !request.startsWith(url + '/')), []);
   console.log(`Cloudflare local smoke passed in Chromium ${browser.version()}: asset bytes/MIME, 404s, edit/download/reimport and browser flight.`);
 } finally {
-  try { await browser?.close(); } finally { server.kill('SIGTERM'); }
+  try { await browser?.close(); } finally { await host.close(); }
 }

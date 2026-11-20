@@ -1,0 +1,103 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { chromium } from 'playwright';
+import { cloudflareFixture, register, createRocket, editorReady, rawSocket, testPassword } from './cloudflare-fixture.mjs';
+import { openSample, openProperties } from './workspace.mjs';
+const host = await cloudflareFixture(8792), { url } = host;
+let browser;
+async function post(context, path, data, origin = url) { return context.request.post(url + path, { headers: { Origin: origin }, data }); }
+async function download(page) {
+  const pending = page.waitForEvent('download');await page.getByRole('button', { name: 'Download .ork', exact: true }).click();const file = await pending;return readFile(await file.path());
+}
+async function send(page, key, id, action, expectedToken) {
+  await page.evaluate(({ key, id, action, expectedToken }) => window[key].socket.send(JSON.stringify({ requestId: id, action, expectedToken: expectedToken ?? window[key].state.token })), { key, id, action, expectedToken });
+  await page.waitForFunction(({ key, id }) => window[key].messages.some(message => message.requestId === id), { key, id });
+  return page.evaluate(({ key, id }) => window[key].messages.find(message => message.requestId === id), { key, id });
+}
+try {
+  await host.start();
+  browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}) });
+  const owner = await browser.newPage(), collaborator = await browser.newPage(), visitor = await browser.newPage(), errors = [];
+  for (const page of [owner, collaborator, visitor]) page.on('pageerror', error => errors.push(error.message));
+  assert.equal((await post(visitor.context(), '/api/rockets', { name: 'Forged', slug: 'forged' })).status(), 401);
+  assert.equal((await post(visitor.context(), '/api/auth/sign-up/email', { email: 'bad@example.test', password: testPassword, name: 'bad' })).status(), 400);
+  assert.equal((await post(visitor.context(), '/api/auth/sign-up/email', { email: 'bad@example.test', password: testPassword, name: 'bad', username: 'api' })).status(), 400);
+  assert.equal((await post(visitor.context(), '/api/auth/sign-up/email', { email: 'bad@example.test', password: testPassword, name: 'bad', username: 'valid-user' }, 'https://other.test')).status(), 403);
+  await register(owner, url, 'Alice');
+  const cookies = await owner.context().cookies();const sessionCookie = cookies.find(cookie => cookie.name.includes('session_token'));
+  assert.equal(sessionCookie.httpOnly, true);assert.equal(sessionCookie.sameSite, 'Lax');
+  const first = await createRocket(owner, url, 'alice', 'alpha', 'Alpha rocket');
+  await owner.getByRole('button', { name: 'Alpha rocket rocket', exact: true }).waitFor();
+  assert.equal(await owner.locator('.filename').textContent(), 'alpha.ork');
+  await openSample(owner, 'Open explicit tube sample');await owner.getByRole('button', { name: 'Tube bodytube', exact: true }).waitFor();
+  const original = await download(owner);
+  const second = await createRocket(owner, url, 'alice', 'beta', 'Beta rocket');
+  const secondBytes = await download(owner);
+  assert.equal((await owner.context().request.get(url + first.slice(0, -1), { maxRedirects: 0 })).status(), 308);
+  assert.equal((await post(owner.context(), '/api/rockets', { name: 'Duplicate', slug: 'alpha' })).status(), 409);
+  assert.equal((await post(owner.context(), '/api/rockets', { name: 'Unsafe', slug: '../other' })).status(), 400);
+  assert.equal((await post(owner.context(), '/api/rockets', { name: 'Bad origin', slug: 'bad-origin' }, 'https://other.test')).status(), 403);
+  assert.equal((await post(visitor.context(), '/api/auth/sign-up/email', { email: 'duplicate@example.test', name: 'Other', username: 'ALICE', password: testPassword })).ok(), false);
+  await register(collaborator, url, 'bob');
+  const alice = (await (await owner.context().request.get(url + '/api/session')).json()).user;
+  const forgedOwner = await post(collaborator.context(), '/api/rockets', { name: 'Bob rocket', slug: 'alpha', ownerId: alice.id });
+  assert.equal(forgedOwner.status(), 201);
+  const bobRocket = (await forgedOwner.json()).rocket;assert.equal(bobRocket.username, 'bob');assert.notEqual(bobRocket.ownerId, alice.id);
+  const directory = await (await visitor.context().request.get(url + '/api/rockets')).json();
+  assert.equal(directory.rockets.length, 3);assert.equal(JSON.stringify(directory).includes('@example.test'), false);
+  const mine = await (await visitor.context().request.get(url + '/api/rockets?owner=alice')).json();assert.equal(mine.rockets.length, 2);
+  await visitor.goto(url + first);await editorReady(visitor);
+  assert.equal(await visitor.getByRole('button', { name: 'Duplicate', exact: true }).isDisabled(), true);
+  assert.equal(await visitor.getByLabel('Open local .ork', { exact: true }).isDisabled(), true);
+  assert.deepEqual(await download(visitor), original);
+  await rawSocket(visitor, 'guest', '/api/rockets/alice/alpha/socket?username=alice');
+  const componentId = await visitor.locator('.component-tree button').first().getAttribute('data-component-id');
+  const rejected = await send(visitor, 'guest', 'guest-edit', { type: 'rename', id: componentId, expected: 'Explicit tube sample', value: 'Unauthorized' });
+  assert.equal(rejected.type, 'rejected');assert.match(rejected.error, /Sign in/);
+  assert.deepEqual(await download(visitor), original);
+  await collaborator.goto(url + first);await editorReady(collaborator);
+  await collaborator.getByRole('button', { name: 'Tube bodytube', exact: true }).click();await openProperties(collaborator);
+  await collaborator.getByLabel('Component name', { exact: true }).fill('Edited by bob');await collaborator.getByRole('button', { name: 'Apply name', exact: true }).click();
+  await visitor.getByRole('button', { name: 'Edited by bob bodytube', exact: true }).waitFor();
+  const shared = await download(collaborator);assert.notDeepEqual(shared, original);assert.deepEqual(await download(visitor), shared);
+  await owner.goto(url + second);await editorReady(owner);assert.deepEqual(await download(owner), secondBytes);
+  const wrongRoom = await rawSocket(owner, 'otherRoom');
+  await rawSocket(collaborator, 'signed');
+  const cross = await send(collaborator, 'signed', 'cross-token', { type: 'rename', id: componentId, expected: 'Explicit tube sample', value: 'Crossed' }, wrongRoom.token);
+  assert.equal(cross.type, 'rejected');assert.match(cross.error, /changed/);
+  assert.equal((await collaborator.context().request.get(url + '/api/rockets/alice/missing')).status(), 404);
+  assert.equal((await visitor.context().request.get(url + '/api/rockets/alice/alpha/socket', { headers: { Origin: 'https://other.test' } })).status(), 403);
+  assert.equal((await visitor.context().request.get(url + '/api/coedit/socket')).status(), 404);
+  // A socket accepted before logout must lose write access after D1 session revocation.
+  assert.equal((await post(collaborator.context(), '/api/auth/sign-out', {})).status(), 200);
+  const revoked = await send(collaborator, 'signed', 'revoked-edit', { type: 'rename', id: componentId, expected: 'Explicit tube sample', value: 'Revoked' });
+  assert.equal(revoked.type, 'rejected');assert.match(revoked.error, /Sign in/);
+  assert.deepEqual(await download(visitor), shared);
+  assert.equal((await post(collaborator.context(), '/api/rockets', { name: 'After logout', slug: 'denied' })).status(), 401);
+  const signedOutSession = await (await collaborator.context().request.get(url + '/api/session')).json();assert.equal(signedOutSession.user, null);
+  assert.equal((await post(collaborator.context(), '/api/auth/sign-in/username', { username: 'bob', password: 'wrong-password' })).ok(), false);
+  assert.equal((await post(collaborator.context(), '/api/auth/update-user', { username: 'renamed' })).status(), 404);
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.getByRole('button', { name: 'Create account', exact: true }).click();
+  const signup = visitor.getByRole('dialog', { name: 'Create account', exact: true });await signup.waitFor();
+  const bounds = await signup.boundingBox();assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= 390 && bounds.y >= 0 && bounds.y + bounds.height <= 844);
+  await visitor.keyboard.press('Escape');await signup.waitFor({ state: 'detached' });
+  assert.equal(await visitor.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await visitor.setViewportSize({ width: 1280, height: 720 });
+  await visitor.screenshot({ path: resolve(import.meta.dirname, '../build/public-rocket.png') });
+  await owner.goto(url + '/alice/');await owner.getByRole('heading', { name: "alice's rockets", exact: true }).waitFor();
+  assert.equal(await owner.locator('.rocket-list article').count(), 2);
+  await owner.screenshot({ path: resolve(import.meta.dirname, '../build/account-rockets.png') });
+  await host.stop();await host.start();
+  await collaborator.goto(url);
+  await collaborator.getByRole('button', { name: 'Sign in', exact: true }).click();
+  const login = collaborator.getByRole('dialog', { name: 'Sign in', exact: true });
+  await login.getByLabel('Username', { exact: true }).fill('BOB');await login.getByLabel('Password', { exact: true }).fill(testPassword);
+  await login.getByRole('button', { name: 'Sign in', exact: true }).click();await collaborator.getByText('Signed in as bob', { exact: true }).waitFor();
+  await collaborator.goto(url + first);await editorReady(collaborator);assert.deepEqual(await download(collaborator), shared);
+  const preserved = await (await collaborator.context().request.get(url + '/api/rockets')).json();assert.equal(preserved.rockets.length, 3);
+  assert.deepEqual(errors, []);
+  console.log(`Accounts passed in Chromium ${browser.version()}: D1 signup/login/logout, normalized unique usernames, multiple owned public URLs, owner spoof refusal, public read-only sockets, authenticated coediting, independent rooms, CSRF, session revocation, restart and preserved accounts/documents.`);
+} catch (error) { console.error(host.log);throw error; }
+finally { await browser?.close();await host.close(); }

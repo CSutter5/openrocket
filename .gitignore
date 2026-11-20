@@ -103,6 +103,7 @@ docs/build
 
 # Environment files
 **/.env
+**/.dev.vars*
 
 # Vi/Vim
 *.swp

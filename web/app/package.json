@@ -11,16 +11,22 @@
     "prebuild": "node scripts/check-engine.mjs && node scripts/generate-motors.mjs && node scripts/generate-components.mjs",
     "test": "npm run build && node --experimental-strip-types test/acceptance.mjs",
     "check:cloudflare": "npm run build && wrangler deploy --dry-run --outdir build/cloudflare",
-    "preview:cloudflare": "wrangler dev --local --ip 127.0.0.1 --port 8787",
+    "preview:cloudflare": "node scripts/preview-cloudflare.mjs",
     "test:cloudflare": "npm run check:cloudflare && node test/cloudflare.mjs",
-    "test:coediting": "npm run check:cloudflare && node test/coediting.mjs"
+    "test:coediting": "npm run check:cloudflare && node test/coediting.mjs",
+    "test:accounts": "npm run check:cloudflare && node test/accounts.mjs",
+    "migrate:local": "wrangler d1 migrations apply DB --local",
+    "migrate:remote": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@openrocket/contracts": "0.0.0",
     "saxes": "6.0.0",
     "@openrocket/ork-format": "0.0.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "better-auth": "1.7.25",
+    "@better-auth/drizzle-adapter": "1.7.25",
+    "drizzle-orm": "0.45.4"
   },
   "devDependencies": {
     "@types/react": "19.2.2",

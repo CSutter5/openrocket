@@ -278,8 +278,26 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 }
 
 .collaboration-bar { padding: 0.4rem 1rem; background: #193b4b; color: #e5f3fa; font-size: 0.875rem; flex-shrink: 0; }
-.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; background: #0009; }
-.join-dialog { margin: auto; width: min(28rem, calc(100vw - 2rem)); padding: 1.5rem; background: #252b32; border: 1px solid #71808f; border-radius: 0.5rem; }
+.join-dialog::backdrop { background: #0009; }
+.join-dialog { max-height: calc(100dvh - 2rem); overflow-y: auto; margin: auto; width: min(28rem, calc(100vw - 2rem)); padding: 1.5rem; background: #252b32; border: 1px solid #71808f; border-radius: 0.5rem; }
 .join-dialog h2 { margin-top: 0; }
 .join-dialog form { display: grid; gap: 0.75rem; }
 .join-dialog input { font-size: 1rem; padding: 0.5rem; }
+
+.account-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; padding: .5rem 1rem; flex: none; border-bottom: 1px solid var(--border); }
+.account-bar a, .rocket-library a { color: #a6ceff; }
+.account-bar > div { display: flex; align-items: center; gap: .75rem; margin-left: auto; }
+.rocket-owner { color: var(--muted); overflow-wrap: anywhere; }
+.rocket-library { overflow: auto; padding: 1rem max(1rem, calc((100vw - 70rem) / 2)); flex: 1; min-height: 0; }
+.rocket-library h1 { font-size: 1.75rem; }
+.new-rocket { display: grid; gap: .65rem; padding: 1.25rem; margin: 1.5rem 0; max-width: 35rem; border: 1px solid var(--border); border-radius: .4rem; background: #292e36; }
+.new-rocket h2 { margin: 0 0 .5rem; }
+.new-rocket input { padding: .5rem; font-size: 1rem; min-width: 0; }
+.new-rocket button { justify-self: start; }
+.rocket-url { display: flex; align-items: center; gap: .4rem; }
+.rocket-url input { flex: 1; }
+.rocket-list { display: grid; gap: .75rem; }
+.rocket-list article { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; background: #292e36; border: 1px solid var(--border); border-radius: .4rem; }
+.rocket-list article > a { display: grid; gap: .35rem; text-decoration: none; }
+.rocket-list article > a strong { font-size: 1.1rem; }
+.rocket-list article > a span { color: var(--muted); overflow-wrap: anywhere; }

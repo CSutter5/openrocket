@@ -1,8 +1,10 @@
-# Browser editor and shared-file POC
+# Browser editor, accounts and public rockets
 
-For coediting, run `npm run build:app --prefix web`, then `npm run preview:cloudflare --prefix web` from the repository root. Open `http://127.0.0.1:8787` in two browsers and enter usernames. Everyone joins one shared rocket; accepted edits save automatically and appear in the other browser. New/Open replaces the file for everyone. No accounts, application logging or version history are included. Use Download .ork to keep a separate copy; simulations and unit/selection choices remain local.
+Run `npm run build:app --prefix web`, then `npm run preview:cloudflare --prefix web` from the repository root. Open `http://127.0.0.1:8787`, create an account and create a rocket. Accounts own multiple rockets at URLs such as `/alice/alpha/`. Everyone can view/download public rockets, and every signed-in account can coedit them. New rockets start empty with their chosen name. Account forms and the public directory replace the earlier username prompt.
 
-The [coediting run and validation record](../../docs/web-app/coediting-poc.md) describes conflicts, reconnects and current limitations, including stale component drafts and conservative conflicts. Run `npm run test:coediting --prefix web` for the isolated two-browser/restart test. This supersedes the local-only descriptions below when using Wrangler. Plain Vite retains the existing local editor and its desktop acceptance workflow.
+Production accounts, sessions and ownership metadata use Cloudflare D1; each rocket's current archive lives in its own Cloudflare Durable Object. The dedicated remote `openrocket-accounts` database is created/migrated. Preview and automated tests use Wrangler's isolated Cloudflare emulation. The preview helper supplies a temporary process-only auth secret unless `AUTH_SECRET` is set, so sign in again after restarting it. No application-managed SQL file or database daemon is used.
+
+The [account run and verification record](../../docs/web-app/accounts-and-rockets.md) describes auth, URLs, concurrency, storage and deployment setup. Run `npm run test:accounts --prefix web`, `npm run test:coediting --prefix web` or `npm run test:cloudflare --prefix web` for their separate checks. Deployment now requires a stable `AUTH_SECRET` and `OPENROCKET_ORIGIN`; `./deploy-cloudflare.sh --dry-run` still stops before remote changes. No app deployment was performed for this increment. Plain Vite retains the local-only workflow below.
 
 ## Browser-local workflow
 

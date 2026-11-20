@@ -2,6 +2,8 @@
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.
 
+The subsequent November 20 request adds [accounts and multiple public owned rockets](accounts-and-rockets.md) (ADR-27). All signed-in accounts may coedit any rocket; visitors are readers. Account/ownership metadata uses a real Cloudflare D1 binding, with one Durable Object per rocket. The remote D1 database is created/migrated, but the app is not deployed. Read the new run/secret setup and old-singleton migration limits before changing account or route behavior.
+
 The November 20 follow-up authorizes [one shared-file coediting POC](coediting-poc.md) (ADR-26), with username prompts and no accounts, logging or version history. Use the app's Wrangler preview for collaboration; plain Vite remains local. Read its conservative concurrency, current-draft persistence and stale-dialog limits before changing transport. This supersedes earlier local-only deferrals for this bounded slice.
 
 The latest screenshot-guided follow-up adds [desktop-style component dialogs and individual field units](component-dialogs.md) (ADR-25), with atomic OK/Cancel and the existing scalar editor under Advanced. The parts library is excluded. Read its units, optional-field and native-verification boundaries before changing the dialogs.
