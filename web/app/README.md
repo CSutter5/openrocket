@@ -1,6 +1,6 @@
 # Browser editor, accounts and public rockets
 
-Run `npm run build:app --prefix web`, then `npm run preview:cloudflare --prefix web` from the repository root. Open `http://127.0.0.1:8787`, create an account and create a rocket. Accounts own multiple rockets at URLs such as `/alice/alpha/`. Everyone can view/download public rockets, and every signed-in account can coedit them. New rockets start empty with their chosen name. Account forms and the public directory replace the earlier username prompt.
+Run `npm run build:app --prefix web`, then `npm run preview:cloudflare --prefix web` from the repository root. Open `http://127.0.0.1:8787`, create an account and create a rocket. Accounts own multiple rockets at URLs such as `/alice/alpha/`. Everyone can view/download public rockets, and every signed-in account can coedit them. In New rocket, choose Empty rocket or Upload existing rocket and enter a name; the URL is generated automatically. Uploads preserve the existing archive and its attachments. Account forms and the public directory replace the earlier username prompt.
 
 Production accounts, sessions and ownership metadata use Cloudflare D1; each rocket's current archive lives in its own Cloudflare Durable Object. The dedicated remote `openrocket-accounts` database is created/migrated. Preview and automated tests use Wrangler's isolated Cloudflare emulation. The preview helper supplies a temporary process-only auth secret unless `AUTH_SECRET` is set, so sign in again after restarting it. No application-managed SQL file or database daemon is used.
 

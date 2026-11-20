@@ -1,4 +1,5 @@
 import type * as CF from '@cloudflare/workers-types';
+import { LIMITS } from '@openrocket/ork-format';
 import { authentication, validUsername } from './auth';
 import type { Env } from './env';
 import type { PublicRocket as Rocket } from '../src/accounts';
@@ -9,19 +10,22 @@ const fail = (message: string, status: number) => json({ error: message }, statu
 const authPaths = new Set(['/sign-up/email', '/sign-in/username', '/get-session', '/sign-out']);
 const slugPattern = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
 const rocketQuery = 'SELECT rocket.id, rocket.name, rocket.slug, rocket.owner_id AS ownerId, user.username FROM rocket JOIN user ON rocket.owner_id=user.id';
-async function body(request: CF.Request) {
+async function readBody(request: CF.Request, limit: number) {
   const reader = request.body?.getReader();
-  if (!reader) throw new Error('JSON body required');
+  if (!reader) throw new Error('Request body required');
   const chunks: Uint8Array[] = []; let length = 0;
   while (true) {
     const { value, done } = await reader.read(); if (done) break;
     length += value.byteLength;
-    if (length > 16384) { await reader.cancel();throw new Error('Request too large'); }
+    if (length > limit) { await reader.cancel();throw new Error('Request too large'); }
     chunks.push(value);
   }
   const bytes = new Uint8Array(length); let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset);offset += chunk.length; }
-  const value = JSON.parse(new TextDecoder().decode(bytes));
+  return bytes;
+}
+async function body(request: CF.Request) {
+  const value = JSON.parse(new TextDecoder().decode(await readBody(request, 16384)));
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('JSON object required');
   return value;
 }
@@ -52,16 +56,50 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
     if (request.headers.get('Origin') !== new URL(env.AUTH_BASE_URL).origin) return fail('Origin refused', 403);
     const session = await authentication(env).api.getSession({ headers: request.headers as unknown as Headers });
     if (!session) return fail('Sign in to create a rocket', 401);
-    const data = await body(request);
+    let data: { name?: unknown; slug?: unknown }, file: File | undefined;
+    if (request.headers.get('Content-Type')?.startsWith('multipart/form-data')) {
+      const bytes = await readBody(request, LIMITS.upload + 16384);
+      let form: FormData;
+      try { form = await new Response(bytes, { headers: { 'Content-Type': request.headers.get('Content-Type')! } }).formData(); }
+      catch { return fail('Invalid upload form', 400); }
+      const upload = form.get('file');
+      if (!(upload instanceof File) || form.getAll('file').length !== 1) return fail('Choose one .ork file to upload', 400);
+      if (upload.size > LIMITS.upload) return fail('File exceeds the 4 MiB upload limit', 400);
+      if (upload.name.length > 255 || /[\x00-\x1f\x7f]/.test(upload.name)) return fail('Invalid filename', 400);
+      file = upload;data = { name: form.get('name') };
+    } else data = await body(request);
     if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 100 || /[\x00-\x1f\x7f]/.test(data.name)) return fail('Enter a rocket name of 1–100 characters', 400);
-    if (typeof data.slug !== 'string' || data.slug.length > 80 || !slugPattern.test(data.slug)) return fail('Use a URL name of lowercase letters, digits, hyphens or underscores', 400);
-    const rocket: Rocket = { id: crypto.randomUUID(), name: data.name.trim(), slug: data.slug, ownerId: session.user.id, username: session.user.username! };
-    try { await env.DB.prepare('INSERT INTO rocket(id, owner_id, name, slug, created_at) VALUES (?, ?, ?, ?, ?)').bind(rocket.id, rocket.ownerId, rocket.name, rocket.slug, Date.now()).run(); }
-    catch (error) {
-      if (await env.DB.prepare('SELECT id FROM rocket WHERE owner_id=? AND slug=?').bind(rocket.ownerId, rocket.slug).first()) return fail('You already have a rocket at that URL', 409);
-      throw error;
+    if (data.slug !== undefined && (typeof data.slug !== 'string' || data.slug.length > 80 || !slugPattern.test(data.slug))) return fail('Use a URL name of lowercase letters, digits, hyphens or underscores', 400);
+    const automatic = data.slug === undefined;
+    const base = automatic ? data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80).replace(/^-|-$/g, '') || 'rocket' : data.slug as string;
+    const rocket: Rocket = { id: crypto.randomUUID(), name: data.name.trim(), slug: base, ownerId: session.user.id, username: session.user.username! };
+    const room = env.SHARED_ROCKET.getByName(`rocket:${rocket.id}`);
+    let staged = false, published = false;
+    try {
+      if (file) {
+        const address = new URL('https://room.internal/initialize-upload');address.searchParams.set('filename', file.name);
+        const initialized = await room.fetch(new Request(address, { method: 'POST', body: await file.arrayBuffer() }) as unknown as CF.Request);
+        if (!initialized.ok) return fail((await initialized.json() as { error: string }).error, initialized.status);
+        staged = true;
+      }
+      const existing = automatic ? (await env.DB.prepare('SELECT slug FROM rocket WHERE owner_id=?').bind(rocket.ownerId).all<{ slug: string }>()).results : [];
+      const taken = new Set(existing.map(row => row.slug));let number = 1;
+      for (;;) {
+        if (automatic) {
+          while (taken.has(rocket.slug)) { const suffix = `-${++number}`;rocket.slug = base.slice(0, 80 - suffix.length).replace(/-$/, '') + suffix; }
+        }
+        try { await env.DB.prepare('INSERT INTO rocket(id, owner_id, name, slug, created_at) VALUES (?, ?, ?, ?, ?)').bind(rocket.id, rocket.ownerId, rocket.name, rocket.slug, Date.now()).run();break; }
+        catch (error) {
+          if (!await env.DB.prepare('SELECT id FROM rocket WHERE owner_id=? AND slug=?').bind(rocket.ownerId, rocket.slug).first()) throw error;
+          if (!automatic) return fail('You already have a rocket at that URL', 409);
+          taken.add(rocket.slug);
+        }
+      }
+      published = true;
+      return json({ rocket }, 201);
+    } finally {
+      if (staged && !published) await room.fetch(`https://room.internal/discard-upload?rocketId=${rocket.id}`, { method: 'POST' });
     }
-    return json({ rocket }, 201);
   }
   const match = /^\/api\/rockets\/([a-z][a-z0-9_-]{2,31})\/([a-z0-9_-]{1,80})(\/socket)?$/.exec(path);
   if (match) {
@@ -83,7 +121,7 @@ export default {
     if (path.startsWith('/api/')) {
       try { return await api(request, env); }
       catch (error) {
-        if (error instanceof SyntaxError || error instanceof Error && ['JSON body required', 'JSON object required', 'Request too large'].includes(error.message)) return fail(error.message, 400);
+        if (error instanceof SyntaxError || error instanceof Error && ['Request body required', 'JSON object required', 'Request too large'].includes(error.message)) return fail(error.message, 400);
         return fail('Service unavailable. Please try again.', 503);
       }
     }

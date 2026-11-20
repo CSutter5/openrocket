@@ -42,13 +42,12 @@ export async function register(page, url, username) {
   await form.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByText(`Signed in as ${username.toLowerCase()}`, { exact: true }).waitFor();
 }
-export async function createRocket(page, url, username, slug, name = slug) {
+export async function createRocket(page, url, username, name) {
   await page.goto(url);
   await page.getByLabel('Rocket name', { exact: true }).fill(name);
-  await page.getByLabel('URL name', { exact: true }).fill(slug);
   await page.getByRole('button', { name: 'Create rocket', exact: true }).click();
-  await page.waitForURL(`${url}/${username}/${slug}/`);await editorReady(page);
-  return `/${username}/${slug}/`;
+  await page.waitForURL(address => address.pathname.startsWith(`/${username}/`) && address.pathname.split('/').filter(Boolean).length === 2);await editorReady(page);
+  return new URL(page.url()).pathname;
 }
 export async function editorReady(page) {
   await page.locator('.session-label').filter({ hasText: 'Connected' }).waitFor();

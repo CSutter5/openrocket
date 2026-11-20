@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { LIMITS } from '@openrocket/ork-format';
 import { accountRequest, rocketPath, type AccountUser, type PublicRocket } from './accounts';
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 function AccountForm({ signup, close }: { signup: boolean; close: () => void }) {
@@ -26,12 +27,22 @@ function AccountForm({ signup, close }: { signup: boolean; close: () => void }) 
 }
 function RocketLibrary({ user, owner }: { user: AccountUser | null; owner?: string }) {
   const [rockets, setRockets] = useState<PublicRocket[]>([]), [loaded, setLoaded] = useState(false);
-  const [name, setName] = useState(''), [slug, setSlug] = useState(''), [customSlug, setCustomSlug] = useState(false);
+  const [name, setName] = useState(''), [source, setSource] = useState<'empty' | 'upload'>('empty');
+  const [file, setFile] = useState<File>();
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
   useEffect(() => { void accountRequest<{ rockets: PublicRocket[] }>('/api/rockets' + (owner ? `?owner=${encodeURIComponent(owner)}` : '')).then(result => { setRockets(result.rockets);setLoaded(true); }).catch(error => setError(failure(error))); }, [owner]);
   async function create(event: React.FormEvent) {
     event.preventDefault();setBusy(true);setError('');
-    try { const { rocket } = await accountRequest<{ rocket: PublicRocket }>('/api/rockets', { name, slug });location.assign(rocketPath(rocket)); }
+    try {
+      let body: object | FormData = { name };
+      if (source === 'upload') {
+        if (!file) throw new Error('Choose an .ork file to upload');
+        if (file.size > LIMITS.upload) throw new Error('File exceeds the 4 MiB upload limit');
+        const form = new FormData();form.set('name', name);form.set('file', file);body = form;
+      }
+      const { rocket } = await accountRequest<{ rocket: PublicRocket }>('/api/rockets', body);
+      location.assign(rocketPath(rocket));
+    }
     catch (error) { setError(failure(error));setBusy(false); }
   }
   return <section className="rocket-library">
@@ -40,9 +51,15 @@ function RocketLibrary({ user, owner }: { user: AccountUser | null; owner?: stri
     {error && <p role="alert" className="error">{error}</p>}
     {user && (!owner || owner === user.username) && <form className="new-rocket" onSubmit={create}>
       <h2>New rocket</h2>
-      <label htmlFor="rocket-name">Rocket name</label><input id="rocket-name" required maxLength={100} value={name} disabled={busy} onChange={event => { setName(event.target.value);if (!customSlug) setSlug(event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80)); }}/>
-      <label htmlFor="rocket-slug">URL name</label><div className="rocket-url"><span>/{user.username}/</span><input id="rocket-slug" required pattern="[a-z0-9]+(?:[-_][a-z0-9]+)*" maxLength={80} value={slug} disabled={busy} onChange={event => { setCustomSlug(true);setSlug(event.target.value); }}/><span>/</span></div>
-      <button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create rocket'}</button>
+      <label htmlFor="rocket-source">Start with</label><select id="rocket-source" value={source} disabled={busy} onChange={event => { setSource(event.target.value as 'empty' | 'upload');setFile(undefined); }}>
+        <option value="empty">Empty rocket</option><option value="upload">Upload existing rocket</option>
+      </select>
+      {source === 'upload' && <><label htmlFor="rocket-file">Rocket file (.ork)</label><input id="rocket-file" type="file" accept=".ork" required disabled={busy} onChange={event => {
+        const selected = event.target.files?.[0];setFile(selected);
+        if (selected && !name.trim()) setName(selected.name.replace(/\.ork$/i, '').slice(0, 100));
+      }}/></>}
+      <label htmlFor="rocket-name">Rocket name</label><input id="rocket-name" required maxLength={100} value={name} disabled={busy} onChange={event => setName(event.target.value)}/>
+      <button type="submit" disabled={busy}>{busy ? 'Creating…' : source === 'upload' ? 'Upload rocket' : 'Create rocket'}</button>
     </form>}
     <div className="rocket-list" aria-label="Public rockets">{rockets.map(rocket => <article key={rocket.id}>
       <a href={rocketPath(rocket)}><strong>{rocket.name}</strong><span>{rocketPath(rocket)}</span></a>

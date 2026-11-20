@@ -49,6 +49,21 @@ export class SharedRocket {
   }
   async fetch(request: CF.Request) {
     return this.serial(async () => {
+      const url = new URL(request.url);
+      // Only the API's trusted binding calls these paths; public routes forward socket URLs.
+      if (url.pathname === '/initialize-upload' && request.method === 'POST') {
+        if (this.state) return CFResponse.json({ error: 'Rocket already initialized' }, { status: 409 });
+        try { await this.session.execute({ type: 'import', filename: url.searchParams.get('filename')!, bytes: new Uint8Array(await request.arrayBuffer()) }); }
+        catch (error) { return CFResponse.json({ error: failure(error) }, { status: 400 }); }
+        const state = { token: crypto.randomUUID(), snapshot: await this.session.snapshot() };
+        await this.persist(state);this.state = state;
+        return CFResponse.json({ initialized: true });
+      }
+      if (url.pathname === '/discard-upload' && request.method === 'POST') {
+        if (await this.env.DB.prepare('SELECT id FROM rocket WHERE id=?').bind(url.searchParams.get('rocketId')).first()) return new CFResponse('Rocket already published', { status: 409 });
+        await this.ctx.storage.deleteAll();this.state = undefined;
+        return new CFResponse(null, { status: 204 });
+      }
       if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new CFResponse('WebSocket required', { status: 426 });
       const rocketId = request.headers.get('X-Rocket-Id');
       if (!rocketId) return new CFResponse('Rocket not found', { status: 404 });

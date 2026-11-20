@@ -292,10 +292,8 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .rocket-library h1 { font-size: 1.75rem; }
 .new-rocket { display: grid; gap: .65rem; padding: 1.25rem; margin: 1.5rem 0; max-width: 35rem; border: 1px solid var(--border); border-radius: .4rem; background: #292e36; }
 .new-rocket h2 { margin: 0 0 .5rem; }
-.new-rocket input { padding: .5rem; font-size: 1rem; min-width: 0; }
+.new-rocket input, .new-rocket select { padding: .5rem; font-size: 1rem; min-width: 0; }
 .new-rocket button { justify-self: start; }
-.rocket-url { display: flex; align-items: center; gap: .4rem; }
-.rocket-url input { flex: 1; }
 .rocket-list { display: grid; gap: .75rem; }
 .rocket-list article { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; background: #292e36; border: 1px solid var(--border); border-radius: .4rem; }
 .rocket-list article > a { display: grid; gap: .35rem; text-decoration: none; }
