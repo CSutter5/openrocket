@@ -26,6 +26,15 @@ try {
     await page.setViewportSize({ width, height });
     await page.getByRole('tab', { name: 'Rocket design', exact: true }).click();await settle();await fits();
     const canvas = await page.locator('.drawing-canvas').boundingBox();assert.ok(canvas.height >= 24, 'drawing retains usable space');
+    for (const name of ['preview-length', 'preview-diameter', 'preview-dry-mass', 'preview-launch-mass', 'preview-stability', 'preview-apogee', 'preview-velocity', 'preview-acceleration']) {
+      const statistic = page.getByTestId(name);
+      await statistic.scrollIntoViewIfNeeded();await inWindow(statistic, name);
+      assert.ok(await statistic.evaluate(element => {
+        const box = element.getBoundingClientRect(), panel = element.closest('.drawing-title, .drawing-footer').getBoundingClientRect();
+        return box.top >= panel.top - 1 && box.bottom <= panel.bottom + 1;
+      }), `${name} can be scrolled fully into its preview section`);
+    }
+    await page.locator('.drawing-title, .drawing-footer').evaluateAll(elements => elements.forEach(element => element.scrollTop = 0));
     assert.ok(await page.locator('.rocket-drawing polygon').evaluateAll(nodes => nodes.every(node => {
       const b = node.getBoundingClientRect(), c = node.closest('.drawing-canvas').getBoundingClientRect();
       return b.top >= c.top - 1 && b.bottom <= c.bottom + 1 && b.left >= c.left - 1 && b.right <= c.right + 1;
@@ -46,7 +55,10 @@ try {
   await page.locator('.component-palette').evaluate(node => node.scrollTop = node.scrollHeight);
   await inWindow(page.locator('.palette-note'), 'last palette item');await fits();
   await page.locator('.document-info summary').click();await fits();
-  await page.locator('.rocket-drawing > details summary').click();await settle();await fits();
+  const omissions = page.locator('.rocket-drawing > details summary');
+  if (await omissions.count()) await omissions.click();
+  else assert.ok(await page.locator('.internal-component').count() > 0, 'formerly omitted internals are now drawn');
+  await settle();await fits();
   assert.ok((await page.locator('.drawing-canvas').boundingBox()).height >= 24);
   checks.push('component keyboard navigation, long palette and expanded disclosures scroll locally');
 

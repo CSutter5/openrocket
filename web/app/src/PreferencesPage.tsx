@@ -4,8 +4,8 @@ import { fontWeights, preferenceUnits, unitPreset, type Preferences, type SavedP
 
 const fields: [UnitPreference, string, boolean][] = [
   ['LENGTH', 'Rocket dimensions', true], ['MOTOR_DIMENSIONS', 'Motor dimensions', true], ['DISTANCE', 'Distance', true], ['VELOCITY', 'Velocity', true],
-  ['ACCELERATION', 'Acceleration', false], ['MASS', 'Mass', true], ['FORCE', 'Force', false], ['IMPULSE', 'Total impulse', true], ['INERTIA', 'Moment of inertia', false],
-  ['STABILITY', 'Stability', false], ['SECONDARY_STABILITY', 'Secondary stability', false],
+  ['ACCELERATION', 'Acceleration', true], ['MASS', 'Mass', true], ['FORCE', 'Force', false], ['IMPULSE', 'Total impulse', true], ['INERTIA', 'Moment of inertia', false],
+  ['STABILITY', 'Stability', true], ['SECONDARY_STABILITY', 'Secondary stability', true],
   ['DENSITY_LINE', 'Line density', true], ['DENSITY_SURFACE', 'Surface density', true], ['DENSITY_BULK', 'Bulk density', true], ['ROUGHNESS', 'Surface roughness', false],
   ['AREA', 'Area', false], ['ANGLE', 'Angle', true], ['ROLL', 'Roll rate', false], ['TEMPERATURE', 'Temperature', false], ['PRESSURE', 'Pressure', false],
   ['WINDSPEED', 'Wind speed', false], ['LATITUDE', 'Latitude', false], ['LONGITUDE', 'Longitude', false],

@@ -1,7 +1,12 @@
 import type { ExpandedArchive, XmlNode } from '@openrocket/ork-format';
 import { field, numeric } from '../../packages/ork-format/src/radius.js';
 import { drawRocket } from '../../engine-adapter/build/generated/teavm/js/reducer.js';
+export interface InternalShape {
+  id: string; kind: 'tube' | 'shoulder' | 'motor' | 'mass' | 'parachute' | 'streamer' | 'cord';
+  x: number; y: number; length: number; radius: number; innerRadius: number;
+}
 export interface Drawing {
+  internals?: InternalShape[];
   polygons: { index: number; points: [number, number][] }[];
   minX: number; maxX: number; radius: number;
   componentIndices: number[]; omitted: string[]; error?: string;

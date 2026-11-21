@@ -14,9 +14,21 @@ const failure = (error: unknown) => error instanceof Error ? error.message : Str
 export async function describe(current: ExpandedArchive, name: string, lastExport: string, configurationId: string | undefined): Promise<DocumentView> {
   const nodes = current.parsed.components;
   try { await resolveCatalogMotors(current); } catch { /* File inspection remains available when catalog assets are unavailable. */ }
-  let centers: DocumentView['stability'];
-  try { centers = JSON.parse(stability(importedInput(current, configurationId, true).model)); }
+  let centers: DocumentView['stability'], internals: import('./drawing').InternalShape[] = [];
+  try { const result = JSON.parse(stability(importedInput(current, configurationId, true).model)) as DocumentView['stability'] & { internals: import('./drawing').InternalShape[] };
+    ({ internals, ...centers } = result); }
   catch (error) { centers = { cg: null, cp: null, reason: failure(error) }; }
+  // Native UUID serialization is lowercase; selection keeps the archive's ID spelling.
+  internals = internals.map(shape => ({ ...shape, id: nodes.find(node => node.id?.toLowerCase() === shape.id)?.id ?? shape.id }));
+  const drawing = rocketDrawing(current);
+  drawing.internals = internals;
+  for (const shape of internals) {
+    drawing.minX = Math.min(drawing.minX, shape.x);
+    drawing.maxX = Math.max(drawing.maxX, shape.x + shape.length);
+    drawing.radius = Math.max(drawing.radius, Math.abs(shape.y) + shape.radius);
+  }
+  const visible = new Set(internals.map(shape => shape.id));
+  drawing.omitted = drawing.omitted.filter(label => !nodes.some(node => node.id && visible.has(node.id) && label === `${node.label ?? node.name}: ${node.name} (interior or unsupported shape)`));
   return {
     stability: centers,
     motorMounts: nodes.filter(n => n.id && ['bodytube', 'innertube'].includes(n.name) && n.children.some(c => c.name === 'motormount')).map(n => {
@@ -34,7 +46,7 @@ export async function describe(current: ExpandedArchive, name: string, lastExpor
       });
       return { id: n.id!, name: n.label ?? n.name, diameter, length, usedGroups: [...new Set(matchedGroups)], assignments };
     }),
-    flightSupport: flightSupport(current, configurationId), flightConfigurations: flightConfigurations(current), flightConfigurationId: configurationId, drawing: rocketDrawing(current), filename: name, mode: current.mode, diagnostics: current.diagnostics,
+    flightSupport: flightSupport(current, configurationId), flightConfigurations: flightConfigurations(current), flightConfigurationId: configurationId, drawing, filename: name, mode: current.mode, diagnostics: current.diagnostics,
     identitySidecarHash: await sha256(new TextEncoder().encode(JSON.stringify(current.identity))),
     hash: current.identity.archiveHash, dirty: current.identity.archiveHash !== lastExport,
     components: componentNames(current).map((component, index) => {

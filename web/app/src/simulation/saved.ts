@@ -4,7 +4,7 @@ import type { Integrator } from './provenance';
 export interface StoredPlot { name: string; points: [number, number][] }
 export interface SavedSimulation {
   id: string; name: string; status: string; configurationId?: string;
-  summary: (number | null)[]; plots: StoredPlot[];
+  summary: (number | null)[]; maxAcceleration: number | null; plots: StoredPlot[];
   support?: import('./input').Support;
   options?: Record<string, string>; integrator?: Integrator; reason?: string;
 }
@@ -86,7 +86,7 @@ export function savedSimulations(archive: ExpandedArchive): SavedSimulation[] {
       try { return numeric(text, 'stored summary'); } catch { return null; }
     };
     const row: SavedSimulation = { id: archive.identity.simulations[i].id, name: n.children.find(n => n.name === 'name')?.text ?? '(unnamed)', status: n.attributes.status?.value ?? 'unspecified',
-      summary: ['maxaltitude', 'maxvelocity', 'timetoapogee', 'flighttime'].map(scalar), plots: [] };
+      summary: ['maxaltitude', 'maxvelocity', 'timetoapogee', 'flighttime'].map(scalar), maxAcceleration: scalar('maxacceleration'), plots: [] };
     for (const branch of data?.children.filter(n => n.name === 'databranch') ?? []) {
       const types = branch.attributes.types?.value.split(',').map(s => s.trim().toLowerCase()) ?? [], time = types.indexOf('time'), altitude = types.indexOf('altitude');
       if (time < 0 || altitude < 0 || types.filter(t => t === 'time').length !== 1 || types.filter(t => t === 'altitude').length !== 1) continue;

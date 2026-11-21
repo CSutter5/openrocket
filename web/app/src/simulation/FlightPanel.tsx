@@ -8,12 +8,11 @@ import { FlightPlot } from './FlightPlot';
 import { PreferencesContext } from '../PreferencesContext';
 import { preferenceUnits } from '../preferences';
 
-export function FlightPanel({ document, busy, unit, setUnit }: { document: DocumentView; busy: boolean; unit: LengthUnit; setUnit: (unit: LengthUnit) => void }) {
+export function FlightPanel({ document, busy, unit, setUnit, results, onResult }: { document: DocumentView; busy: boolean; unit: LengthUnit; setUnit: (unit: LengthUnit) => void; results: Record<string, SessionResult>; onResult: (id: string, result: SessionResult) => void }) {
   const preferences = useContext(PreferencesContext);
   const velocityUnit = preferences ? preferenceUnits.VELOCITY.options.find(option => option.id === preferences.units.VELOCITY)! : null;
   const [state, setState] = useState<JobState>({ status: 'idle' });
   const [selected, setSelected] = useState('');
-  const [results, setResults] = useState<Record<string, SessionResult>>({});
   const [graph, setGraph] = useState<string>();
   const active = useRef('');
   const identities = document.simulations.map(s => s.id).join(',');
@@ -24,7 +23,7 @@ export function FlightPanel({ document, busy, unit, setUnit }: { document: Docum
   const job = useRef<FlightJob | null>(null);
   if (!job.current) job.current = new FlightJob(next => {
     setState(next);
-    if (next.status === 'completed' && next.result) setResults(previous => ({ ...previous, [active.current]: next.result! }));
+    if (next.status === 'completed' && next.result) onResult(active.current, next.result);
   }, () => new Worker(new URL('./simulation.worker.ts', import.meta.url), { type: 'module' }));
   useEffect(() => () => job.current?.dispose(), []);
   const saved = document.simulations.find(s => s.id === selected);

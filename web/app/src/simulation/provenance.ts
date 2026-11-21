@@ -23,7 +23,7 @@ export async function bindFlight(archive: ExpandedArchive, integrator: Integrato
 }
 export interface FlightResult {
   rk6: boolean; mass: number; cg: number; cp: number; motorImpulse: number; motorThrustSamples: number[];
-  summary: [number, number, number, number]; events: [string, number][]; series: [number, number, number, number][];
+  summary: [number, number, number, number]; maxAcceleration: number | null; events: [string, number][]; series: [number, number, number, number][];
   warningCount: number; warnings: string[]; inputs: unknown;
 }
 export interface FlightSnapshot { bytes: Uint8Array; identity: import('@openrocket/contracts').IdentitySidecar; provenance: SimulationInput; inputHash: string }

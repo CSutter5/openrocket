@@ -80,7 +80,11 @@ export function createDocumentSession<V>(describe: (archive: ExpandedArchive, fi
           if (input) validateTubeRadiusEdit(archive, input, intrinsic(input, Number(radius.value)).after);
         }
         const currentName = componentNames(candidate).find(n => n.id === action.id)?.name;
-        if (currentName !== action.name) candidate = await renameComponent(candidate, action.id, currentName!, action.name);
+        if (currentName !== action.name) {
+          candidate = await renameComponent(candidate, action.id, currentName!, action.name);
+          const exported = await exportArchive(candidate);
+          candidate = { ...candidate, identity: exported.identity };
+        }
         if (candidate !== archive) notice = 'Component updated.';
       } else if (action.type === 'componentProperty') {
         candidate = await editComponentProperty(archive, action.id, action.key, action.value, action.attributes);

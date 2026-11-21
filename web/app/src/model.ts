@@ -14,7 +14,8 @@ export interface DocumentView {
   flightConfigurations: import('./simulation/input').FlightConfigurationChoice[];
   flightConfigurationId?: string;
   motorMounts: { id: string; name: string; diameter?: number; length?: number; usedGroups: number[]; assignments: { configurationId: string; motorKey?: string; delay: string }[] }[];
-  stability: { cg: number | null; cp: number | null; reason?: string };
+  stability: { cg: number | null; cp: number | null; length?: number | null; diameter?: number | null;
+    massWithoutMotors?: number | null; massWithMotors?: number | null; caliber?: number | null; aerodynamicLength?: number | null; reason?: string };
   drawing: import('./drawing').Drawing;
   filename: string; mode: 'editable' | 'preservation'; diagnostics: string[];
   identitySidecarHash: string; hash: string; dirty: boolean; components: ComponentView[];

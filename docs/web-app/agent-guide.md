@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The latest follow-up adds [desktop-style rocket preview statistics and internal outlines](rocket-preview.md) (ADR-34). Read its native mass/CG/CP and geometry boundaries, selected-configuration result matching and stale-result rules before changing the preview. Personal acceleration and stability unit defaults now have active displays.
+
 The latest request adds [account UI and unit preferences](preferences.md) (ADR-33). The user chose UI and Units first. Read the personal D1/version boundary, desktop-exported unit presets, default application and unavailable-view labels before changing presentation or account loading. Preferences never modify shared archives or runtime engine globals. No deployment or remote migration is included.
 
 The latest request adds [rocket sharing permissions](sharing.md) (ADR-32): Restricted defaults, Public viewing, explicit Viewer/Editor grants and download flags, live revocation/downgrades, and confirmed ownership transfer with stable share URLs. Read its migration, former-owner Editor access, socket/broadcast checks and export limitations before changing account or collaboration behavior. Earlier blanket signed-in editing is superseded. No deployment or remote migration is included.

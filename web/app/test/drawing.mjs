@@ -27,12 +27,13 @@ try {
     const canvas=await page.locator('.drawing-canvas').boundingBox();
     const viewportHeight=Math.max(80,1000*canvas.height/canvas.width);
     const scale=Math.min(900/(expected.maxX-expected.minX),(viewportHeight-36)/2/Math.max(expected.radius,.001));
+    const left=(1000-(expected.maxX-expected.minX)*scale)/2;
     for(let i=0;i<expected.polygons.length;i++) {
       const points=(await polygons.nth(i).getAttribute('points')).split(' ').map(p=>p.split(',').map(Number));
       assert.equal(points.length,expected.polygons[i].points.length);
       for(let j=0;j<points.length;j++) {
         const [x,y]=expected.polygons[i].points[j];
-        assert.ok(Math.abs(points[j][0]-(50+(x-expected.minX)*scale))<1e-8,`actual desktop x ${key}/${i}/${j}`);
+        assert.ok(Math.abs(points[j][0]-(left+(x-expected.minX)*scale))<1e-8,`actual desktop x ${key}/${i}/${j}`);
         assert.ok(Math.abs(points[j][1]-(150-y*scale))<1e-8,`actual desktop y ${key}/${i}/${j}`);
       }
     }

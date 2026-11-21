@@ -120,6 +120,7 @@ public final class ImportedFlight {
             .append(",\"cg\":").append(mass.getCM().getX()).append(",\"cp\":").append(cp.getX())
             .append(",\"motorImpulse\":").append(motor.getTotalImpulseEstimate())
             .append(",\"motorThrustSamples\":[").append(motor.getThrust(0.05)).append(',').append(motor.getThrust(0.2)).append(']')
+            .append(",\"maxAcceleration\":").append(EditorStability.scalar(data.getMaxAcceleration()))
             .append(",\"summary\":[").append(data.getMaxAltitude()).append(',').append(data.getMaxVelocity()).append(',')
             .append(data.getTimeToApogee()).append(',').append(data.getFlightTime()).append("],\"events\":[");
         boolean first = true;

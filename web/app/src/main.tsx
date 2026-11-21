@@ -14,6 +14,7 @@ import { additionTarget } from './components';
 import { AccountShell } from './AccountShell';
 import type { PublicRocket } from './accounts';
 import { FlightPanel } from './simulation/FlightPanel';
+import type { SessionResult } from './simulation/provenance';
 import { PreferencesContext } from './PreferencesContext';
 import './style.css';
 import './themes.css';
@@ -23,6 +24,7 @@ function message(error: unknown) { return error instanceof Error ? error.message
 function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
   const preferences = useContext(PreferencesContext);
   const [document, setDocument] = useState<DocumentView>();
+  const [flightResults, setFlightResults] = useState<Record<string, SessionResult>>({});
   const [selected, setSelected] = useState(0);
   const [unit, setUnit] = useState<LengthUnit>((preferences?.units.LENGTH ?? 'm') as LengthUnit);
   const [simulationUnit, setSimulationUnit] = useState<LengthUnit>((preferences?.units.DISTANCE ?? 'm') as LengthUnit);
@@ -212,7 +214,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
             <MotorConfigurations key={document.identitySidecarHash} document={document} busy={blocked || readOnly} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
           </section>
           <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
-            <FlightPanel document={document} busy={blocked} unit={preferences ? simulationUnit : unit} setUnit={preferences ? setSimulationUnit : setUnit}/>
+            <FlightPanel document={document} busy={blocked} unit={preferences ? simulationUnit : unit} setUnit={preferences ? setSimulationUnit : setUnit} results={flightResults} onResult={(id, result) => setFlightResults(previous => ({ ...previous, [id]: result }))}/>
           </div>
         </div>
         <div className="splitter" aria-hidden="true">•••</div>
@@ -227,7 +229,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
             {document.flightConfigurations.map(c => <option key={c.id} value={c.id}>{c.label}{c.isDefault ? ' · archived default' : ''}</option>)}
           </select></div>
         </div>
-        <RocketDrawing unit={unit} drawing={document.drawing} stability={document.stability} components={components} selected={selected} busy={blocked} select={selectComponent} edit={() => setEditor(true)}/>
+        <RocketDrawing unit={unit} document={document} results={flightResults} components={components} selected={selected} busy={blocked} select={selectComponent} edit={() => setEditor(true)}/>
         <details className="document-info" open={document.mode === 'preservation'}><summary>Document information · {components.length} components{document.diagnostics.length ? ` · ${document.diagnostics.length} notices` : ''}</summary>
           <p>{readOnly ? 'Public read-only view: sign in to edit' : document.mode === 'editable' ? 'Component properties and tree editable' : 'Preservation only: all properties read-only'}. Unsupported properties and attachments are preserved.</p>
           {document.diagnostics.map((d, i) => <p key={i}>{d}</p>)}

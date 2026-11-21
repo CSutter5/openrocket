@@ -1,5 +1,7 @@
 # OpenRocket web application plan
 
+The latest follow-up adds [desktop-style rocket preview statistics and internal outlines](rocket-preview.md) (ADR-34). Read its native mass/CG/CP and geometry boundaries, selected-configuration result matching and stale-result rules before changing the preview. Personal acceleration and stability unit defaults now have active displays.
+
 The latest follow-up adds [account UI and unit preferences](preferences.md) (ADR-33): personal themes, typography/scale, unit defaults and metric/imperial presets, with atomic versioned D1 saves. The user chose the UI and Units panels first; other desktop Preferences tabs remain deferred.
 
 The latest November 20 follow-up adds [rocket sharing permissions](sharing.md) (ADR-32), replacing blanket signed-in editing with Restricted/Public visibility, explicit Viewer/Editor grants, download controls, live revocation and stable-URL ownership transfer. New rockets default to Restricted; existing rockets retain Public visibility and require explicit Editor grants for collaborators.

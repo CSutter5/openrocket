@@ -25,6 +25,7 @@ try {
   await import('./p02.mjs');
   await import('./roundtrip.mjs');
   await import('./drawing.mjs');
+  await import('./preview.mjs');
   await import('./properties.mjs');
   await import('./units.mjs');
   await import('./simulation.mjs');

@@ -61,7 +61,7 @@ try {
   await alice.getByRole('button', { name: 'Default imperial', exact: true }).click();
   for (const [group, value] of Object.entries({ LENGTH: 'in', MOTOR_DIMENSIONS: 'in', DISTANCE: 'ft', VELOCITY: 'ft/s', MASS: 'oz', DENSITY_LINE: 'oz/ft', DENSITY_SURFACE: 'oz/ft²', DENSITY_BULK: 'oz/in³', PRESSURE: 'mbar', FORCE: 'N' })) assert.equal(await alice.locator(`#preference-${group}`).inputValue(), value);
   await alice.getByLabel('Display secondary stability unit', { exact: true }).uncheck();assert.equal(await alice.locator('#preference-SECONDARY_STABILITY').isDisabled(), true);
-  await alice.locator('#preference-VELOCITY').selectOption('mph');await alice.locator('#preference-ANGLE').selectOption('rad');await alice.locator('#preference-IMPULSE').selectOption('lbf·s');
+  await alice.locator('#preference-VELOCITY').selectOption('mph');await alice.locator('#preference-ACCELERATION').selectOption('G');await alice.locator('#preference-ANGLE').selectOption('rad');await alice.locator('#preference-IMPULSE').selectOption('lbf·s');
   await alice.getByRole('button', { name: 'Apply', exact: true }).click();await waitSaved(alice);
   const accepted = await saved(alice);assert.equal(accepted.version, 1);assert.equal(accepted.preferences.ui.theme, 'light');assert.equal(accepted.preferences.units.VELOCITY, 'mph');
   assert.equal(await alice.evaluate(() => getComputedStyle(document.documentElement).fontSize), '20px');
@@ -75,6 +75,9 @@ try {
   await alice.getByRole('tab', { name: 'UI', exact: true }).click();await alice.screenshot({ path: resolve(import.meta.dirname, '../build/preferences-ui.png') });
   await alice.getByRole('button', { name: 'OK', exact: true }).click();await alice.waitForURL(url + path);await editorReady(alice);
   assert.equal(await alice.getByLabel('Length units', { exact: true }).inputValue(), 'in');
+  assert.match(await alice.getByTestId('preview-length').innerText(), / in$/);
+  assert.match(await alice.getByTestId('preview-dry-mass').innerText(), / oz$/);
+  assert.equal(await alice.getByTestId('preview-stability').innerText(), 'Unavailable', 'undefined aerodynamic CP is not converted to a stability margin');
   await contrast(alice, '.view-toolbar strong', 4.5);
   await alice.getByRole('button', { name: 'Tube bodytube', exact: true }).click();await openProperties(alice, { advanced: false });
   const editor = alice.getByRole('dialog', { name: 'Component editor', exact: true });
@@ -98,6 +101,8 @@ try {
   assert.equal(Number(edited.parsed.components.find(node => node.name === 'bodytube').children.find(node => node.name === 'length').text), .0508);
   assert.equal(edited.entries.some(entry => entry.path.includes('preferences')), false);
   await openSample(alice, 'Open flight-ready sample');await alice.getByRole('status').filter({ hasText: 'Archive opened' }).waitFor();
+  assert.match(await alice.getByTestId('preview-stability').innerText(), / cal$/);
+  assert.ok(!(await alice.getByTestId('preview-stability').innerText()).includes('/'), 'secondary stability is hidden');
   await alice.getByRole('tab', { name: 'Flight simulations', exact: true }).click();assert.equal(await alice.getByLabel('Simulation units', { exact: true }).inputValue(), 'ft');
   await alice.getByRole('columnheader', { name: 'Max. velocity (mph)', exact: true }).waitFor();
   assert.equal(await alice.getByRole('button', { name: 'Plot', exact: true }).isDisabled(), true);
@@ -118,6 +123,10 @@ try {
   await alice.getByRole('button', { name: 'Run flight', exact: true }).click();await alice.getByTestId('flight-status').filter({ hasText: 'Flight completed.' }).waitFor({ timeout: 60000 });
   const physical = await alice.evaluate(() => window.preferenceFlight.summary), displayed = await alice.locator('.simulation-table tr[aria-selected=true] td').allTextContents();
   assert.equal(Number(displayed[3]), Number((physical[0] / .3048).toFixed(2)));assert.equal(Number(displayed[4]), Number((physical[1] / .44704).toFixed(2)));
+  const acceleration = await alice.evaluate(() => window.preferenceFlight.maxAcceleration);
+  assert.equal(await alice.getByTestId('preview-acceleration').innerText(), `${Number((acceleration / 9.80665).toPrecision(4)).toLocaleString(undefined, { maximumSignificantDigits: 4 })} G`);
+  assert.match(await alice.getByTestId('preview-apogee').innerText(), / ft$/);
+  assert.match(await alice.getByTestId('preview-velocity').innerText(), / mph$/);
   await alice.getByRole('button', { name: 'Plot', exact: true }).click();assert.equal(await alice.getByLabel('Graph altitude units', { exact: true }).inputValue(), 'ft');
   await contrast(alice, '.flight-plot polyline', 3, 'stroke');
   await alice.getByRole('button', { name: /^Close Flight graph/ }).click();
