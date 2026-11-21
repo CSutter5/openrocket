@@ -42,7 +42,7 @@ public class SavedSimulationDesktopProof {
             var sim=doc.getSimulation(Integer.parseInt(args[2]));
             if(!sim.getOptions().isRandomSeedFixed())sim.getOptions().setRandomSeed(42);
             var id=sim.getId();doc.getRocket().setSelectedConfiguration(id);ThrustCurveMotor motor=null;
-            for(var c:doc.getRocket())if(c instanceof MotorMount m&&m.isMotorMount())motor=(ThrustCurveMotor)m.getMotorConfig(id).getMotor();
+            for(var c:doc.getRocket())if(c instanceof MotorMount m&&m.isMotorMount()&&m.getMotorConfig(id).getMotor() instanceof ThrustCurveMotor assigned)motor=assigned;
             var conditions=sim.getOptions().toSimulationConditions();conditions.setSimulation(sim);
             boolean rk6=sim.getOptions().getSimulationStepperMethodChoice()==SimulationStepperMethod.RK6;
             Files.writeString(Path.of(args[3]),ImportedFlight.simulate(doc.getRocket(),motor,sim,rk6,conditions));return;

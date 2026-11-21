@@ -199,6 +199,7 @@ public final class ImportedRocketFlight {
                 motor=motor(text(p+"digest"));
                 if(!motor.getDesignation().equals(text(p+"designation"))||!motor.getManufacturer().matches(text(p+"manufacturer"))||Math.abs(motor.getDiameter()-num(p+"diameter"))>1e-12||Math.abs(motor.getLength()-num(p+"length"))>1e-12||!motor.getMotorType().name().equalsIgnoreCase(text(p+"type")))throw new IllegalArgumentException("Motor reference differs from embedded curve");
                 mc.setMotor(motor);mc.setEjectionDelay(text(p+"delay").equals("none")?Double.POSITIVE_INFINITY:num(p+"delay"));
+                if(fields.containsKey(p+"nozzleexitdiameter"))mc.setNozzleExitDiameter(num(p+"nozzleexitdiameter"));
             }
             String ignition=prefix+"ignitionconfiguration/"+id+"/";
             if(fields.containsKey(ignition+"ignitionevent")){mc.setIgnitionEvent(ignition(text(ignition+"ignitionevent")));mc.setIgnitionDelay(num(ignition+"ignitiondelay"));}

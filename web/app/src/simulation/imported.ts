@@ -45,12 +45,39 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
   if(nodes.length>64||nodes[0]?.name!=='rocket'||!stages.length||stages.some(n=>n.parent?.parent!==nodes[0]))throw new Error('Requires direct axial stages and at most 64 components');
   const root=archive.parsed.nodes.find(n=>n.name==='openrocket')!;
   attributes(root,['version','creator']);
-  for(const c of root.children)if(c.name!=='rocket'){attributes(c,[]);if(c.name==='docprefs'&&c.children.some(n=>n.name!=='docmaterials'))throw new Error('Unsupported document preferences');}
+  for(const c of root.children)if(c.name!=='rocket'){
+    attributes(c,[]);
+    if(c.name==='docprefs') {
+      const seen=new Set<string>();
+      for(const pref of c.children) {
+        if(pref.name==='docmaterials')continue;
+        attributes(pref,['key','type']);scalar(pref);
+        const key=attr(pref,'key');
+        if(pref.name!=='pref'||key!=='simulation.table.hiddenColumns'||attr(pref,'type')!=='string'||seen.has(key))throw new Error('Unsupported document preferences');
+        seen.add(key);
+      }
+    }
+  }
   for(const n of root.children)if(!['rocket','simulations','datatypes','photostudio','docprefs'].includes(n.name))throw new Error(`Unsupported document field ${n.name}`);
   // Historical series/expressions are preserved data. They do not initialize a new run.
   if(archive.parsed.nodes.some(n=>/^(extension|listener|script|simulationextension)$/i.test(n.name)))throw new Error('Imported simulation extensions/scripts are unsupported');
   for(const simulation of archive.parsed.simulations) {
-    if(simulation.children.some(n=>!['name','simulator','calculator','conditions','flightdata'].includes(n.name)))throw new Error('Unsupported imported simulation behavior');
+    if(simulation.children.some(n=>!['name','simulator','calculator','conditions','flightdata','landingdispersion'].includes(n.name)))throw new Error('Unsupported imported simulation behavior');
+    const dispersion=simulation.children.filter(n=>n.name==='landingdispersion');
+    if(dispersion.length>1)throw new Error('Ambiguous landing-dispersion settings');
+    for(const settings of dispersion) {
+      // A separate analysis setup, preserved without affecting the nominal flight.
+      attributes(settings,['runs','seed']);
+      const runs=numeric(attr(settings,'runs')??'','dispersion runs'),seed=numeric(attr(settings,'seed')??'','dispersion seed');
+      if(settings.text.trim()||!Number.isInteger(runs)||runs<2||runs>100000||!Number.isInteger(seed)||seed< -2147483648||seed>2147483647)throw new Error('Invalid landing-dispersion settings');
+      const relative='airdensity totalmass axialdrag normalforce thrust recoverydrag'.split(' '),parameters=[...relative,...'windspeed winddirection launchguideangle launchguidedirection cgaxial ignitiondelay deploymentdelay'.split(' ')],seen=new Set<string>();
+      for(const uncertainty of settings.children) {
+        attributes(uncertainty,['parameter','distribution','spread']);scalar(uncertainty);
+        const parameter=attr(uncertainty,'parameter')??'',distribution=attr(uncertainty,'distribution');
+        if(uncertainty.name!=='uncertainty'||uncertainty.text.trim()||!parameters.includes(parameter)||seen.has(parameter)||!['normal','uniform','lognormal'].includes(distribution??'')||distribution==='lognormal'&&!relative.includes(parameter)||numeric(attr(uncertainty,'spread')??'','dispersion spread')<0)throw new Error('Unsupported landing-dispersion uncertainty');
+        seen.add(parameter);
+      }
+    }
     if(simulation.children.find(n=>n.name==='simulator')?.text.trim()!=='RK4Simulator')throw new Error('Unsupported imported simulator');
     if(simulation.children.find(n=>n.name==='calculator')?.text.trim()!=='BarrowmanCalculator')throw new Error('Unsupported imported aerodynamic calculator');
   }
@@ -106,6 +133,18 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       }
       if(seen.has(c.name)&&!repeated)throw new Error(`Ambiguous ${n.name}/${c.name}`);seen.add(c.name);
       if(c.name==='appearance')continue; // Visual metadata never affects rigid-body flight.
+      if(c.name==='preset'&&n.name==='parachute'&&Object.entries(importedPreset).some(([k,v])=>attr(c,k)!==v)) {
+        attributes(c,['type','manufacturer','partno','digest']);scalar(c);
+        if(c.text.trim()||attr(c,'type')!=='PARACHUTE'||!attr(c,'manufacturer')?.trim()||!attr(c,'partno')?.trim()||!/^[a-f0-9]{1,32}$/i.test(attr(c,'digest')??''))throw new Error('Invalid parachute preset reference');
+        for(const name of 'packedlength packedradius cd material diameter linecount linelength linematerial'.split(' ')) {
+          if(one(n,name).start<c.end)throw new Error('Parachute physical fields must follow the preset reference');
+        }
+        for(const pair of [['overridemass','overridesubcomponentsmass'],['overridecg','overridesubcomponentscg'],['overridecd','overridesubcomponentscd']]) {
+          if(n.children.some(field=>pair.includes(field.name)))for(const name of pair)one(n,name);
+        }
+        if(n.children.some(field=>['overridemass','overridesubcomponentsmass','overridecg','overridesubcomponentscg','overridecd','overridesubcomponentscd'].includes(field.name)&&field.start<c.end))throw new Error('Parachute overrides must follow the preset reference');
+        continue;
+      }
       if(c.name==='preset'&&n.name==='railbutton') {
         attributes(c,['type','manufacturer','partno','digest']);scalar(c);
         if(c.text.trim()||attr(c,'type')!=='RAIL_BUTTON'||!attr(c,'manufacturer')?.trim()||!attr(c,'partno')?.trim()||!/^[a-f0-9]{32}$/i.test(attr(c,'digest')??''))throw new Error('Invalid rail-button preset reference');
@@ -140,8 +179,9 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
           if(m.name==='motor'||m.name==='ignitionconfiguration') {
             attributes(m,['configid']);const id=attr(m,'configid')!;if(!ids.includes(id))throw new Error('Unresolved motor configuration');
             const keys=m.name==='motor'?['type','manufacturer','digest','designation','diameter','length','delay']:['ignitionevent','ignitiondelay'];
-            if(m.children.length!==keys.length||new Set(m.children.map(c=>c.name)).size!==keys.length)throw new Error('Incomplete motor/ignition configuration');
-            for(const v of m.children){if(!keys.includes(v.name))throw new Error(`Unknown motor ${v.name}`);attributes(v,[]);scalar(v);add(v,`${i}/motormount/${m.name}/${id}/${v.name}`);}
+            const optional=m.name==='motor'?['nozzleexitdiameter']:[];
+            if(keys.some(key=>m.children.filter(c=>c.name===key).length!==1)||new Set(m.children.map(c=>c.name)).size!==m.children.length)throw new Error('Incomplete motor/ignition configuration');
+            for(const v of m.children){if(!keys.includes(v.name)&&!optional.includes(v.name))throw new Error(`Unknown motor ${v.name}`);attributes(v,[]);scalar(v);if(v.name==='nozzleexitdiameter'){const diameter=numeric(v.text.trim(),'nozzle exit diameter');if(diameter<0||diameter>numeric(one(m,'diameter').text.trim(),'motor diameter'))throw new Error('Nozzle exit diameter must be between zero and motor diameter');}add(v,`${i}/motormount/${m.name}/${id}/${v.name}`);}
             if(m.name==='motor') {
               const digest=one(m,'digest').text.trim();if(!/^[a-f0-9]{32}$/.test(digest))throw new Error('Invalid motor digest');
               const pinned=(catalog.motors as Record<string,{rse:string;sha256:string}>)[digest];

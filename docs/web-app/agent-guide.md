@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The [imported document metadata follow-up](imported-document-metadata.md) (ADR-38) supports the known hidden-column preference, preserved landing-dispersion setup, complete saved parachute state and native motor nozzle dimensions needed by the large local user archive. Read its nominal-flight, preset and native-verification boundaries before changing import policy.
+
 The [large saved-flight archive follow-up](archive-size-limits.md) (ADR-37) lets one entry use the existing 16 MiB expanded archive budget, fixing the reported third-upload refusal for a 10.14 MiB XML file. Read its per-upload limits, preservation tests and actual-file evidence before changing archive bounds. Rockets remain unlimited.
 
 The plot-screen follow-up adds [desktop plot configuration controls and recorded flight channels](plot-controls.md). Read its additive channel contract, native metadata, session-only appearance defaults and archive-preservation boundaries before changing plots. This is a local plotting slice, not complete desktop chart or persistent preference parity.
