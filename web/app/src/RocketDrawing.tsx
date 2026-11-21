@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentView, DocumentView } from './model';
 import type { SessionResult } from './simulation/provenance';
 import { PhysicalStatistics, StabilityStatistics, FlightStatistics } from './PreviewStatistics';
-import {displayLength, lengthLabel, type LengthUnit} from './units';
+import {displayLength, metresFromLength, lengthLabel, type LengthUnit} from './units';
 export function RocketDrawing({ document, results, components, selected, select, busy, unit, edit }: {
   document: DocumentView; results: Record<string, SessionResult>; components: ComponentView[]; selected: number; select: (index: number) => void; busy: boolean; unit: LengthUnit; edit: () => void;
 }) {
@@ -25,12 +25,27 @@ export function RocketDrawing({ document, results, components, selected, select,
   const left = (1000 - (drawing.maxX - drawing.minX) * scale) / 2;
   const x = (value: number) => left + (value - drawing.minX) * scale;
   const y = (value: number) => 150 - value * scale;
+  const rulerTarget = displayLength(100 / scale, unit);
+  const rulerPower = 10 ** Math.floor(Math.log10(rulerTarget));
+  const rulerMultiple = [1, 2, 5, 10].find(value => value * rulerPower >= rulerTarget)!;
+  const rulerDivisions = rulerMultiple === 2 ? 4 : 5;
+  const rulerStep = rulerMultiple * rulerPower / rulerDivisions;
+  const firstTick = Math.ceil(displayLength(drawing.minX, unit) / rulerStep - 1e-9);
+  const lastTick = Math.floor(displayLength(drawing.maxX, unit) / rulerStep + 1e-9);
+  const rulerTicks = Array.from({ length: Math.max(0, lastTick - firstTick + 1) }, (_, i) => {
+    const index = firstTick + i, value = index * rulerStep;
+    return { value, position: metresFromLength(value, unit), major: index % rulerDivisions === 0 };
+  });
   return <section className="rocket-drawing" aria-label="Rocket drawing"><div className="drawing-title"><PhysicalStatistics stats={stability} unit={unit}/><StabilityStatistics stats={stability} unit={unit}/></div>
     {drawing.error ? <p>{drawing.error}</p> : <>
       <div ref={canvas} className="drawing-canvas"><svg style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 100}%`, height: `${zoom * 100}%` }} viewBox={`0 0 1000 ${height}`} role="img" aria-label="Rocket side drawing with internal components: select a component to edit">
-        <defs><pattern id="ruler-ticks" width="20" height="12" patternUnits="userSpaceOnUse"><path d="M0 0V10M10 0V5" stroke="currentColor" strokeWidth=".5"/></pattern></defs>
-        <rect x="35" y="0" width="930" height="12" fill="url(#ruler-ticks)"/>
-        {Array.from({ length: 10 }, (_, i) => <text key={i} className="ruler-number" x={50 + i * 100} y="24">{Number((displayLength((50 + i * 100 - left) / scale + drawing.minX, unit)).toPrecision(3))}</text>)}
+        <g aria-label={`Rocket ruler (${unit})`} data-testid="rocket-ruler">
+          <line x1={x(drawing.minX)} x2={x(drawing.maxX)} y1="0" y2="0" stroke="currentColor" strokeWidth=".5"/>
+          {rulerTicks.map(tick => <g key={tick.value} data-position={tick.position} data-major={tick.major} transform={`translate(${x(tick.position)} 0)`}>
+            <line y1="0" y2={tick.major ? 10 : 5} stroke="currentColor" strokeWidth=".5"/>
+            {tick.major && <text className="ruler-number" x="0" y="24" textAnchor="middle">{Number(tick.value.toPrecision(12))}</text>}
+          </g>)}
+        </g>
         <g transform={`translate(0 ${(height + 20) / 2 - 150})`}><line x1="35" x2="965" y1="150" y2="150" stroke="#8298a6" strokeDasharray="5 5"/>
         {drawing.polygons.map((polygon, i) => {
           const index = drawing.componentIndices[polygon.index], component = components[index];

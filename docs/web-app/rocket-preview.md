@@ -20,6 +20,12 @@ Completed browser results are held in the app's existing session lifetime and su
 
 The regression check found that a name-only component-dialog save retained the old archive hash. That path now refreshes its identity hash after renaming, matching the existing direct rename command. This necessary correction makes dirty state, concurrency preconditions and displayed result freshness reflect the accepted bytes.
 
+## Ruler alignment follow-up
+
+The screenshot-reported ruler error came from combining a fixed screen-space tick pattern with labels calculated from the centered rocket. Ticks and labels now share the rocket's physical coordinate transform, with zero at its origin and the ruler spanning the drawing bounds. Major intervals use regular 1/2/5 decade steps in the selected unit; minor ticks subdivide those same intervals. Labels are centered on their major ticks. Resizing, zooming and metre/inch changes retain alignment with component locations. No engine, archive, account or simulation behavior changes.
+
+The drawing regression checks the ruler against the independently known 0.52 m sample length and 0.0254 m/in conversion, including origin/end alignment and actual screen positions at four viewport sizes and two zoom levels. The production build (`npm run build:app --prefix web`) and the `drawing.mjs` and `layout.mjs` regressions passed in Chromium 149.0.7827.55, using the same native classpath/browser environment documented below and a process-owned Vite preview on port 4178. The drawing regression covers 16 ruler cases; the layout regression covers all seven viewport sizes. A read-only browser check of the existing user rocket also confirmed zero/nose alignment in inches and exact unchanged source archive bytes. The wide sample and user-rocket screenshots under `web/app/build/gp/ruler-*.png` were inspected. Node syntax and diff-whitespace checks passed. Initial test attempts used inconsistent Playwright/SVG bounding boxes and font glyph bounds; the passing regression measures actual SVG client coordinates and text anchors instead. No engine rebuild or full numerical/aggregate acceptance rerun was needed for this presentation-only correction.
+
 ## Verification and handoff
 
 Checks actually run on November 20, 2026:
