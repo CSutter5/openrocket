@@ -109,7 +109,7 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
       if (session.user && !session.user.mustChangePassword) {
         const preferences = await accountRequest<SavedPreferences>('/api/account/preferences');setPreferences(preferences);applyPreferences(preferences.preferences);
       }
-      if (parts.length === 2) setRocket((await accountRequest<{ rocket: PublicRocket }>(`/api/rockets/${parts[0]}/${parts[1]}`)).rocket);
+      if (parts.length === 2 && !session.user?.mustChangePassword) setRocket((await accountRequest<{ rocket: PublicRocket }>(`/api/rockets/${parts[0]}/${parts[1]}`)).rocket);
       setReady(true);
     })().catch(error => setError(failure(error)));
     return () => window.removeEventListener('rocket-metadata', changed);
@@ -127,7 +127,7 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
       {rocket && user && !user.mustChangePassword && (user.id === rocket.ownerId || user.isAdmin) && <><button onClick={() => setShareCurrent(true)}>Share</button><button onClick={() => setRenameCurrent(true)}>Rename rocket</button><button className="danger-button" onClick={() => setDeleteCurrent(true)}>Delete rocket</button></>}
       <div>{user ? <><span>Signed in as {user.username}</span><button onClick={() => void signOut()}>Sign out</button></> : <><button onClick={() => setForm('signin')}>Sign in</button><button onClick={() => setForm('signup')}>Create account</button></>}</div>
     </nav>
-    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <AccountSettings initial/> : preferencesPage ? preferences ? <PreferencesPage initial={preferences} returnTo={returnTo} saved={value => { setPreferences(value);applyPreferences(value.preferences); }}/> : <p role="alert">Sign in to change preferences.</p> : settingsPage ? user ? <AccountSettings/> : <p role="alert">Sign in to change your password.</p> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
+    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <AccountSettings initial returnTo={user.isAdmin ? '/admin/' : '/'}/> : preferencesPage ? preferences ? <PreferencesPage initial={preferences} returnTo={returnTo} saved={value => { setPreferences(value);applyPreferences(value.preferences); }}/> : <p role="alert">Sign in to change preferences.</p> : settingsPage ? user ? <AccountSettings/> : <p role="alert">Sign in to change your password.</p> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
     {renameCurrent && rocket && <RenameRocket rocket={rocket} close={() => setRenameCurrent(false)} renamed={setRocket}/>}
     {shareCurrent && rocket && <ShareRocket rocket={rocket} close={() => setShareCurrent(false)} changed={setRocket}/>}
     {deleteCurrent && rocket && <ConfirmAction title="Delete rocket" confirm="Delete rocket" close={() => setDeleteCurrent(false)} action={async () => { await accountRequest(`/api/rockets${rocketPath(rocket).slice(0, -1)}?rocketId=${rocket.id}`, undefined, 'DELETE');location.assign('/'); }}>

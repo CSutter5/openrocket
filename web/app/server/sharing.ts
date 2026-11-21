@@ -14,7 +14,7 @@ export async function rocketAccess(env: Env, id: string, actor: AccountUser | nu
     canDownload: canView && (canManage || (row?.role ? row.memberDownload === 1 : row?.visibility === 'public' && row.publicDownload === 1)) };
 }
 export async function socketAccess(env: Env, identity: SocketIdentity) {
-  const actor = identity.sessionId ? await env.DB.prepare('SELECT user.id, user.username, app_admin.user_id AS adminId, COALESCE(app_admin.must_change_password,0) AS mustChangePassword FROM session JOIN user ON user.id=session.user_id LEFT JOIN app_admin ON app_admin.user_id=user.id WHERE session.id=? AND session.user_id=? AND session.expires_at>? AND user.deleting=0')
+  const actor = identity.sessionId ? await env.DB.prepare('SELECT user.id, user.username, app_admin.user_id AS adminId, user.must_change_password AS mustChangePassword FROM session JOIN user ON user.id=session.user_id LEFT JOIN app_admin ON app_admin.user_id=user.id WHERE session.id=? AND session.user_id=? AND session.expires_at>? AND user.deleting=0')
     .bind(identity.sessionId, identity.userId, Date.now()).first<{ id: string; username: string; adminId: string | null; mustChangePassword: number }>() : null;
   return rocketAccess(env, identity.rocketId, actor ? { ...actor, isAdmin: !!actor.adminId, mustChangePassword: actor.mustChangePassword === 1 } : null);
 }
@@ -39,7 +39,7 @@ export async function manageSharing(request: CF.Request, env: Env, id: string) {
     statements.push(env.DB.prepare('UPDATE rocket SET visibility=?, public_download=? WHERE id=?').bind(data.visibility, Number(data.publicDownload), id));
   } else if (['member', 'remove', 'transfer'].includes(data.operation)) {
     if (typeof data.username !== 'string' || data.username.length > 32) return fail('Enter an existing username', 400);
-    const target = await env.DB.prepare('SELECT user.id, COALESCE(app_admin.must_change_password,0) AS mustChangePassword FROM user LEFT JOIN app_admin ON app_admin.user_id=user.id WHERE user.username=? AND user.deleting=0').bind(data.username.trim().toLowerCase()).first<{ id: string; mustChangePassword: number }>();
+    const target = await env.DB.prepare('SELECT user.id, user.must_change_password AS mustChangePassword FROM user WHERE user.username=? AND user.deleting=0').bind(data.username.trim().toLowerCase()).first<{ id: string; mustChangePassword: number }>();
     if (!target) return fail('User not found', 404);
     if (target.id === rocket.ownerId) return fail('The owner already has full access', 400);
     if (data.operation === 'member') {

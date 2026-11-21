@@ -6,6 +6,7 @@ export const user = sqliteTable('user', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(), updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
   username: text('username').notNull().unique(), displayUsername: text('display_username'),
   deleting: integer('deleting', { mode: 'boolean' }).notNull().default(false),
+  mustChangePassword: integer('must_change_password', { mode: 'boolean' }).notNull().default(false),
 });
 export const session = sqliteTable('session', {
   id: text('id').primaryKey(), expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(), token: text('token').notNull().unique(),

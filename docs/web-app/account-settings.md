@@ -1,5 +1,7 @@
 # Rocket names and account passwords
 
+The [administrator-issued temporary-password follow-up](account-password-reset.md) supersedes this record's password-write/session-rotation implementation and extends mandatory password changes to ordinary accounts. The rename behavior and historical evidence below remain applicable.
+
 The November 20, 2026 follow-up authorizes renaming owned rockets and changing account passwords. Owners and the protected administrator receive Rename rocket actions in the library and editor header. The native modal supports Cancel/Escape and enforces a nonempty display name of at most 100 characters. Renaming changes D1 directory metadata and the editor header, preserving the shared URL, immutable UUID, archive filename and internal component names. Existing document component-name editing remains independent. Names are rendered as text.
 
 The authenticated same-origin rename endpoint requires the immutable rocket ID and expected old name. A conditional D1 update refuses stale confirmations, concurrent renames, deleted rockets and unavailable owners. Other signed-in editors can still edit public document content but cannot rename another owner's directory entry. Renaming does not rewrite archive bytes or invalidate physics results. Other open pages refresh metadata on reload; this does not add a second collaboration protocol for directory metadata. No schema migration is needed.

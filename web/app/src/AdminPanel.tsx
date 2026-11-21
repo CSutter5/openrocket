@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { accountRequest, rocketPath, type PublicRocket } from './accounts';
 import { ConfirmAction } from './ConfirmAction';
-interface ManagedUser { id: string; username: string; email: string; createdAt: number; deleting: number; rocketCount: number; adminId: string | null }
+import { ResetUserPassword } from './ResetUserPassword';
+interface ManagedUser { id: string; username: string; email: string; createdAt: number; deleting: number; mustChangePassword: number; rocketCount: number; adminId: string | null }
 export function AdminPanel() {
   const [users, setUsers] = useState<ManagedUser[]>([]), [rockets, setRockets] = useState<(PublicRocket & { deletedAt?: number })[]>([]), [error, setError] = useState('');
   const [pending, setPending] = useState<{ kind: 'user' | 'rocket' | 'sessions'; user?: ManagedUser; rocket?: PublicRocket }>();
+  const [resetUser, setResetUser] = useState<ManagedUser>(), [notice, setNotice] = useState('');
   async function load() {
     const [accounts, documents] = await Promise.all([accountRequest<{ users: ManagedUser[] }>('/api/admin/users'), accountRequest<{ rockets: PublicRocket[] }>('/api/admin/rockets')]);
     setUsers(accounts.users);setRockets(documents.rockets);
@@ -17,8 +19,10 @@ export function AdminPanel() {
   }
   return <section className="rocket-library admin-panel"><h1>Admin panel</h1><p>Manage accounts and rockets.</p>
     {error && <p role="alert" className="error">{error}</p>}
+    {notice && <p role="status">{notice}</p>}
     <h2>Users</h2><div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Rockets</th><th>Actions</th></tr></thead><tbody>{users.map(user => <tr key={user.id} data-user-id={user.id}>
-      <td>{user.username}{user.adminId ? ' · Administrator' : user.deleting ? ' · Deletion pending' : ''}</td><td>{user.email}</td><td>{user.rocketCount}</td><td>{user.adminId ? <span>Protected account</span> : <div className="management-actions">
+      <td>{user.username}{user.adminId ? ' · Administrator' : user.deleting ? ' · Deletion pending' : user.mustChangePassword ? ' · Password change required' : ''}</td><td>{user.email}</td><td>{user.rocketCount}</td><td>{user.adminId ? <span>Protected account</span> : <div className="management-actions">
+        <button disabled={!!user.deleting} onClick={() => { setNotice('');setResetUser(user); }}>Reset password</button>
         <button onClick={() => setPending({ kind: 'sessions', user })}>Revoke sessions</button><button className="danger-button" onClick={() => setPending({ kind: 'user', user })}>Delete user</button>
       </div>}</td></tr>)}</tbody></table></div>
     <h2>Rockets</h2><div className="rocket-list">{rockets.map(rocket => <article key={rocket.id}>
@@ -29,5 +33,8 @@ export function AdminPanel() {
       <p>{pending.rocket ? `Are you sure you want to permanently delete “${pending.rocket.name}”?` : pending.kind === 'user' ? `Are you sure you want to permanently delete ${pending.user!.username} and all ${pending.user!.rocketCount} of their rockets?` : `Are you sure you want to sign ${pending.user!.username} out of all sessions?`}</p>
       <p>{pending.kind === 'sessions' ? 'They can sign in again with their password.' : 'This cannot be undone. Connected editors will lose access.'}</p>
     </ConfirmAction>}
+    {resetUser && <ResetUserPassword user={resetUser} close={() => setResetUser(undefined)} reset={async () => {
+      await load();setNotice(`Temporary password set for ${resetUser.username}. Their sessions have been signed out; they must change it after signing in.`);
+    }}/>}
   </section>;
 }

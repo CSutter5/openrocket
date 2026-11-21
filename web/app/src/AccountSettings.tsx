@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { accountRequest } from './accounts';
-export function AccountSettings({ initial = false }: { initial?: boolean }) {
+export function AccountSettings({ initial = false, returnTo = '/' }: { initial?: boolean; returnTo?: string }) {
   const [current, setCurrent] = useState(''), [password, setPassword] = useState(''), [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [saved, setSaved] = useState(false);
   async function change(event: React.FormEvent) {
@@ -9,7 +9,7 @@ export function AccountSettings({ initial = false }: { initial?: boolean }) {
     setBusy(true);
     try {
       await accountRequest('/api/account/password', { currentPassword: current, newPassword: password });
-      if (initial) { location.assign('/admin/');return; }
+      if (initial) { location.assign(returnTo);return; }
       setCurrent('');setPassword('');setConfirm('');setSaved(true);
     } catch (error) { setError(error instanceof Error ? error.message : String(error)); }
     setBusy(false);
