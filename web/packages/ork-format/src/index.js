@@ -2,9 +2,9 @@ import { Gunzip, Inflate, Zip, ZipDeflate } from 'fflate';
 import { SaxesParser } from 'saxes';
 
 export const CODEC_VERSION = 1;
-// G1 corpus maximum: 0.90 MB compressed, 2.77 MB XML, 11 entries.
+// A single entry may use the archive budget; saved flight XML can exceed 8 MiB.
 export const LIMITS = Object.freeze({ upload: 4 * 1024 * 1024, expanded: 16 * 1024 * 1024,
-  entry: 8 * 1024 * 1024, entries: 64, depth: 64, elements: 100000, name: 1024 });
+  entry: 16 * 1024 * 1024, entries: 64, depth: 64, elements: 100000, name: 1024 });
 const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 const encode = new TextEncoder();
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,8 +62,9 @@ function zipEntries(bytes) {
     check(!paths.has(path) && !paths.has(path.toLowerCase()), 'DUPLICATE_PATH', path);
     paths.add(path); paths.add(path.toLowerCase());
     expanded += size;
-    check(size <= LIMITS.entry && expanded <= LIMITS.expanded && compressed !== 0xffffffff,
-      'EXPANSION_LIMIT', 'Expanded archive limit');
+    check(size <= LIMITS.entry, 'EXPANSION_LIMIT', `Archive entry "${path}" expands to ${size} bytes; the per-entry limit is ${LIMITS.entry / 1048576} MiB (${LIMITS.entry} bytes)`);
+    check(expanded <= LIMITS.expanded, 'EXPANSION_LIMIT', `Archive expands to at least ${expanded} bytes; the total expanded limit per upload is ${LIMITS.expanded / 1048576} MiB (${LIMITS.expanded} bytes)`);
+    check(compressed !== 0xffffffff, 'EXPANSION_LIMIT', 'ZIP64 compressed sizes are not supported');
     check(u32(local) === 0x04034b50 && u16(local + 6) === flags && u16(local + 8) === method,
       'INVALID_ZIP', 'Local header mismatch');
     const localLen = u16(local + 26), localExtra = u16(local + 28);

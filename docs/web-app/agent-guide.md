@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The [large saved-flight archive follow-up](archive-size-limits.md) (ADR-37) lets one entry use the existing 16 MiB expanded archive budget, fixing the reported third-upload refusal for a 10.14 MiB XML file. Read its per-upload limits, preservation tests and actual-file evidence before changing archive bounds. Rockets remain unlimited.
+
 The plot-screen follow-up adds [desktop plot configuration controls and recorded flight channels](plot-controls.md). Read its additive channel contract, native metadata, session-only appearance defaults and archive-preservation boundaries before changing plots. This is a local plotting slice, not complete desktop chart or persistent preference parity.
 
 The rail-button import follow-up (ADR-36) consumes complete serialized physical state while preserving personal preset links. Read [its projection and verification boundaries](multistage.md#rail-button-preset-import-follow-up) before changing preset handling. It fixes the preview and flight refusal reported with `example 2stage.ork`; incomplete state still refuses.

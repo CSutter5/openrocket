@@ -115,6 +115,36 @@ test('lying ZIP expanded size rejects during streaming inflation', async () => {
   await assert.rejects(importArchive(bomb), { code: 'EXPANSION_LIMIT' });
 });
 
+test('stored flight XML larger than 8 MiB imports and survives edits in ZIP and GZIP', async () => {
+  const point = `<datapoint>${Array.from({ length: 40 }, (_, i) => `${i}.123456789012345`).join(',')}</datapoint>`;
+  const data = '<flightdata><databranch>' + point.repeat(17000) + '</databranch></flightdata>';
+  const input = xml(minimal.replace('</simulation>', data + '</simulation>'));
+  assert.ok(input.length > 8 * 1024 * 1024 && input.length < 16 * 1024 * 1024);
+  for (const bytes of [zip({ 'rocket.ork': input }), gzipSync(input)]) {
+    const archive = await importArchive(bytes);
+    assert.deepEqual((await exportArchive(archive)).bytes, bytes);
+    const changed = await renameComponent(archive, id, 'A', 'B');
+    const reopened = await importArchive((await exportArchive(changed)).bytes);
+    assert.equal(reopened.xml, new TextDecoder().decode(input).replace('<name>A</name>', '<name>B</name>'));
+    assert.equal(reopened.parsed.simulations.length, 2);
+  }
+});
+
+test('archive entry and total expansion limits report sizes and remain enforced', async () => {
+  await assert.rejects(importArchive(zip({ 'rocket.ork': new Uint8Array(LIMITS.entry + 1) })), {
+    code: 'EXPANSION_LIMIT',
+    message: 'Archive entry "rocket.ork" expands to 16777217 bytes; the per-entry limit is 16 MiB (16777216 bytes)',
+  });
+  const input = xml(minimal), half = 8 * 1024 * 1024;
+  const boundary = zip({ 'rocket.ork': input, 'first.bin': new Uint8Array(half), 'second.bin': new Uint8Array(half - input.length) });
+  const archive = await importArchive(boundary);
+  assert.equal(archive.entries.reduce((size, entry) => size + entry.bytes.length, 0), 16 * 1024 * 1024);
+  await assert.rejects(importArchive(zip({ 'rocket.ork': input, 'first.bin': new Uint8Array(half), 'second.bin': new Uint8Array(half) })), {
+    code: 'EXPANSION_LIMIT',
+    message: `Archive expands to at least ${2 * half + input.length} bytes; the total expanded limit per upload is 16 MiB (16777216 bytes)`,
+  });
+});
+
 test('malformed identity sidecars require explicit reconciliation', async () => {
   const imported = await importArchive(xml(minimal));
   for (const simulations of [[{id: undefined}, {id: 'x'}], [{id: 'x'}, {id: 'y'}], [null,null]]) {

@@ -21,7 +21,8 @@
     "test:account-settings": "npm run check:cloudflare && node test/account-settings.mjs",
     "test:sharing": "npm run check:cloudflare && node test/sharing-migration.mjs && node test/sharing.mjs",
     "test:preferences": "npm run check:cloudflare && node test/preferences.mjs",
-    "test:password-reset": "npm run check:cloudflare && node test/password-reset-migration.mjs && node test/password-reset.mjs"
+    "test:password-reset": "npm run check:cloudflare && node test/password-reset-migration.mjs && node test/password-reset.mjs",
+    "test:archive-upload": "npm run check:cloudflare && node test/archive-upload.mjs"
   },
   "dependencies": {
     "@openrocket/contracts": "0.0.0",
