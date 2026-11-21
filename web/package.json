@@ -19,7 +19,8 @@
     "test:accounts": "npm run test:accounts --workspace @openrocket/local-editor",
     "test:management": "npm run test:management --workspace @openrocket/local-editor",
     "test:account-settings": "npm run test:account-settings --workspace @openrocket/local-editor",
-    "test:sharing": "npm run test:sharing --workspace @openrocket/local-editor"
+    "test:sharing": "npm run test:sharing --workspace @openrocket/local-editor",
+    "test:preferences": "npm run test:preferences --workspace @openrocket/local-editor"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

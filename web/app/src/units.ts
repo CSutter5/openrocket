@@ -8,6 +8,8 @@ export const lengthUnits = [
   { id: 'ft', label: 'Feet', metres: .3048 },
   { id: 'yd', label: 'Yards', metres: .9144 },
   { id: 'mi', label: 'Miles', metres: 1609.344 },
+  { id: 'nmi', label: 'Nautical miles', metres: 1852 },
+  { id: 'in/64', label: 'Fractional inches', metres: INCH_METRES },
 ] as const;
 export type LengthUnit = typeof lengthUnits[number]['id'];
 export function displayLength(metres: number, unit: LengthUnit): number {

@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { request } from '../bridge';
 import type { DocumentView } from '../model';
 import { displayLength, lengthUnits, type LengthUnit } from '../units';
 import { FlightJob, type JobState } from './job';
 import type { SessionResult } from './provenance';
 import { FlightPlot } from './FlightPlot';
+import { PreferencesContext } from '../PreferencesContext';
+import { preferenceUnits } from '../preferences';
 
 export function FlightPanel({ document, busy, unit, setUnit }: { document: DocumentView; busy: boolean; unit: LengthUnit; setUnit: (unit: LengthUnit) => void }) {
+  const preferences = useContext(PreferencesContext);
+  const velocityUnit = preferences ? preferenceUnits.VELOCITY.options.find(option => option.id === preferences.units.VELOCITY)! : null;
   const [state, setState] = useState<JobState>({ status: 'idle' });
   const [selected, setSelected] = useState('');
   const [results, setResults] = useState<Record<string, SessionResult>>({});
@@ -45,7 +49,7 @@ export function FlightPanel({ document, busy, unit, setUnit }: { document: Docum
       <button disabled={!running} onClick={() => job.current!.cancel()}>Cancel flight</button>
       <label>Simulation units<select aria-label="Simulation units" value={unit} onChange={event => setUnit(event.target.value as LengthUnit)}>{lengthUnits.map(u => <option key={u.id} value={u.id}>{u.label} ({u.id})</option>)}</select></label>
     </div>
-    <div className="simulation-table table-scroll"><table><thead><tr><th>Name</th><th>Configuration</th><th>Status</th><th>Apogee ({unit})</th><th>Max. velocity ({unit}/s)</th><th>Time to apogee (s)</th></tr></thead><tbody>
+    <div className="simulation-table table-scroll"><table><thead><tr><th>Name</th><th>Configuration</th><th>Status</th><th>Apogee ({unit})</th><th>Max. velocity ({velocityUnit?.id ?? `${unit}/s`})</th><th>Time to apogee (s)</th></tr></thead><tbody>
       {document.simulations.map(row => {
         const completed = results[row.id], summary = completed?.flight.summary ?? row.summary;
         const label = document.flightConfigurations.find(c => c.id === row.configurationId)?.label ?? row.configurationId ?? 'Missing configuration';
@@ -53,7 +57,7 @@ export function FlightPanel({ document, busy, unit, setUnit }: { document: Docum
         const status = running && active.current === row.id ? 'Running…' : completed ? current ? 'Completed' : 'Outdated' : row.status === 'not_simulated' ? 'Not run' : row.status === 'outdated' ? 'Outdated' : 'Stored result';
         return <tr key={row.id} aria-selected={selected === row.id} className={selected === row.id ? 'selected-row' : ''} onClick={() => setSelected(row.id)} onDoubleClick={() => { setSelected(row.id); setGraph(row.id); }}>
           <td><button aria-pressed={selected === row.id} onClick={() => setSelected(row.id)}>{row.name}</button></td><td>{label}</td><td>{status}</td>
-          <td>{summary?.[0] != null ? displayLength(summary[0], unit).toFixed(unit === 'km' || unit === 'mi' ? 6 : 2) : '—'}</td><td>{summary?.[1] != null ? displayLength(summary[1], unit).toFixed(unit === 'km' || unit === 'mi' ? 6 : 2) : '—'}</td><td>{summary?.[2] != null ? summary[2].toFixed(2) : '—'}</td>
+          <td>{summary?.[0] != null ? displayLength(summary[0], unit).toFixed(unit === 'km' || unit === 'mi' || unit === 'nmi' ? 6 : 2) : '—'}</td><td>{summary?.[1] != null ? (velocityUnit ? summary[1] / velocityUnit.factor : displayLength(summary[1], unit)).toFixed(velocityUnit || !['km', 'mi', 'nmi'].includes(unit) ? 2 : 6) : '—'}</td><td>{summary?.[2] != null ? summary[2].toFixed(2) : '—'}</td>
         </tr>;
       })}
     </tbody></table>{!document.simulations.length && <p className="empty-state">No simulations. Create a configuration in Motors &amp; Configuration to add one.</p>}</div>

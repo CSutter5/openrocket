@@ -1,4 +1,5 @@
 import { lengthUnits, type LengthUnit } from './units';
+import { preferenceUnits, type UnitPreference } from './preferences';
 
 export type Dimension = 'length' | 'angle' | 'mass' | 'bulkDensity' | 'surfaceDensity' | 'lineDensity' | 'time' | 'pressure';
 export interface QuantityUnit { id: string; label: string; factor: number }
@@ -14,6 +15,15 @@ export const quantityUnits: Record<Dimension, QuantityUnit[]> = {
   time: [{ id: 's', label: 's', factor: 1 }, { id: 'ms', label: 'ms', factor: .001 }, { id: 'min', label: 'min', factor: 60 }],
   pressure: [{ id: 'Pa', label: 'Pa', factor: 1 }, { id: 'kPa', label: 'kPa', factor: 1000 }, { id: 'MPa', label: 'MPa', factor: 1e6 }, { id: 'GPa', label: 'GPa', factor: 1e9 }, { id: 'psi', label: 'psi', factor: 6894.757293168 }],
 };
+export const quantityPreferences: Partial<Record<Dimension, UnitPreference>> = { angle: 'ANGLE', mass: 'MASS', bulkDensity: 'DENSITY_BULK', surfaceDensity: 'DENSITY_SURFACE', lineDensity: 'DENSITY_LINE' };
+export const quantityUnitId = (id: string) => id === '°' ? 'deg' : id.replaceAll('²', '2').replaceAll('³', '3');
+for (const [dimension, group] of Object.entries(quantityPreferences)) {
+  const options = quantityUnits[dimension as Dimension];
+  for (const unit of preferenceUnits[group!].options) {
+    const id = quantityUnitId(unit.id);
+    if (!options.some(option => option.id === id)) options.push({ id, label: unit.id, factor: unit.factor * (dimension === 'angle' ? 180 / Math.PI : 1) });
+  }
+}
 export function defaultQuantityUnit(dimension: Dimension, length: LengthUnit) {
   return dimension === 'length' ? length : dimension === 'angle' ? 'deg' : dimension === 'mass' ? 'g' : quantityUnits[dimension][0].id;
 }

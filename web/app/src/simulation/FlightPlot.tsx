@@ -4,7 +4,7 @@ import { WindowPanel } from '../WorkspacePanels';
 export function FlightPlot({ plots, unit, setUnit, name, source, close }: { plots: StoredPlot[]; unit: LengthUnit; setUnit: (unit: LengthUnit) => void; name: string; source: string; close: () => void }) {
   const rows = plots.flatMap(p => p.points);
   const time = rows.reduce((max, p) => Math.max(max, p[0]), 1), min = rows.reduce((min, p) => Math.min(min, p[1]), 0), max = rows.reduce((max, p) => Math.max(max, p[1]), 1), range = max - min;
-  const colors = ['#72b9ee', '#e9b85f', '#b9d891', '#d6a5da'];
+  const colors = ['var(--plot-series-1)', 'var(--plot-series-2)', 'var(--plot-series-3)', 'var(--plot-series-4)'];
   return <WindowPanel title={`Flight graph · ${name}`} close={close} className="flight-graph">
     <h2>{name}</h2><label>Graph altitude units<select aria-label="Graph altitude units" value={unit} onChange={event => setUnit(event.target.value as LengthUnit)}>{lengthUnits.map(u => <option key={u.id} value={u.id}>{u.label} ({u.id})</option>)}</select></label><p className="muted">{source}</p>{rows.length ? <svg viewBox="0 0 800 360" role="img" aria-label={`Altitude versus time, ${unit}, seconds`} className="flight-plot">
       <path d="M65 35V295H765" fill="none" stroke="currentColor"/>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { LIMITS } from '@openrocket/ork-format';
 import type { Action, ComponentView } from './model';
 import { ImportedProperties } from './ImportedProperties';
@@ -7,11 +7,14 @@ import { Schematic } from './Schematic';
 import { displayLength, lengthInput, lengthLabel, type LengthUnit } from './units';
 import { useLengthInput } from './useLengthInput';
 import { useEditorUnit } from './QuantityInput';
+import { PreferencesContext } from './PreferencesContext';
+import { preferredUnit } from './preferences';
 
 export function Properties({ component, expectedHash, editable, busy, edit, unit }: {
   component: ComponentView; expectedHash: string; editable: boolean; busy: boolean; edit: (action: Action) => void; unit: LengthUnit;
 }) {
   const [name, setName] = useState(component.name ?? '');
+  const preferences = useContext(PreferencesContext), massUnit = preferredUnit(preferences, 'MASS', 'kg'), densityUnit = preferredUnit(preferences, 'DENSITY_BULK', 'kg/m³');
   const selectedUnit = useEditorUnit('quick-radius', 'length'), radiusUnit = selectedUnit.unit as LengthUnit;
   const radius = useLengthInput(component.tube?.state.radius ?? NaN, radiusUnit);
   const [numberError, setNumberError] = useState(false);
@@ -44,12 +47,12 @@ export function Properties({ component, expectedHash, editable, busy, edit, unit
       <p className="muted">Per component; excludes mass/CG overrides and motors. These are not whole-rocket values.</p>
       <dl><dt>Outer radius ({unit})</dt><dd data-testid="radius">{displayLength(tube.state.radius, unit)}</dd>
         <dt>Wall thickness ({unit})</dt><dd data-testid="thickness">{displayLength(tube.state.thickness, unit)}</dd>
-        <dt>Intrinsic mass (kg)</dt><dd data-testid="mass">{tube.state.mass}</dd>
+        <dt>Intrinsic mass ({massUnit.id})</dt><dd data-testid="mass">{tube.state.mass / massUnit.factor}</dd>
         <dt>Local CG ({unit})</dt><dd data-testid="cg">{displayLength(tube.state.cg, unit)}</dd>
-        <dt>Length ({unit})</dt><dd data-testid="length">{displayLength(tube.input.length, unit)}</dd><dt>Density (kg/m³)</dt><dd data-testid="density">{tube.input.density}</dd>
+        <dt>Length ({unit})</dt><dd data-testid="length">{displayLength(tube.input.length, unit)}</dd><dt>Density ({densityUnit.id})</dt><dd data-testid="density">{tube.input.density / densityUnit.factor}</dd>
         <dt>Preset attached</dt><dd>{tube.state.preset ? 'Yes' : 'No'}</dd>
       </dl>
-      {'ring' in tube.state && <p>Automatic ring: outer radius {lengthLabel(tube.state.ring.outerRadius, unit)}; inner radius {lengthLabel(tube.state.ring.innerRadius, unit)}; intrinsic mass {tube.state.ring.mass} kg; local CG {lengthLabel(tube.state.ring.cg, unit)}.</p>}
+      {'ring' in tube.state && <p>Automatic ring: outer radius {lengthLabel(tube.state.ring.outerRadius, unit)}; inner radius {lengthLabel(tube.state.ring.innerRadius, unit)}; intrinsic mass {tube.state.ring.mass / massUnit.factor} {massUnit.id}; local CG {lengthLabel(tube.state.ring.cg, unit)}.</p>}
     </section>}
     <details className="preview" hidden={!tube}><summary>Selected tube measurements and local schematic</summary><Schematic unit={unit} component={component}/></details>
     {tube && imported}

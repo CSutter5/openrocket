@@ -1,11 +1,14 @@
 import { createContext, useContext, useState } from 'react';
-import { convertQuantityText, defaultQuantityUnit, quantityUnits, type Dimension } from './quantities';
+import { convertQuantityText, defaultQuantityUnit, quantityUnits, quantityPreferences, quantityUnitId, type Dimension } from './quantities';
 import type { LengthUnit } from './units';
+import { PreferencesContext } from './PreferencesContext';
 
 export const EditorUnits = createContext<{ length: LengthUnit; units: Record<string, string>; choose: (key: string, unit: string) => void }>({ length: 'm', units: {}, choose: () => {} });
 export function useEditorUnit(key: string, dimension: Dimension) {
   const context = useContext(EditorUnits), options = quantityUnits[dimension];
-  const preference = context.units[key], unit = options.some(u => u.id === preference) ? preference : defaultQuantityUnit(dimension, context.length);
+  const preferences = useContext(PreferencesContext), group = quantityPreferences[dimension];
+  const savedDefault = preferences && group ? quantityUnitId(preferences.units[group]) : undefined;
+  const preference = context.units[key], unit = options.some(u => u.id === preference) ? preference : savedDefault && options.some(u => u.id === savedDefault) ? savedDefault : defaultQuantityUnit(dimension, context.length);
   return { unit, options, factor: options.find(u => u.id === unit)!.factor, choose: (unit: string) => context.choose(key, unit) };
 }
 export function QuantityInput({ value, change, dimension, label, unitKey, disabled, numeric = false }: {

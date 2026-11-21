@@ -6,6 +6,9 @@ import { AdminPanel } from './AdminPanel';
 import { AccountSettings } from './AccountSettings';
 import { RenameRocket } from './RenameRocket';
 import { ShareRocket } from './ShareRocket';
+import { PreferencesPage } from './PreferencesPage';
+import { PreferencesContext } from './PreferencesContext';
+import { applyPreferences, type SavedPreferences } from './preferences';
 const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 function AccountForm({ signup, close }: { signup: boolean; close: () => void }) {
   const [username, setUsername] = useState(''), [email, setEmail] = useState(''), [password, setPassword] = useState('');
@@ -91,14 +94,21 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
   const [rocket, setRocket] = useState<PublicRocket>(), [deleteCurrent, setDeleteCurrent] = useState(false);
   const [renameCurrent, setRenameCurrent] = useState(false);
   const [shareCurrent, setShareCurrent] = useState(false);
+  const [preferences, setPreferences] = useState<SavedPreferences>();
   const parts = location.pathname.split('/').filter(Boolean), owner = parts[0] || new URLSearchParams(location.search).get('owner') || undefined;
   const adminPage = location.pathname === '/admin/';
   const settingsPage = location.pathname === '/' && new URLSearchParams(location.search).get('account') === 'settings';
+  const preferencesPage = location.pathname === '/' && new URLSearchParams(location.search).get('account') === 'preferences';
+  const requestedReturn = new URLSearchParams(location.search).get('returnTo') ?? '/';
+  const returnTo = /^\/(?:[a-z][a-z0-9_-]{2,31}\/(?:[a-z0-9_-]{1,80}\/)?|)$/.test(requestedReturn) ? requestedReturn : '/';
   useEffect(() => {
     const changed = (event: Event) => setRocket((event as CustomEvent<PublicRocket>).detail);
     window.addEventListener('rocket-metadata', changed);
     void (async () => {
       const session = await accountRequest<{ user: AccountUser | null }>('/api/session');setUser(session.user);
+      if (session.user && !session.user.mustChangePassword) {
+        const preferences = await accountRequest<SavedPreferences>('/api/account/preferences');setPreferences(preferences);applyPreferences(preferences.preferences);
+      }
       if (parts.length === 2) setRocket((await accountRequest<{ rocket: PublicRocket }>(`/api/rockets/${parts[0]}/${parts[1]}`)).rocket);
       setReady(true);
     })().catch(error => setError(failure(error)));
@@ -108,20 +118,21 @@ export function AccountShell({ renderEditor }: { renderEditor: (rocket: PublicRo
     try { await accountRequest('/api/auth/sign-out', {});location.reload(); }
     catch (error) { setError(failure(error)); }
   }
-  return <>
+  return <PreferencesContext.Provider value={preferences?.preferences ?? null}>
     <nav className="account-bar" aria-label="Account">
       <a href="/">All rockets</a>{user && !user.mustChangePassword && <a href={user.username === 'admin' ? '/?owner=admin' : `/${user.username}/`}>My rockets</a>}{user?.isAdmin && !user.mustChangePassword && <a href="/admin/">Admin panel</a>}
       {user && !user.mustChangePassword && <a href="/?account=settings">Account settings</a>}
+      {user && !user.mustChangePassword && <a href={`/?account=preferences&returnTo=${encodeURIComponent(location.pathname)}`}>Preferences</a>}
       {rocket && <span className="rocket-owner"><strong>{rocket.name}</strong> · {rocketPath(rocket)}</span>}
       {rocket && user && !user.mustChangePassword && (user.id === rocket.ownerId || user.isAdmin) && <><button onClick={() => setShareCurrent(true)}>Share</button><button onClick={() => setRenameCurrent(true)}>Rename rocket</button><button className="danger-button" onClick={() => setDeleteCurrent(true)}>Delete rocket</button></>}
       <div>{user ? <><span>Signed in as {user.username}</span><button onClick={() => void signOut()}>Sign out</button></> : <><button onClick={() => setForm('signin')}>Sign in</button><button onClick={() => setForm('signup')}>Create account</button></>}</div>
     </nav>
-    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <AccountSettings initial/> : settingsPage ? user ? <AccountSettings/> : <p role="alert">Sign in to change your password.</p> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
+    {error ? <section className="rocket-library"><p role="alert" className="error">{error}</p><a href="/">Back to public rockets</a></section> : !ready ? <p role="status">Loading rockets…</p> : user?.mustChangePassword ? <AccountSettings initial/> : preferencesPage ? preferences ? <PreferencesPage initial={preferences} returnTo={returnTo} saved={value => { setPreferences(value);applyPreferences(value.preferences); }}/> : <p role="alert">Sign in to change preferences.</p> : settingsPage ? user ? <AccountSettings/> : <p role="alert">Sign in to change your password.</p> : adminPage ? user?.isAdmin ? <AdminPanel/> : <p role="alert">Administrator access required</p> : rocket ? renderEditor(rocket) : <RocketLibrary user={user} owner={owner}/>}
     {renameCurrent && rocket && <RenameRocket rocket={rocket} close={() => setRenameCurrent(false)} renamed={setRocket}/>}
     {shareCurrent && rocket && <ShareRocket rocket={rocket} close={() => setShareCurrent(false)} changed={setRocket}/>}
     {deleteCurrent && rocket && <ConfirmAction title="Delete rocket" confirm="Delete rocket" close={() => setDeleteCurrent(false)} action={async () => { await accountRequest(`/api/rockets${rocketPath(rocket).slice(0, -1)}?rocketId=${rocket.id}`, undefined, 'DELETE');location.assign('/'); }}>
       <p>Are you sure you want to permanently delete “{rocket.name}”?</p><p>This cannot be undone. Connected editors will lose access.</p>
     </ConfirmAction>}
     {form && <AccountForm signup={form === 'signup'} close={() => setForm(undefined)}/>}
-  </>;
+  </PreferencesContext.Provider>;
 }

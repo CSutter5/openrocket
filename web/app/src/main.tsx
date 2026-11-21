@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LIMITS } from '@openrocket/ork-format';
 import { request, collaborationAvailable, connectShared, subscribeCollaboration, type CollaborationStatus } from './bridge';
@@ -14,14 +14,18 @@ import { additionTarget } from './components';
 import { AccountShell } from './AccountShell';
 import type { PublicRocket } from './accounts';
 import { FlightPanel } from './simulation/FlightPanel';
+import { PreferencesContext } from './PreferencesContext';
 import './style.css';
+import './themes.css';
 
 type PendingComponent = Omit<Extract<Action, { type: 'addComponent' }>, 'position'>;
 function message(error: unknown) { return error instanceof Error ? error.message : String(error); }
 function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
+  const preferences = useContext(PreferencesContext);
   const [document, setDocument] = useState<DocumentView>();
   const [selected, setSelected] = useState(0);
-  const [unit, setUnit] = useState<LengthUnit>('m');
+  const [unit, setUnit] = useState<LengthUnit>((preferences?.units.LENGTH ?? 'm') as LengthUnit);
+  const [simulationUnit, setSimulationUnit] = useState<LengthUnit>((preferences?.units.DISTANCE ?? 'm') as LengthUnit);
   const [tab, setTab] = useState('design');
   const [editor, setEditorOpen] = useState(false);
   const [editorContext, setEditorContext] = useState<{ view: DocumentView; id: string }>();
@@ -208,7 +212,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
             <MotorConfigurations key={document.identitySidecarHash} document={document} busy={blocked || readOnly} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
           </section>
           <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
-            <FlightPanel document={document} busy={blocked} unit={unit} setUnit={setUnit}/>
+            <FlightPanel document={document} busy={blocked} unit={preferences ? simulationUnit : unit} setUnit={preferences ? setSimulationUnit : setUnit}/>
           </div>
         </div>
         <div className="splitter" aria-hidden="true">•••</div>

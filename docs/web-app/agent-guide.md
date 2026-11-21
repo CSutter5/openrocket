@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The latest request adds [account UI and unit preferences](preferences.md) (ADR-33). The user chose UI and Units first. Read the personal D1/version boundary, desktop-exported unit presets, default application and unavailable-view labels before changing presentation or account loading. Preferences never modify shared archives or runtime engine globals. No deployment or remote migration is included.
+
 The latest request adds [rocket sharing permissions](sharing.md) (ADR-32): Restricted defaults, Public viewing, explicit Viewer/Editor grants and download flags, live revocation/downgrades, and confirmed ownership transfer with stable share URLs. Read its migration, former-owner Editor access, socket/broadcast checks and export limitations before changing account or collaboration behavior. Earlier blanket signed-in editing is superseded. No deployment or remote migration is included.
 
 This file is the starting handoff for OpenRocket web application work. It collects stable project context and working rules; detailed decisions and task acceptance criteria live in the linked documents. Follow the user's latest instructions and repository contribution guidance when they change this context.

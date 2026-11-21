@@ -8,6 +8,7 @@ import { CFResponse, json, fail, body, readBody } from './http';
 import { accountSession, changePassword } from './access';
 import { adminApi, deleteRocket } from './management';
 import { rocketQuery, rocketAccess } from './sharing';
+import { preferencesApi } from './preferences';
 const authPaths = new Set(['/sign-up/email', '/sign-in/username', '/get-session', '/sign-out']);
 const slugPattern = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
 async function api(request: CF.Request, env: Env): Promise<CF.Response> {
@@ -35,6 +36,7 @@ async function api(request: CF.Request, env: Env): Promise<CF.Response> {
     return response as unknown as CF.Response;
   }
   if (path === '/api/account/password' && request.method === 'POST') return changePassword(request, env);
+  if (path === '/api/account/preferences') return preferencesApi(request, env);
   if (path.startsWith('/api/admin/')) return adminApi(request, env);
   if (path === '/api/session') {
     const session = await accountSession(env, request.headers);

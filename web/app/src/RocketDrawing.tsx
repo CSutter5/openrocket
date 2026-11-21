@@ -32,8 +32,8 @@ export function RocketDrawing({ drawing, stability, components, selected, select
         {drawing.polygons.map((polygon, i) => {
           const index = drawing.componentIndices[polygon.index], component = components[index];
           return <polygon key={i} data-testid={`rocket-part-${component.id}`} points={polygon.points.map(([a,b]) => `${x(a)},${y(b)}`).join(' ')}
-            fill={selected === index ? '#344a64' : '#292c32'}
-            stroke={selected === index ? '#90bfff' : '#b7c8e6'} strokeWidth={selected === index ? 3 : 1.5}
+            fill={selected === index ? 'var(--drawing-selected)' : 'var(--drawing-fill)'}
+            stroke={selected === index ? 'var(--drawing-selected-stroke)' : 'var(--drawing-stroke)'} strokeWidth={selected === index ? 3 : 1.5}
             tabIndex={busy ? -1 : 0} role="button" aria-label={`Select ${component.name} in drawing`} aria-pressed={selected === index}
             onClick={() => !busy && select(index)} onDoubleClick={() => !busy && edit()} onKeyDown={event => { if (!busy && ['Enter',' '].includes(event.key)) { event.preventDefault(); select(index); } }}>
             <title>{component.name} · {component.type}</title>
