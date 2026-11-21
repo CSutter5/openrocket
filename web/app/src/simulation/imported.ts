@@ -75,7 +75,7 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     ellipticalfinset: `${finFields} rootchord height`,
     tubefinset: `${common} finish material instancecount fincount radiusoffset angleoffset rotation radius length thickness`,
     launchlug: `${common} finish material instancecount instanceseparation angleoffset radialdirection radius length thickness`,
-    railbutton: `${common} finish material instancecount instanceseparation angleoffset outerdiameter innerdiameter height baseheight flangeheight screwheight`,
+    railbutton: `${common} preset finish material instancecount instanceseparation angleoffset outerdiameter innerdiameter height baseheight flangeheight screwheight`,
     streamer: `${common} ${mass} cd material deployevent deployaltitude deploydelay deploymentconfiguration striplength stripwidth`,
     centeringring: `${common} material length radialposition radialdirection outerradius innerradius instancecount instanceseparation`,
     tubecoupler: `${common} material length radialposition radialdirection outerradius thickness`,
@@ -106,6 +106,16 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       }
       if(seen.has(c.name)&&!repeated)throw new Error(`Ambiguous ${n.name}/${c.name}`);seen.add(c.name);
       if(c.name==='appearance')continue; // Visual metadata never affects rigid-body flight.
+      if(c.name==='preset'&&n.name==='railbutton') {
+        attributes(c,['type','manufacturer','partno','digest']);scalar(c);
+        if(c.text.trim()||attr(c,'type')!=='RAIL_BUTTON'||!attr(c,'manufacturer')?.trim()||!attr(c,'partno')?.trim()||!/^[a-f0-9]{32}$/i.test(attr(c,'digest')??''))throw new Error('Invalid rail-button preset reference');
+        // The archive supplies the complete physical state; retain the library link only in the archive.
+        for(const name of 'finish material outerdiameter innerdiameter height baseheight flangeheight screwheight overridemass overridesubcomponentsmass'.split(' ')) {
+          if(one(n,name).start<c.end)throw new Error('Rail-button physical fields must follow the preset reference');
+        }
+        if(n.children.some(field=>['overridecd','overridesubcomponentscd'].includes(field.name)&&field.start<c.end))throw new Error('Rail-button drag overrides must follow the preset reference');
+        continue;
+      }
       if(c.name==='motorconfiguration') {
         attributes(c,['configid','default']);
         if(c.children.some(n=>!['name','stage'].includes(n.name))||c.children.filter(n=>n.name==='name').length>1)throw new Error('Unknown or ambiguous configuration field');

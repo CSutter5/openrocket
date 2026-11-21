@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The rail-button import follow-up (ADR-36) consumes complete serialized physical state while preserving personal preset links. Read [its projection and verification boundaries](multistage.md#rail-button-preset-import-follow-up) before changing preset handling. It fixes the preview and flight refusal reported with `example 2stage.ork`; incomplete state still refuses.
+
 The latest follow-up enables [axial multistage creation, configuration and imported browser flights](multistage.md) (ADR-35). Read its stage-flag/inheritance, native geometry, TeaVM adaptations and complete-branch validation boundaries before changing staging. Pods, parallel boosters and clusters remain deferred. No deployment is included.
 
 The latest follow-up adds [desktop-style rocket preview statistics and internal outlines](rocket-preview.md) (ADR-34). Read its native mass/CG/CP and geometry boundaries, selected-configuration result matching and stale-result rules before changing the preview. Personal acceleration and stability unit defaults now have active displays.

@@ -29,6 +29,7 @@ export async function describe(current: ExpandedArchive, name: string, lastExpor
       return !['rocket', 'stage'].includes(n.name) && stages.some(s => s.id === stage?.id && s.active) && !exteriorIds.includes(n.id?.toLowerCase() ?? '');
     }).map(n => `${n.label ?? n.name}: ${n.name} (interior or unsupported shape)`),
   } : rocketDrawing(current);
+  if (stages.length > 1 && drawing.error && centers.reason) drawing.error = `Drawing unavailable: ${centers.reason}`;
   drawing.internals = internals;
   for (const shape of internals) {
     drawing.minX = Math.min(drawing.minX, shape.x);
