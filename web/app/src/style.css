@@ -74,20 +74,22 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: .
 .view-toolbar strong { background: #343a44; padding: .3rem .75rem; font-weight: 400; }
 .configuration-choice { margin-left: auto; width: min(34%, 520px); }
 .rocket-drawing { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--panel-bg); border: 1px solid #8b919a; }
-.drawing-title { flex: none; display: flex; justify-content: space-between; align-items: start; padding: .6rem .9rem; gap: .5rem; max-height: 35%; overflow: auto; }
+.drawing-ruler { flex: none; height: 1.5rem; overflow: hidden; }
+.drawing-ruler .ruler-number { font-size: .72rem; }
+.drawing-title { flex: 0 1 auto; display: flex; justify-content: space-between; align-items: start; padding: .6rem .9rem; gap: .5rem; max-height: 35%; overflow: auto; }
 .drawing-title h2 { font-size: .95rem; margin-bottom: .25rem; }
 .drawing-title span { color: var(--muted); font-size: .9rem; }
 .drawing-title p, .drawing-footer p { margin: 0; font-size: .82rem; line-height: 1.35; }
 .stability-statistics { text-align: right; }
 .drawing-title .cg-label { color: #56b4e9; }
 .drawing-title .cp-label { color: #e69f00; }
-.drawing-footer { flex: none; display: flex; align-items: start; justify-content: space-between; gap: .5rem; padding: .35rem .9rem; max-height: 30%; overflow: auto; }
+.drawing-footer { flex: 0 1 auto; display: flex; align-items: start; justify-content: space-between; gap: .5rem; padding: .35rem .9rem; max-height: 30%; overflow: auto; }
 .drawing-footer .zoom-controls { flex: none; align-self: end; }
 .internal-component { cursor: pointer; }
 .internal-component:focus-visible { outline: none; stroke: var(--drawing-selected-stroke); stroke-width: 3px; stroke-dasharray: none; }
 .zoom-controls { display: flex; gap: .3rem; }
 .zoom-controls button { padding: .15rem .55rem; }
-.drawing-canvas { flex: 1; min-height: 0; overflow: auto; }
+.drawing-canvas { flex: 1; min-height: 24px; overflow: auto; }
 svg { display: block; width: 100%; }
 
 svg text { font: 13px "Segoe UI", system-ui, sans-serif; fill: var(--drawing-text); }

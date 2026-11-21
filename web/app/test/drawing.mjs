@@ -47,15 +47,19 @@ try {
           await page.getByLabel('Length units', { exact: true }).selectOption(unit);
           for (const zoom of [1, 1.25]) {
             if (zoom > 1) await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
+            if (zoom > 1) await page.locator('.drawing-canvas').evaluate(element => { element.scrollLeft = 40; element.scrollTop = 30; });
             await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
             const nose = await polygons.first().evaluate(node => node.getBoundingClientRect().toJSON());
             const tail = Math.max(...await polygons.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().right)));
             const ruler = page.getByTestId('rocket-ruler');
+            const top = await ruler.locator('..').evaluate(element => element.getBoundingClientRect().top);
+            const containerTop = await page.locator('.rocket-drawing').evaluate(element => element.getBoundingClientRect().top + element.clientTop);
+            assert.ok(Math.abs(top - containerTop) < .1, 'ruler remains at the top edge of rocket-drawing during resize, zoom and scroll');
             const baseline = await ruler.locator(':scope > line').evaluate(node => node.getBoundingClientRect().toJSON());
             assert.ok(Math.abs(baseline.x - nose.x) < .1, `ruler begins at the nose ${JSON.stringify({ width, height, unit, zoom, baseline, nose })}`);
             assert.ok(Math.abs(baseline.x + baseline.width - tail) < .1, 'ruler ends at the rocket extent');
             const labels = await ruler.locator('text').evaluateAll(nodes => nodes.map(node => ({ value: Number(node.textContent),
-              anchor: new DOMPoint(Number(node.getAttribute('x')), Number(node.getAttribute('y'))).matrixTransform(node.getScreenCTM()).x,
+              anchor: new DOMPoint(node.x.baseVal[0].value, node.y.baseVal[0].value).matrixTransform(node.getScreenCTM()).x,
               centered: getComputedStyle(node).textAnchor === 'middle', tick: node.parentElement.querySelector('line').getBoundingClientRect().x })));
             assert.equal(labels[0].value, 0, 'zero is explicitly labeled at the rocket origin');
             assert.ok(Math.abs(labels[0].tick - nose.x) < .1, 'zero tick is directly above the nose');

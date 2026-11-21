@@ -9,13 +9,15 @@ export function RocketDrawing({ document, results, components, selected, select,
   const { drawing, stability } = document;
   const [zoom, setZoom] = useState(1);
   const canvas = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(300);
+  const [viewport, setViewport] = useState({ width: 1000, height: 300 });
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const height = Math.max(80, 1000 * viewport.height / viewport.width);
   useEffect(() => {
     const element = canvas.current;
     if (!element) return;
     const resize = () => {
       const box = element.getBoundingClientRect();
-      if (box.width) setHeight(Math.max(80, 1000 * box.height / box.width));
+      if (element.clientWidth) setViewport({ width: box.width - (element.offsetWidth - element.clientWidth), height: box.height - (element.offsetHeight - element.clientHeight) });
     };
     const observer = new ResizeObserver(resize);
     observer.observe(element); resize();
@@ -25,6 +27,8 @@ export function RocketDrawing({ document, results, components, selected, select,
   const left = (1000 - (drawing.maxX - drawing.minX) * scale) / 2;
   const x = (value: number) => left + (value - drawing.minX) * scale;
   const y = (value: number) => 150 - value * scale;
+  const screenScale = zoom * Math.min(viewport.width / 1000, viewport.height / height);
+  const screenOffset = (viewport.width * zoom - 1000 * screenScale) / 2 - scrollLeft;
   const rulerTarget = displayLength(100 / scale, unit);
   const rulerPower = 10 ** Math.floor(Math.log10(rulerTarget));
   const rulerMultiple = [1, 2, 5, 10].find(value => value * rulerPower >= rulerTarget)!;
@@ -36,16 +40,19 @@ export function RocketDrawing({ document, results, components, selected, select,
     const index = firstTick + i, value = index * rulerStep;
     return { value, position: metresFromLength(value, unit), major: index % rulerDivisions === 0 };
   });
-  return <section className="rocket-drawing" aria-label="Rocket drawing"><div className="drawing-title"><PhysicalStatistics stats={stability} unit={unit}/><StabilityStatistics stats={stability} unit={unit}/></div>
-    {drawing.error ? <p>{drawing.error}</p> : <>
-      <div ref={canvas} className="drawing-canvas"><svg style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 100}%`, height: `${zoom * 100}%` }} viewBox={`0 0 1000 ${height}`} role="img" aria-label="Rocket side drawing with internal components: select a component to edit">
-        <g aria-label={`Rocket ruler (${unit})`} data-testid="rocket-ruler">
-          <line x1={x(drawing.minX)} x2={x(drawing.maxX)} y1="0" y2="0" stroke="currentColor" strokeWidth=".5"/>
-          {rulerTicks.map(tick => <g key={tick.value} data-position={tick.position} data-major={tick.major} transform={`translate(${x(tick.position)} 0)`}>
-            <line y1="0" y2={tick.major ? 10 : 5} stroke="currentColor" strokeWidth=".5"/>
-            {tick.major && <text className="ruler-number" x="0" y="24" textAnchor="middle">{Number(tick.value.toPrecision(12))}</text>}
+  return <section className="rocket-drawing" aria-label="Rocket drawing">
+    {!drawing.error && <svg className="drawing-ruler" aria-label={`Rocket ruler (${unit})`}>
+        <g data-testid="rocket-ruler">
+          <line x1={screenOffset + x(drawing.minX) * screenScale} x2={screenOffset + x(drawing.maxX) * screenScale} y1="0" y2="0" stroke="currentColor" strokeWidth=".5"/>
+          {rulerTicks.map(tick => <g key={tick.value} data-position={tick.position} data-major={tick.major} transform={`translate(${screenOffset + x(tick.position) * screenScale} 0)`}>
+            <line y1="0" y2={tick.major ? '.4rem' : '.2rem'} stroke="currentColor" strokeWidth=".5"/>
+            {tick.major && <text className="ruler-number" x="0" y="1.25rem" textAnchor="middle">{Number(tick.value.toPrecision(12))}</text>}
           </g>)}
         </g>
+      </svg>}
+    <div className="drawing-title"><PhysicalStatistics stats={stability} unit={unit}/><StabilityStatistics stats={stability} unit={unit}/></div>
+    {drawing.error ? <p>{drawing.error}</p> : <>
+      <div ref={canvas} className="drawing-canvas" onScroll={event => setScrollLeft(event.currentTarget.scrollLeft)}><svg style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 100}%`, height: `${zoom * 100}%` }} viewBox={`0 0 1000 ${height}`} role="img" aria-label="Rocket side drawing with internal components: select a component to edit">
         <g transform={`translate(0 ${(height + 20) / 2 - 150})`}><line x1="35" x2="965" y1="150" y2="150" stroke="#8298a6" strokeDasharray="5 5"/>
         {drawing.polygons.map((polygon, i) => {
           const index = drawing.componentIndices[polygon.index], component = components[index];
