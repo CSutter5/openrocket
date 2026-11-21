@@ -138,7 +138,7 @@ try {
       report.comparisons.push({ rocket: name, configuration: config.id, branches: actual.branches.map(b => ({ name: b.name, points: b.series.length })), summary: actual.summary, differences });
     }
     await page.getByRole('button', { name: 'Plot', exact: true }).click();
-    const graph = page.getByRole('dialog', { name: /^Flight graph/ });assert.equal(await graph.locator('polyline').count(), initial.stages.length);
+    const graph = page.getByRole('dialog', { name: /^Flight graph/ });assert.equal(await graph.locator('polyline[data-series=altitude]').count(), initial.stages.length);
     await graph.getByRole('button', { name: 'Close', exact: true }).click();
     assert.deepEqual(await readFile(await download(`multistage-unchanged-${initial.stages.length}.ork`)), bytes);
   }

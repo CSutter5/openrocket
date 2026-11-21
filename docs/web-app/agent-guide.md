@@ -1,5 +1,7 @@
 # General guidance for future agents
 
+The plot-screen follow-up adds [desktop plot configuration controls and recorded flight channels](plot-controls.md). Read its additive channel contract, native metadata, session-only appearance defaults and archive-preservation boundaries before changing plots. This is a local plotting slice, not complete desktop chart or persistent preference parity.
+
 The rail-button import follow-up (ADR-36) consumes complete serialized physical state while preserving personal preset links. Read [its projection and verification boundaries](multistage.md#rail-button-preset-import-follow-up) before changing preset handling. It fixes the preview and flight refusal reported with `example 2stage.ork`; incomplete state still refuses.
 
 The latest follow-up enables [axial multistage creation, configuration and imported browser flights](multistage.md) (ADR-35). Read its stage-flag/inheritance, native geometry, TeaVM adaptations and complete-branch validation boundaries before changing staging. Pods, parallel boosters and clusters remain deferred. No deployment is included.

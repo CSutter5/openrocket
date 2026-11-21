@@ -5,7 +5,7 @@ const root = resolve(import.meta.dirname, '../../..'), build = resolve(root, 'we
 await mkdir(build, { recursive: true });
 const classpath = (await readFile(resolve(root, 'web/engine-adapter/build/reference-classpath.txt'), 'utf8')).trim();
 for (const [command, args] of [
-  ['javac', ['-cp', classpath, '-d', build, resolve(import.meta.dirname, 'ComponentDefaultsExporter.java'), resolve(import.meta.dirname, 'PreferenceUnitsExporter.java')]],
+  ['javac', ['-cp', classpath, '-d', build, resolve(import.meta.dirname, 'ComponentDefaultsExporter.java'), resolve(import.meta.dirname, 'PreferenceUnitsExporter.java'), resolve(import.meta.dirname, 'PlotMetadataExporter.java')]],
   ['java', ['-Djava.awt.headless=true', `-Djava.util.prefs.userRoot=${build}/preferences`, '-cp', build + delimiter + classpath, 'ComponentDefaultsExporter', resolve(build, 'defaults.json')]],
 ]) {
   const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' });

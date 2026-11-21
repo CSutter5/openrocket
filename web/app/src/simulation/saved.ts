@@ -1,7 +1,8 @@
 import type { ExpandedArchive, XmlNode } from '@openrocket/ork-format';
 import { numeric } from '../../../packages/ork-format/src/radius.js';
 import type { Integrator } from './provenance';
-export interface StoredPlot { name: string; points: [number, number][] }
+import { canonicalPlotType, plotEvents } from './plot.ts';
+export interface StoredPlot { name: string; points: [number, number][]; channels?: Record<string, (number | null)[]>; events?: [string, number, (string | null)?][] }
 export interface SavedSimulation {
   id: string; name: string; status: string; configurationId?: string;
   summary: (number | null)[]; maxAcceleration: number | null; plots: StoredPlot[];
@@ -88,14 +89,21 @@ export function savedSimulations(archive: ExpandedArchive): SavedSimulation[] {
     const row: SavedSimulation = { id: archive.identity.simulations[i].id, name: n.children.find(n => n.name === 'name')?.text ?? '(unnamed)', status: n.attributes.status?.value ?? 'unspecified',
       summary: ['maxaltitude', 'maxvelocity', 'timetoapogee', 'flighttime'].map(scalar), maxAcceleration: scalar('maxacceleration'), plots: [] };
     for (const branch of data?.children.filter(n => n.name === 'databranch') ?? []) {
-      const types = branch.attributes.types?.value.split(',').map(s => s.trim().toLowerCase()) ?? [], time = types.indexOf('time'), altitude = types.indexOf('altitude');
-      if (time < 0 || altitude < 0 || types.filter(t => t === 'time').length !== 1 || types.filter(t => t === 'altitude').length !== 1) continue;
+      const types = branch.attributes.types?.value.split(',').map(canonicalPlotType) ?? [], time = types.indexOf('time'), altitude = types.indexOf('altitude');
+      if (time < 0 || new Set(types).size !== types.length) continue;
+      const channels: Record<string, (number | null)[]> = Object.fromEntries(types.map(type => [type, []]));
       const points: [number, number][] = [];
       for (const point of branch.children.filter(n => n.name === 'datapoint')) {
         const columns = point.text.split(','), t = Number(columns[time]), h = Number(columns[altitude]);
+        types.forEach((type, i) => { const value = Number(columns[i]);channels[type].push(columns[i]?.trim() && Number.isFinite(value) ? value : null); });
         if (columns[time]?.trim() && columns[altitude]?.trim() && Number.isFinite(t) && Number.isFinite(h)) points.push([t, h]);
       }
-      if (points.length) row.plots.push({ name: branch.attributes.name?.value ?? 'Flight', points });
+      const events: NonNullable<StoredPlot['events']> = branch.children.filter(n => n.name === 'event').flatMap(n => {
+        const type = plotEvents.find(e => e.id.toLowerCase().replaceAll('_', '') === n.attributes.type?.value.toLowerCase().replaceAll('_', ''))?.id;
+        const time = Number(n.attributes.time?.value);
+        return type && n.attributes.time?.value.trim() && Number.isFinite(time) ? [[type, time, n.attributes.source?.value ?? null] as [string, number, string | null]] : [];
+      });
+      if (channels.time.length) row.plots.push({ name: branch.attributes.name?.value ?? 'Flight', points, channels, events });
     }
     try {
       const conditions = child(n, 'conditions');

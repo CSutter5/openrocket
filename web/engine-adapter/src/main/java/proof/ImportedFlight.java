@@ -159,7 +159,18 @@ public final class ImportedFlight {
                     .append(EditorStability.scalar(altitude.get(i))).append(',').append(EditorStability.scalar(velocity.get(i))).append(',')
                     .append(EditorStability.scalar(acceleration.get(i))).append(']');
             }
-            out.append("]}");
+            out.append("],\"channels\":{");
+            var types=branch.getTypes();
+            for(int t=0;t<types.length;t++) {
+                if(t>0)out.append(',');
+                out.append(quote(types[t].getSaveKey())).append(":[");
+                var values=branch.get(types[t]);
+                for(int i=0;i<values.size();i++) {
+                    if(i>0)out.append(',');out.append(EditorStability.scalar(values.get(i)));
+                }
+                out.append(']');
+            }
+            out.append("}}");
         }
         return out.append(']').toString();
     }

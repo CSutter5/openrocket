@@ -87,6 +87,7 @@ public class ComponentDefaultsExporter {
         }
         Files.writeString(Path.of(args[0]).resolveSibling("materials.json"),new Gson().toJson(materials)+"\n");
         PreferenceUnitsExporter.export(Path.of(args[0]).resolveSibling("preference-units.json"));
+        PlotMetadataExporter.export(Path.of(args[0]).resolveSibling("plot-metadata.json"));
         System.out.println("Exported " + rows.size() + " native component defaults and compatibility rules");
     }
 }

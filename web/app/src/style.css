@@ -177,8 +177,51 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 }
 .simulation-table tbody tr { cursor: pointer; }
 .simulation-table tr[aria-selected=true] { outline: 1px solid #9bc3fb; outline-offset: -1px; }
-.flight-graph { width: min(1000px, calc(100vw - 32px)); }
+.flight-graph { width: min(1200px, calc(100vw - 32px)); }
 .flight-graph .flight-plot { max-width: none; }
+.plot-preset, .plot-x, .plot-x label, .plot-row-fields, .plot-row-fields label { display: flex; align-items: center; gap: .5rem; }
+.plot-preset { padding: .7rem 0; border-bottom: 1px solid var(--border); }
+.plot-preset select { flex: 1; min-width: 0; }
+.plot-x { flex-wrap: wrap; padding: .8rem 0 .4rem; gap: 1rem; }
+.plot-x select { max-width: 20rem; }
+.plot-configuration { display: grid; grid-template-columns: minmax(0, 1fr) 16rem; gap: 1.2rem; margin-bottom: 1rem; }
+.plot-rows { min-height: 20rem; max-height: 30rem; overflow: auto; border: 1px solid var(--border); margin-bottom: .5rem; padding: .3rem .5rem; }
+.plot-row { margin: 0 0 .5rem; padding: .4rem .5rem .65rem; border: 0; border-bottom: 1px solid var(--border); min-width: 0; }
+.plot-row legend { color: var(--muted); }
+.plot-row-fields { flex-wrap: wrap; gap: .5rem .8rem; }
+.plot-row-fields select { min-width: 0; max-width: 16rem; }
+.plot-row-fields label:first-child { flex: 1; min-width: 12rem; }
+.plot-row-fields label:first-child select { flex: 1; width: 12rem; }
+.plot-appearance { margin-top: .5rem; }
+.plot-appearance > svg { width: 4rem; flex: none; }
+.plot-appearance label:first-child { flex: none; min-width: 0; }
+.plot-appearance input[type=color] { width: 2.5rem; height: 1.8rem; padding: .1rem; }
+.plot-event-options { min-width: 0; border: 0; padding: .5rem 0; }
+.plot-event-list { height: 15rem; overflow: auto; border: 1px solid var(--border); padding: .4rem; }
+.plot-event-list label { display: flex; align-items: center; gap: .4rem; padding: .15rem 0; }
+.plot-event-list label:has(input:disabled) { color: var(--muted); }
+.plot-event-buttons { display: flex; gap: 1rem; margin: .5rem 0; }
+.plot-event-buttons button { flex: 1; }
+.plot-marker-style { border: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.plot-marker-style label { display: flex; align-items: center; gap: .3rem; }
+.plot-output { border-top: 1px solid var(--border); }
+.plot-output .flight-plot { width: 100%; display: block; }
+.plot-legend { padding-left: 2rem; }
+.plot-legend li { margin-bottom: .35rem; }
+.plot-legend svg { display: inline-block; width: 36px; margin-right: .5rem; vertical-align: middle; }
+@media (max-width: 850px) {
+  .plot-configuration { grid-template-columns: minmax(0, 1fr); }
+  .plot-x { display: grid; grid-template-columns: minmax(0, 1fr); gap: .5rem; }
+  .plot-x label { display: grid; grid-template-columns: 6rem minmax(0, 1fr); }
+  .plot-x select { width: 100%; min-width: 0; }
+  .plot-rows { min-height: 0; }
+  .plot-event-options { max-width: none; }
+  .plot-preset { flex-wrap: wrap; }
+  .plot-preset select { flex-basis: 100%; }
+  .plot-row-fields label { flex-wrap: wrap; }
+  .plot-row-fields select, .plot-x select { max-width: 100%; }
+  .flight-graph .window-footer { flex-wrap: wrap; }
+}
 .catalog-assignment { display: flex; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
 .catalog-assignment label { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
 .catalog-table tr { cursor: pointer; }

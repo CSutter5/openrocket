@@ -75,7 +75,7 @@ try {
   await select('Simple RK4');await page.evaluate(() => window.hold = false);await run();await complete();const newer = await latest();
   await page.evaluate(() => { const h = window.held.shift();h.worker.dispatchEvent(new MessageEvent('message', { data: h.data })); });
   await table.getByRole('button', { name: 'Simple RK4', exact: true }).dblclick();
-  const graph = page.getByRole('dialog', { name: 'Flight graph · Simple RK4', exact: true });assert.equal((await graph.locator('polyline').getAttribute('points')).split(' ').length, newer.flight.series.length);await graph.press('Escape');
+  const graph = page.getByRole('dialog', { name: 'Flight graph · Simple RK4', exact: true });assert.equal((await graph.locator('polyline[data-series=altitude]').getAttribute('points')).split(' ').length, newer.flight.series.length);await graph.press('Escape');
   checks.push('captured results stay with their own rows; restarting another row rejects superseded completion');
   await openProperties(page);await page.getByLabel('BodyTube length (m)', { exact: true }).fill('0.35');await page.getByRole('button', { name: 'Apply length', exact: true }).click();await page.getByTestId('length').filter({ hasText: '0.35' }).waitFor();await closeProperties(page);
   await table.getByRole('row').filter({ hasText: 'Simple RK4' }).getByText('Outdated', { exact: true }).waitFor();

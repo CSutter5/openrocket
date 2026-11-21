@@ -49,7 +49,7 @@ try {
   await table.getByRole('button', { name: rows[0].name, exact: true }).dblclick();
   const graph = page.getByRole('dialog', { name: `Flight graph · ${rows[0].name}`, exact: true });
   await graph.getByRole('img', { name: /Altitude versus time/ }).waitFor();
-  assert.equal((await graph.locator('polyline').getAttribute('points')).split(' ').length, rows[0].plots[0].points.length);
+  assert.equal((await graph.locator('polyline[data-series=altitude]').getAttribute('points')).split(' ').length, rows[0].plots[0].points.length);
   await graph.getByRole('button', { name: `Close Flight graph · ${rows[0].name}`, exact: true }).click();
   report.checks.push('stored motor configuration and summary columns; double-click opens the exact stored graph');
   async function runRow(index, path = fixture, key = `saved-${index}`) {
@@ -71,7 +71,7 @@ try {
   assert.ok((await table.getByRole('row').filter({ hasText: rows[0].name }).innerText()).includes(first.flight.summary[0].toFixed(2)));
   await table.getByRole('button', { name: rows[1].name, exact: true }).dblclick();
   const secondGraph = page.getByRole('dialog', { name: `Flight graph · ${rows[1].name}`, exact: true });
-  assert.equal((await secondGraph.locator('polyline').getAttribute('points')).split(' ').length, second.flight.series.length);
+  assert.equal((await secondGraph.locator('polyline[data-series=altitude]').getAttribute('points')).split(' ').length, second.flight.series.length);
   await secondGraph.press('Escape');
   async function download() { const event = page.waitForEvent('download');await page.getByRole('button', { name: 'Download .ork', exact: true }).click();return readFile(await (await event).path()); }
   assert.deepEqual(await download(), bytes);

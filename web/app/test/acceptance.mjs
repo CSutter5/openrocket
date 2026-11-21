@@ -30,6 +30,7 @@ try {
   await import('./units.mjs');
   await import('./simulation.mjs');
   await import('./saved-flights.mjs');
+  await import('./plot-controls.mjs');
   await import('./imported-flight.mjs');
   await import('./motor-filters.mjs');
   await import('./configurations.mjs');

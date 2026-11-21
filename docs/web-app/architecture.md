@@ -1,5 +1,7 @@
 # Architecture and decision records
 
+The [configurable plotting decision](plot-controls.md#decision-and-data-contract) adds native recorded channel maps to flight results and desktop-derived plot metadata without changing flight algorithms, archive authority or shared commands.
+
 The latest [ADR-32](#adr-32-per-rocket-sharing-and-stable-url-ownership-transfer) supersedes blanket public creation/editing from ADR-27. The current sharing authority is D1 metadata/memberships checked through the per-rocket Durable Object, as recorded in [sharing permissions](sharing.md).
 
 Read [the scope](README.md) first. These decisions are proposed for implementation, with feasibility conditions stated explicitly. Supersede a decision with its evidence and consequences rather than silently changing it. All production compute must remain in Workers or the user's browser.

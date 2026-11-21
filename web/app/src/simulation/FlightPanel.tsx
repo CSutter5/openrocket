@@ -7,6 +7,7 @@ import type { SessionResult } from './provenance';
 import { FlightPlot } from './FlightPlot';
 import { PreferencesContext } from '../PreferencesContext';
 import { preferenceUnits } from '../preferences';
+import type { Appearance } from './plot';
 
 export function FlightPanel({ document, busy, unit, setUnit, results, onResult }: { document: DocumentView; busy: boolean; unit: LengthUnit; setUnit: (unit: LengthUnit) => void; results: Record<string, SessionResult>; onResult: (id: string, result: SessionResult) => void }) {
   const preferences = useContext(PreferencesContext);
@@ -14,6 +15,7 @@ export function FlightPanel({ document, busy, unit, setUnit, results, onResult }
   const [state, setState] = useState<JobState>({ status: 'idle' });
   const [selected, setSelected] = useState('');
   const [graph, setGraph] = useState<string>();
+  const [plotDefaults, setPlotDefaults] = useState<Record<string, Appearance>>({});
   const active = useRef('');
   const identities = document.simulations.map(s => s.id).join(',');
   useEffect(() => {
@@ -30,7 +32,9 @@ export function FlightPanel({ document, busy, unit, setUnit, results, onResult }
   const running = ['starting', 'running'].includes(state.status);
   const freshness = (r: SessionResult) => r.provenance.archiveTreeHash === document.hash && r.provenance.identitySidecarHash === document.identitySidecarHash;
   const graphSaved = document.simulations.find(s => s.id === graph), graphResult = graph ? results[graph] : undefined;
-  const graphPlots = graphResult ? (graphResult.flight.branches ?? [{ name: 'Flight', series: graphResult.flight.series }]).map(branch => ({ name: branch.name, points: branch.series.filter(row => row[1] !== null).map(row => [row[0], row[1]!] as [number, number]) })) : graphSaved?.plots ?? [];
+  const graphPlots = graphResult ? (graphResult.flight.branches ?? [{ name: 'Flight', series: graphResult.flight.series, events: graphResult.flight.events, channels: {
+    time: graphResult.flight.series.map(row => row[0]), altitude: graphResult.flight.series.map(row => row[1]), velocity_total: graphResult.flight.series.map(row => row[2]), acceleration_total: graphResult.flight.series.map(row => row[3]),
+  } }]).map(branch => ({ name: branch.name, channels: branch.channels, events: branch.events, points: branch.series.filter(row => row[1] !== null).map(row => [row[0], row[1]!] as [number, number]) })) : graphSaved?.plots ?? [];
   const reason = saved?.reason ?? (saved?.support && !saved.support.supported ? saved.support.reason : undefined);
   async function run() {
     if (!saved?.support?.supported || saved.reason || !saved.integrator) return;
@@ -62,6 +66,6 @@ export function FlightPanel({ document, busy, unit, setUnit, results, onResult }
     </tbody></table>{!document.simulations.length && <p className="empty-state">No simulations. Create a configuration in Motors &amp; Configuration to add one.</p>}</div>
     {reason && <p role="alert" className="error">{reason}</p>}
     {state.status !== 'idle' && <p role="status" data-testid="flight-status">{state.status === 'starting' ? 'Starting flight…' : state.status === 'running' ? 'Running flight…' : state.status === 'completed' ? 'Flight completed.' : state.status === 'cancelled' ? 'Flight cancelled.' : `Flight failed: ${state.error}`}</p>}
-    {graph && graphSaved && <FlightPlot plots={graphPlots} unit={unit} setUnit={setUnit} name={graphSaved.name} source={graphResult ? freshness(graphResult) ? 'Completed flight' : 'Outdated result' : 'Stored flight data'} close={() => setGraph(undefined)}/>}
+    {graph && graphSaved && <FlightPlot key={graph} plots={graphPlots} unit={unit} name={graphSaved.name} defaults={plotDefaults} setDefaults={setPlotDefaults} source={graphResult ? freshness(graphResult) ? 'Completed flight' : 'Outdated result' : 'Stored flight data'} close={() => setGraph(undefined)}/>}
   </section>;
 }
