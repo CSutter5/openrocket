@@ -26,15 +26,33 @@ try {
     await page.setViewportSize({ width, height });
     await page.getByRole('tab', { name: 'Rocket design', exact: true }).click();await settle();await fits();
     const canvas = await page.locator('.drawing-canvas').boundingBox();assert.ok(canvas.height >= 24, 'drawing retains usable space');
+    const panel = await page.locator('.rocket-drawing').evaluate(element => {
+      const box = element.getBoundingClientRect();
+      return { x: box.x + element.clientLeft, y: box.y + element.clientTop, width: box.width - 2 * element.clientLeft, height: box.height - 2 * element.clientTop };
+    });
+    for (const key of ['x', 'y', 'width', 'height']) assert.ok(Math.abs(canvas[key] - panel[key]) < .5, `canvas fills the entire drawing container: ${key}`);
+    assert.ok(await page.locator('.rocket-drawing').evaluate(element => {
+      const physical = element.querySelector('.physical-statistics').getBoundingClientRect();
+      const stability = element.querySelector('.stability-statistics').getBoundingClientRect();
+      const title = element.querySelector('.drawing-title').getBoundingClientRect();
+      const hit = document.elementFromPoint((physical.right + stability.left) / 2, title.top + Math.min(title.height / 2, 20));
+      return element.querySelector('.drawing-canvas').contains(hit);
+    }), 'empty statistics overlay space allows canvas interaction');
     for (const name of ['preview-length', 'preview-diameter', 'preview-dry-mass', 'preview-launch-mass', 'preview-stability', 'preview-apogee', 'preview-velocity', 'preview-acceleration']) {
       const statistic = page.getByTestId(name);
       await statistic.scrollIntoViewIfNeeded();await inWindow(statistic, name);
       assert.ok(await statistic.evaluate(element => {
-        const box = element.getBoundingClientRect(), panel = element.closest('.drawing-title, .drawing-footer').getBoundingClientRect();
+        const box = element.getBoundingClientRect(), panel = element.closest('.drawing-title, .drawing-bottom').getBoundingClientRect();
         return box.top >= panel.top - 1 && box.bottom <= panel.bottom + 1;
       }), `${name} can be scrolled fully into its preview section`);
     }
-    await page.locator('.drawing-title, .drawing-footer').evaluateAll(elements => elements.forEach(element => element.scrollTop = 0));
+    await page.locator('.drawing-title, .drawing-bottom').evaluateAll(elements => elements.forEach(element => element.scrollTop = 0));
+    const zoom = page.getByRole('button', { name: 'Zoom in', exact: true });
+    await inWindow(zoom, 'Zoom in');
+    assert.ok(await zoom.evaluate(button => {
+      const box = button.getBoundingClientRect();
+      return button.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+    }), 'zoom controls remain clickable without scrolling the statistics');
     assert.ok(await page.locator('.rocket-drawing polygon').evaluateAll(nodes => nodes.every(node => {
       const b = node.getBoundingClientRect(), c = node.closest('.drawing-canvas').getBoundingClientRect();
       return b.top >= c.top - 1 && b.bottom <= c.bottom + 1 && b.left >= c.left - 1 && b.right <= c.right + 1;
@@ -55,7 +73,7 @@ try {
   await page.locator('.component-palette').evaluate(node => node.scrollTop = node.scrollHeight);
   await inWindow(page.locator('.palette-note'), 'last palette item');await fits();
   await page.locator('.document-info summary').click();await fits();
-  const omissions = page.locator('.rocket-drawing > details summary');
+  const omissions = page.locator('.drawing-bottom > details summary');
   if (await omissions.count()) await omissions.click();
   else assert.ok(await page.locator('.internal-component').count() > 0, 'formerly omitted internals are now drawn');
   await settle();await fits();

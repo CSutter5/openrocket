@@ -86,9 +86,14 @@ export function RocketDrawing({ document, results, components, selected, select,
         </g>)}
         </g>
       </svg></div>
-      <p className="drawing-selection">Selected: <strong>{components[selected]?.name}</strong>. Click to select · Double-click to edit · Enter / Space to select with keyboard.</p>
     </>}
-    <div className="drawing-footer"><FlightStatistics document={document} results={results} unit={unit}/><div className="zoom-controls"><button aria-label="Zoom out" disabled={zoom <= 0.5} onClick={() => setZoom(Math.max(.5, zoom - .25))}>−</button><button onClick={() => setZoom(1)}>{Math.round(zoom * 100)}% · Fit</button><button aria-label="Zoom in" disabled={zoom >= 3} onClick={() => setZoom(Math.min(3, zoom + .25))}>+</button></div></div>
-    {!!drawing.omitted.length && <details><summary>Parts omitted from the side view ({drawing.omitted.length})</summary><ul>{drawing.omitted.map((text,i) => <li key={i}>{text}</li>)}</ul></details>}
+    <div className="drawing-bottom">
+      <div className="drawing-footer"><div>
+        {!drawing.error && <p className="drawing-selection">Selected: <strong>{components[selected]?.name}</strong>. Click to select · Double-click to edit · Enter / Space to select with keyboard.</p>}
+        <FlightStatistics document={document} results={results} unit={unit}/>
+      </div></div>
+      {!!drawing.omitted.length && <details><summary>Parts omitted from the side view ({drawing.omitted.length})</summary><ul>{drawing.omitted.map((text,i) => <li key={i}>{text}</li>)}</ul></details>}
+    </div>
+    <div className="zoom-controls drawing-zoom"><button aria-label="Zoom out" disabled={zoom <= 0.5} onClick={() => setZoom(Math.max(.5, zoom - .25))}>−</button><button onClick={() => setZoom(1)}>{Math.round(zoom * 100)}% · Fit</button><button aria-label="Zoom in" disabled={zoom >= 3} onClick={() => setZoom(Math.min(3, zoom + .25))}>+</button></div>
   </section>;
 }

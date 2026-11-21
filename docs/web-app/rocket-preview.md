@@ -30,6 +30,12 @@ The subsequent top-edge clarification places the ruler in its own strip as the f
 
 The production build and the drawing/layout regressions passed again against the local production preview on port 4178. The 16 ruler cases now also assert top-edge positioning during zoom and horizontal/vertical scrolling while retaining the independent distance checks. All seven layout viewports passed. A separate Chromium check confirmed ruler labels fit at 8/20 pixel root text sizes and the pinned strip sits at the top of the user's existing rocket; its source archive remained byte-identical. The screenshot `web/app/build/gp/ruler-user-pinned.png` was inspected. Syntax/whitespace checks passed. No engine, database, deployment or full aggregate/numerical-suite work is included.
 
+## Full-container canvas follow-up
+
+The latest user request makes `drawing-canvas` cover the entire inner area of `rocket-drawing`. The container is positioned relatively and the canvas uses absolute positioning with zero insets. The ruler, corner statistics and bottom information are overlays rather than layout rows. Statistics and omissions retain bounded scrolling; zoom controls are pinned independently at the bottom right, outside that scroller. Empty overlay areas pass pointer events through to the drawing. This supersedes the preceding strip/row allocation while preserving the ruler's top-edge alignment and physical scale.
+
+The production build and sequential `drawing.mjs`, `layout.mjs` and `preview.mjs` checks passed against the process-owned production preview on port 4178 with the documented native classpath/browser environment. New layout assertions compare all four canvas bounds against the container's inner bounds at all seven viewport sizes, hit-test an empty statistics gap, and confirm zoom controls remain clickable without scrolling. Existing assertions cover readable/scrolled statistics, native geometry, ruler position/scale through zoom and scroll, internal component mouse/keyboard selection and editing, configuration/result freshness, and exact archives. The phone screenshot was inspected; an initial version placed zoom controls inside the scrolling information area, which the final independent pinning fixes. Syntax and whitespace checks passed. This changes presentation only; no engine rebuild, database migration, full aggregate acceptance rerun or deployment is included.
+
 ## Verification and handoff
 
 Checks actually run on November 20, 2026:

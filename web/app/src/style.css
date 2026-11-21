@@ -73,32 +73,36 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: .
 .view-toolbar label, .view-toolbar span { font-size: .9rem; color: var(--muted); }
 .view-toolbar strong { background: #343a44; padding: .3rem .75rem; font-weight: 400; }
 .configuration-choice { margin-left: auto; width: min(34%, 520px); }
-.rocket-drawing { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--panel-bg); border: 1px solid #8b919a; }
-.drawing-ruler { flex: none; height: 1.5rem; overflow: hidden; }
+.rocket-drawing { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--panel-bg); border: 1px solid #8b919a; }
+.drawing-ruler { position: absolute; inset: 0 0 auto; z-index: 3; height: 1.5rem; overflow: hidden; pointer-events: none; }
 .drawing-ruler .ruler-number { font-size: .72rem; }
-.drawing-title { flex: 0 1 auto; display: flex; justify-content: space-between; align-items: start; padding: .6rem .9rem; gap: .5rem; max-height: 35%; overflow: auto; }
+.drawing-title { position: absolute; inset: 1.5rem 0 auto; z-index: 2; display: flex; justify-content: space-between; align-items: start; padding: .6rem .9rem; gap: .5rem; max-height: 35%; overflow: auto; pointer-events: none; }
+.drawing-title > div { pointer-events: auto; }
 .drawing-title h2 { font-size: .95rem; margin-bottom: .25rem; }
 .drawing-title span { color: var(--muted); font-size: .9rem; }
 .drawing-title p, .drawing-footer p { margin: 0; font-size: .82rem; line-height: 1.35; }
 .stability-statistics { text-align: right; }
 .drawing-title .cg-label { color: #56b4e9; }
 .drawing-title .cp-label { color: #e69f00; }
-.drawing-footer { flex: 0 1 auto; display: flex; align-items: start; justify-content: space-between; gap: .5rem; padding: .35rem .9rem; max-height: 30%; overflow: auto; }
-.drawing-footer .zoom-controls { flex: none; align-self: end; }
+.drawing-bottom { position: absolute; inset: auto 12rem 0 0; z-index: 2; max-height: 35%; overflow: auto; pointer-events: none; }
+.drawing-footer { padding: .35rem .9rem; }
+.drawing-footer .drawing-selection, .drawing-footer .flight-statistics { pointer-events: auto; }
+.drawing-footer .flight-statistics { width: fit-content; max-width: 100%; }
+.drawing-zoom { position: absolute; right: .9rem; bottom: .35rem; z-index: 3; }
 .internal-component { cursor: pointer; }
 .internal-component:focus-visible { outline: none; stroke: var(--drawing-selected-stroke); stroke-width: 3px; stroke-dasharray: none; }
 .zoom-controls { display: flex; gap: .3rem; }
 .zoom-controls button { padding: .15rem .55rem; }
-.drawing-canvas { flex: 1; min-height: 24px; overflow: auto; }
+.drawing-canvas { position: absolute; inset: 0; overflow: auto; }
 svg { display: block; width: 100%; }
 
 svg text { font: 13px "Segoe UI", system-ui, sans-serif; fill: var(--drawing-text); }
 svg .ruler-number { font-size: 7px; fill: var(--ruler-text); }
 .rocket-drawing polygon { cursor: pointer; vector-effect: non-scaling-stroke; }
 .rocket-drawing polygon:focus-visible { outline: none; stroke: #e9b85f; stroke-width: 4px; }
-.drawing-selection { flex: none; border-top: 1px solid #3c424c; padding: .4rem .9rem; font-size: .9rem; }
-.rocket-drawing > details { flex: none; max-height: 35%; overflow: auto; padding: 0 .9rem; }
-.rocket-drawing > p:not(.drawing-selection) { padding: 1rem; }
+.drawing-selection { padding-bottom: .3rem; font-size: .9rem; }
+.drawing-bottom > details { padding: 0 .9rem; background: var(--panel-bg); pointer-events: auto; }
+.rocket-drawing > p { position: absolute; inset: 40% 0 auto; padding: 1rem; }
 summary { cursor: pointer; padding: .4rem 0; }
 details p { margin: .4rem 0; }
 .document-info { flex: none; max-height: 20dvh; overflow: auto; font-size: .9rem; color: var(--muted); padding: .25rem .5rem; }
