@@ -50,13 +50,22 @@ tasks.register('adaptCore') {
                 'java/util/concurrent/ConcurrentMap': 'java/util/Map',
                 'java/text/Collator': 'proof/PortableCollator',
                 'java/awt/geom/Point2D': 'proof/PortablePoint2D',
-                'java/awt/geom/Point2D$Double': 'proof/PortablePoint2D$Double'
+                'java/awt/geom/Point2D$Double': 'proof/PortablePoint2D$Double',
+                'java/awt/geom/Line2D': 'proof/PortableLine2D',
+                'java/awt/geom/Line2D$Double': 'proof/PortableLine2D$Double'
             ])
             def registryCalls = new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9, writer) {
                 @Override
                 org.objectweb.asm.MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                     def delegate = super.visitMethod(access, name, descriptor, signature, exceptions)
                     return new org.objectweb.asm.MethodVisitor(org.objectweb.asm.Opcodes.ASM9, delegate) {
+                        @Override
+                        void visitLdcInsn(Object value) {
+                            // TeaVM lacks %g; this eager branch log is presentation only.
+                            if (reader.className == 'info/openrocket/core/simulation/BasicEventSimulationEngine'
+                                && value instanceof String && value == "==>> @ %g; from Branch: %s ---- Branching: %s ---- \n") value = value.replace('%g', '%s')
+                            super.visitLdcInsn(value)
+                        }
                         @Override
                         void visitFieldInsn(int opcode, String owner, String field, String desc) {
                             if (owner == 'java/util/Locale$Category' && field == 'FORMAT') return

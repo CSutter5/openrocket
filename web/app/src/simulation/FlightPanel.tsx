@@ -30,7 +30,7 @@ export function FlightPanel({ document, busy, unit, setUnit, results, onResult }
   const running = ['starting', 'running'].includes(state.status);
   const freshness = (r: SessionResult) => r.provenance.archiveTreeHash === document.hash && r.provenance.identitySidecarHash === document.identitySidecarHash;
   const graphSaved = document.simulations.find(s => s.id === graph), graphResult = graph ? results[graph] : undefined;
-  const graphPlots = graphResult ? [{ name: 'Flight', points: graphResult.flight.series.map(row => [row[0], row[1]] as [number, number]) }] : graphSaved?.plots ?? [];
+  const graphPlots = graphResult ? (graphResult.flight.branches ?? [{ name: 'Flight', series: graphResult.flight.series }]).map(branch => ({ name: branch.name, points: branch.series.filter(row => row[1] !== null).map(row => [row[0], row[1]!] as [number, number]) })) : graphSaved?.plots ?? [];
   const reason = saved?.reason ?? (saved?.support && !saved.support.supported ? saved.support.reason : undefined);
   async function run() {
     if (!saved?.support?.supported || saved.reason || !saved.integrator) return;

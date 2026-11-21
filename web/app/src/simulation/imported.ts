@@ -20,11 +20,11 @@ const required:Record<string,string>={
   shockcord:`name id ${mass} cordlength material`,bulkhead:'name id material length radialposition radialdirection outerradius instancecount instanceseparation',
 };
 const fields: Record<string,string> = {
-  rocket:'name id comment axialoffset position designtype motorconfiguration referencetype', stage:'name id comment',
+  rocket:`${common} designer revision kitname designtype motorconfiguration referencetype customreference`, stage:`${common} separationevent separationaltitude separationdelay separationconfiguration`,
   nosecone:`${common} ${shell} ${transition}`, transition:`${common} ${shell} ${transition}`,
   bodytube:`${common} ${shell} radius motormount`,
   innertube:`${common} material length radialposition radialdirection outerradius thickness clusterconfiguration clusterscale clusterrotation motormount`,
-  trapezoidfinset:`${common} finish material thickness instancecount fincount radiusoffset angleoffset rotation crosssection cant filletradius filletmaterial rootchord tipchord sweeplength height`,
+  trapezoidfinset:`${common} finish material thickness instancecount fincount radiusoffset angleoffset rotation crosssection cant filletradius filletmaterial rootchord tipchord sweeplength height tabheight tablength tabposition`,
   masscomponent:`${common} ${mass} mass masscomponenttype`,
   parachute:`${common} ${mass} preset cd material deployevent deployaltitude deploydelay deploymentconfiguration diameter linecount linelength linematerial isdrogue`,
   bulkhead:`${common} material length radialposition radialdirection outerradius instancecount instanceseparation`,
@@ -35,11 +35,14 @@ const attr = (n: XmlNode,key:string) => n.attributes[key]?.value;
 const one = (n: XmlNode,key:string) => { const all=n.children.filter(c=>c.name===key); if(all.length!==1)throw new Error(`Expected one ${n.name}/${key}`);return all[0]; };
 function attributes(n:XmlNode, allowed:string[]) { if(Object.keys(n.attributes).some(k=>!allowed.includes(k)))throw new Error(`Unsupported ${n.name} attributes`); }
 function scalar(n:XmlNode) { if(n.children.length)throw new Error(`Unsupported nested ${n.name}`); }
+const separationEvents = new Set('launch ignition burnout ejection upperignition altitudeascending apogee altitudedescending never'.split(' '));
+const ignitionEvents = new Set('automatic launch ejectioncharge burnout never'.split(' '));
 const encode=(s:string)=>s.replace(/\\/g,'\\\\').replace(/\t/g,'\\t').replace(/\r/g,'\\r').replace(/\n/g,'\\n');
 export function importedInput(archive: ExpandedArchive, requestedConfigurationId?: string, analysis = false) {
   if(archive.mode!=='editable'||archive.parsed.version!=='1.11')throw new Error('Requires an editable format 1.11 archive');
   const nodes=archive.parsed.components;
-  if(nodes.length>64||nodes[0]?.name!=='rocket'||nodes.filter(n=>n.name==='stage').length!==1||nodes[1]?.name!=='stage')throw new Error('Requires one direct axial stage and at most 64 components');
+  const stages = nodes.filter(n => n.name === 'stage');
+  if(nodes.length>64||nodes[0]?.name!=='rocket'||!stages.length||stages.some(n=>n.parent?.parent!==nodes[0]))throw new Error('Requires direct axial stages and at most 64 components');
   const root=archive.parsed.nodes.find(n=>n.name==='openrocket')!;
   attributes(root,['version','creator']);
   for(const c of root.children)if(c.name!=='rocket'){attributes(c,[]);if(c.name==='docprefs'&&c.children.some(n=>n.name!=='docmaterials'))throw new Error('Unsupported document preferences');}
@@ -59,13 +62,16 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
   const configurationId=requestedConfigurationId ?? (selected[0] ? attr(selected[0],'configid')! : '00000000-0000-0000-0000-000000000000');
   if((configurations.length || !analysis) && !ids.includes(configurationId))throw new Error('Unknown selected flight configuration');
   const rows=['imported-flight-v1',`configuration\t${configurationId}`,`count\t${nodes.length}`];
-  const materials:unknown[]=[],curves=new Map<string,{bytes:Uint8Array;hash:string}>();let selectedMotor='', mounts=0,recovery=0;const catalogReferences:string[]=[];
+  const materials:unknown[]=[],curves=new Map<string,{bytes:Uint8Array;hash:string}>();let mounts=0,recovery=0;const selectedMotors:string[]=[];const catalogReferences:string[]=[];
   function add(n:XmlNode,path:string) {
+    if(n.name==='separationevent'&&!separationEvents.has(n.text.trim()))throw new Error('Unsupported separation event');
+    if(n.name==='ignitionevent'&&!ignitionEvents.has(n.text.trim()))throw new Error('Unsupported ignition event');
     rows.push(`${path}\t${encode(n.text.trim())}`);
     for(const [key,v] of Object.entries(n.attributes))rows.push(`${path}/@${key}\t${encode(v.value)}`);
   }
-  const finFields = `${common} finish material thickness instancecount fincount radiusoffset angleoffset rotation crosssection cant filletradius filletmaterial`;
-  const analysisFields: Record<string, string> = {
+  const finFields = `${common} finish material thickness instancecount fincount radiusoffset angleoffset rotation crosssection cant filletradius filletmaterial tabheight tablength tabposition`;
+  const additionalFields: Record<string, string> = {
+    freeformfinset: `${finFields} finpoints`,
     ellipticalfinset: `${finFields} rootchord height`,
     tubefinset: `${common} finish material instancecount fincount radiusoffset angleoffset rotation radius length thickness`,
     launchlug: `${common} finish material instancecount instanceseparation angleoffset radialdirection radius length thickness`,
@@ -76,7 +82,7 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     engineblock: `${common} material length radialposition radialdirection outerradius thickness`,
   };
   nodes.forEach((n,i)=>{
-    const allowed = fields[n.name] ?? (analysis ? analysisFields[n.name] : undefined);
+    const allowed = fields[n.name] ?? additionalFields[n.name];
     if(!allowed)throw new Error(`Unsupported component ${n.name}`);
     const parent=nodes.indexOf(n.parent?.parent!);if(i>0&&(parent<0||parent>=i))throw new Error('Invalid component parent');
     const positions=n.children.filter(c=>['axialoffset','position'].includes(c.name));
@@ -87,8 +93,14 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     for(const c of n.children) {
       if(c.name==='subcomponents')continue;
       if(!allowed.split(' ').includes(c.name))throw new Error(`Unsupported ${n.name}/${c.name}`);
-      const repeated=['motorconfiguration','deploymentconfiguration'].includes(c.name);
-      if (analysis && n.name === 'tubefinset' && ['fincount', 'rotation'].includes(c.name) && seen.has(c.name)) {
+      const repeated=['motorconfiguration','deploymentconfiguration','separationconfiguration','tabposition'].includes(c.name);
+      if(c.name==='tabposition') {
+        const methods:Record<string,string>={front:'top',center:'middle',end:'bottom',top:'top',middle:'middle',bottom:'bottom'};
+        const tabs=n.children.filter(v=>v.name==='tabposition');
+        if(tabs.length>2||tabs.some(v=>!methods[attr(v,'relativeto')!]||methods[attr(v,'relativeto')!]!==methods[attr(c,'relativeto')!]||numeric(v.text.trim(),'tab position')!==numeric(c.text.trim(),'tab position')))throw new Error('Ambiguous fin tab position');
+        if(seen.has(c.name))continue;
+      }
+      if (n.name === 'tubefinset' && ['fincount', 'rotation'].includes(c.name) && seen.has(c.name)) {
         if (n.children.filter(other => other.name === c.name).some(other => other.text.trim() !== c.text.trim())) throw new Error('Ambiguous tube-fin geometry');
         continue;
       }
@@ -97,15 +109,22 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       if(c.name==='motorconfiguration') {
         attributes(c,['configid','default']);
         if(c.children.some(n=>!['name','stage'].includes(n.name))||c.children.filter(n=>n.name==='name').length>1)throw new Error('Unknown or ambiguous configuration field');
-        const stage=one(c,'stage');
-        if(attr(stage,'number')!=='0'||attr(stage,'active')!=='true')throw new Error('Requires one active axial stage');
-        attributes(stage,['number','active']);if(stage.children.length)throw new Error('Unknown stage configuration behavior');
+        const flags=c.children.filter(n=>n.name==='stage'), numbers=new Set<number>();
+        if(flags.length!==stages.length)throw new Error('Requires one active flag per axial stage');
+        for(const stage of flags) {
+          const number=Number(attr(stage,'number'));
+          if(!/^\d+$/.test(attr(stage,'number')??'')||number>=stages.length||numbers.has(number)||!['true','false'].includes(attr(stage,'active')!))throw new Error('Invalid or ambiguous stage configuration');
+          attributes(stage,['number','active']);if(stage.children.length||stage.text.trim())throw new Error('Unknown stage configuration behavior');
+          numbers.add(number);rows.push(`stageActive/${attr(c,'configid')}/${number}\t${attr(stage,'active')}`);
+        }
+        if(!flags.some(n=>attr(n,'active')==='true'))throw new Error('Requires at least one active stage');
         const name=c.children.find(n=>n.name==='name');
         if(name){attributes(name,[]);scalar(name);if(name.text.trim())rows.push(`configurationName/${attr(c,'configid')}\t${encode(name.text)}`);}
         rows.push(`config/${attr(c,'configid')}\t${attr(c,'default')==='true'}`);continue;
       }
       if(c.name==='motormount') {
         attributes(c,[]);mounts++;
+        for(const key of ['overhang','ignitionevent','ignitiondelay'])one(c,key);
         for(const m of c.children) {
           if(!['ignitionevent','ignitiondelay','overhang','motor','ignitionconfiguration'].includes(m.name))throw new Error(`Unsupported motor field ${m.name}`);
           if(m.name==='motor'||m.name==='ignitionconfiguration') {
@@ -118,15 +137,30 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
               const pinned=(catalog.motors as Record<string,{rse:string;sha256:string}>)[digest];
               const entry=archive.entries.find(e=>e.path===`thrustcurves/${digest}.rse`);
               if(pinned){curves.set(digest,{bytes:new TextEncoder().encode(pinned.rse),hash:pinned.sha256});catalogReferences.push(digest);}
+              else if(cachedMotorCurve(digest)){curves.set(digest,cachedMotorCurve(digest)!);catalogReferences.push(digest);}
               else if(entry&&digest===sampleProfile.motor.digest&&entry.sha256!==sampleProfile.motor.sha256)throw new Error('Changed synthetic motor curve');
               else if(entry)curves.set(digest,{bytes:entry.bytes,hash:entry.sha256});
-              else if(cachedMotorCurve(digest)){curves.set(digest,cachedMotorCurve(digest)!);catalogReferences.push(digest);}
               else throw new Error('Missing embedded or available catalog motor curve');
-              if(id===configurationId)selectedMotor=one(m,'designation').text.trim();
+              if(id===configurationId) {
+                let stage:XmlNode|undefined=n;while(stage&&stage.name!=='stage')stage=stage.parent;
+                const flag=configurations.find(c=>attr(c,'configid')===id)?.children.find(c=>c.name==='stage'&&Number(attr(c,'number'))===stages.indexOf(stage!));
+                if(attr(flag!,'active')==='true')selectedMotors.push(one(m,'designation').text.trim());
+              }
             }
           } else {attributes(m,[]);scalar(m);add(m,`${i}/motormount/${m.name}`);}
         }
         continue;
+      }
+      if(c.name==='separationconfiguration') {
+        attributes(c,['configid']);const id=attr(c,'configid')!;if(!ids.includes(id))throw new Error('Unresolved separation configuration');
+        const keys=['separationevent','separationaltitude','separationdelay'];
+        if(c.children.length!==3||new Set(c.children.map(n=>n.name)).size!==3)throw new Error('Incomplete separation configuration');
+        for(const v of c.children){if(!keys.includes(v.name))throw new Error('Unknown separation field');attributes(v,[]);scalar(v);if(v.name!=='separationevent')numeric(v.text.trim(),v.name);add(v,`${i}/separationconfiguration/${id}/${v.name}`);}continue;
+      }
+      if(c.name==='finpoints') {
+        attributes(c,[]);if(c.children.length<3||c.children.length>64||c.text.trim())throw new Error('Requires 3–64 fin points');
+        c.children.forEach((point,j)=>{if(point.name!=='point'||point.children.length||point.text.trim())throw new Error('Unsupported fin point');attributes(point,['x','y']);for(const axis of ['x','y']){numeric(attr(point,axis)??'','fin point');rows.push(`${i}/finpoints/${j}/${axis}\t${attr(point,axis)}`);}});
+        rows.push(`${i}/finpoints/count\t${c.children.length}`);continue;
       }
       if(c.name==='deploymentconfiguration') {
         attributes(c,['configid']);const id=attr(c,'configid')!;if(!ids.includes(id))throw new Error('Unresolved recovery configuration');
@@ -135,9 +169,9 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       }
       if(['material','filletmaterial','linematerial'].includes(c.name)) {attributes(c,['type','density','shearModulus','group']);numeric(attr(c,'density')??'',c.name);materials.push([c.text,c.attributes]);}
       else if(c.name==='preset') {attributes(c,Object.keys(importedPreset));if(Object.entries(importedPreset).some(([k,v])=>attr(c,k)!==v))throw new Error('Unresolved preset digest');}
-      else attributes(c,['axialoffset','radiusoffset','angleoffset'].includes(c.name)?['method']:c.name==='position'?['type']:[]);
+      else attributes(c,['axialoffset','radiusoffset','angleoffset'].includes(c.name)?['method']:c.name==='position'?['type']:c.name==='tabposition'?['relativeto']:[]);
       scalar(c);
-      const tokens=new Set('name id comment color linestyle designtype referencetype finish shape crosssection masscomponenttype clusterconfiguration deployevent preset material linematerial filletmaterial'.split(' '));
+      const tokens=new Set('name id comment designer revision kitname color linestyle designtype referencetype finish shape crosssection masscomponenttype clusterconfiguration deployevent separationevent preset material linematerial filletmaterial'.split(' '));
       const flags=new Set('shapeclipped isflipped aftshouldercapped foreshouldercapped overridesubcomponentsmass overridesubcomponentscg overridesubcomponentscd isdrogue'.split(' '));
       if(flags.has(c.name)){if(!['true','false'].includes(c.text.trim()))throw new Error(`Invalid ${c.name}`);}
       else if(!tokens.has(c.name)){
@@ -149,23 +183,24 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
       }
       add(c,`${i}/${c.name}`);
     }
-    if (!analysis) for(const name of required[n.name].split(' '))one(n,name);
+    if (!analysis) for(const name of (required[n.name] ?? 'name id').split(' '))one(n,name);
     one(n, 'name');one(n, 'id');
-    if (analysis) {
-      if (!['rocket', 'stage', 'masscomponent'].includes(n.name)) one(n, 'material');
-      if (n.name === 'parachute') one(n, 'linematerial');
-      if (n.children.some(c => c.name === 'filletradius' && numeric(c.text.trim(), 'fillet radius') > 0)) one(n, 'filletmaterial');
-    }
+    if(n.name==='freeformfinset')one(n,'finpoints');
+    if (!['rocket', 'stage', 'masscomponent'].includes(n.name)) one(n, 'material');
+    if (n.name === 'parachute') one(n, 'linematerial');
+    if (n.children.some(c => c.name === 'filletradius' && numeric(c.text.trim(), 'fillet radius') > 0)) one(n, 'filletmaterial');
     if(!analysis && ['nosecone','transition'].includes(n.name)) {
       const shape=one(n,'shape').text.trim();
       if(!['conical','ogive','ellipsoid','power','parabolic','haack'].includes(shape))throw new Error('Unsupported shell shape');
       if(!['conical','ellipsoid'].includes(shape))one(n,'shapeparameter');
       if(['ellipsoid','power','haack'].includes(shape))one(n,'shapeclipped');
     }
-    if(n.name==='innertube'&&(!analysis || n.children.some(c=>c.name==='clusterconfiguration'))&&one(n,'clusterconfiguration').text.trim()!=='single')throw new Error('Motor clusters are unsupported');
+    if(n.name==='innertube'&&n.children.some(c=>c.name==='clusterconfiguration')&&one(n,'clusterconfiguration').text.trim()!=='single')throw new Error('Motor clusters are unsupported');
     if(n.name==='parachute')recovery++;
   });
-  if(!analysis && (mounts!==1||!selectedMotor||recovery<1||recovery>2))throw new Error('Requires one resolved motor mount and one or two parachutes');
+  if(!analysis && (!mounts||!selectedMotors.length))throw new Error('Requires a resolved motor in an active stage');
+  const keys = new Set<string>();
+  for(const row of rows) {const key=row.split('\t')[0];if(keys.has(key))throw new Error('Ambiguous simulation field '+key);keys.add(key);}
   const motorHashes:string[]=[];
   for(const [digest,curve] of curves) {
     const text=new TextDecoder('utf-8',{fatal:true}).decode(curve.bytes);if(/<!DOCTYPE|<!ENTITY/i.test(text))throw new Error('Motor entities are forbidden');
@@ -183,7 +218,7 @@ export function importedInput(archive: ExpandedArchive, requestedConfigurationId
     });parser.on('closetag',()=>{stack.pop();});parser.on('text',value=>{if(stack.at(-1)!=='comments'&&value.trim())throw new Error('Unexpected motor text');});parser.write(text).close();if(engines!==1||points<2||points>4096)throw new Error('Requires one explicit motor curve');
     rows.push(`curve/${digest}/count\t${points}`);motorHashes.push(curve.hash);
   }
-  return {model:rows.join('\n'),configurationId,catalogReferences:[...new Set(catalogReferences)],motorHashes,materials,motor:selectedMotor,recovery:`${recovery} parachute(s), using archived deployment settings`,kind:'imported' as const,maxTime:600};
+  return {model:rows.join('\n'),configurationId,catalogReferences:[...new Set(catalogReferences)],motorHashes,materials,motor:selectedMotors.join(' + '),recovery:`${recovery} parachute(s), using archived deployment settings`,kind:'imported' as const,maxTime:600};
 }
 export async function resolvedImportedInput(archive:ExpandedArchive, configurationId?:string) {
   const input=importedInput(archive,configurationId),hash=(value:unknown)=>sha256(new TextEncoder().encode(JSON.stringify(value)));

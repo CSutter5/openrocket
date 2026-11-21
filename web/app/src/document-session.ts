@@ -6,6 +6,7 @@ import { createConfiguration, renameConfiguration, deleteConfiguration } from '.
 import { assignMotor } from './simulation/assign-motor';
 import { editComponentTree } from './component-tree';
 import { editComponentProperty, editComponentProperties } from './component-properties';
+import { editStaging } from './staging';
 import { editMotorMount } from './motor-mount';
 import { addComponent, newRocket } from './components';
 import type { Action, Intrinsic, Reply } from './model';
@@ -112,6 +113,10 @@ export function createDocumentSession<V>(describe: (archive: ExpandedArchive, fi
       candidate = await deleteConfiguration(archive, action.configurationId);
       if (nextConfigurationId === action.configurationId) nextConfigurationId = flightConfigurations(candidate).find(c => c.isDefault)?.id;
       notice = 'Configuration and linked simulations deleted.';
+    } else if (action.type === 'staging') {
+      if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before stage settings; try again');
+      candidate = await editStaging(archive, action.configurationId, action.settings);
+      if (candidate !== archive) notice = 'Stage settings updated for the selected configuration.';
     } else if (action.type === 'assignMotor') {
       if (archive.identity.archiveHash !== action.expectedHash) throw new Error('Document changed before motor assignment; choose again');
       candidate = await assignMotor(archive, action.configurationId, action.mountId, action.motorKey, action.delay, fetchCurve);

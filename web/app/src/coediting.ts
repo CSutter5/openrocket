@@ -11,5 +11,5 @@ export type SharedMessage =
   | { type: 'state'; state: SharedState; requestId?: string; notice?: string; configurationId?: string; selectedId?: string }
   | { type: 'presence'; users: string[] }
   | { type: 'rejected'; requestId: string; error: string };
-export const sharedActions = new Set(['new', 'import', 'addComponent', 'componentProperty', 'componentProperties', 'componentTree', 'rename', 'radius', 'tubeProperty', 'assignMotor', 'createConfiguration', 'renameConfiguration', 'deleteConfiguration']);
+export const sharedActions = new Set(['new', 'import', 'addComponent', 'componentProperty', 'componentProperties', 'componentTree', 'rename', 'radius', 'tubeProperty', 'assignMotor', 'staging', 'createConfiguration', 'renameConfiguration', 'deleteConfiguration']);
 export interface SharedCommand { requestId: string; expectedToken: string; action: Action }

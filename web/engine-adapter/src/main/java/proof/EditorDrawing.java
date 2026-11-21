@@ -75,7 +75,7 @@ public final class EditorDrawing {
                     points[i] = new double[]{x + localX, radius}; points[129 - i] = new double[]{x + localX, -radius};
                 }
                 polygons.add(points);
-            } else if (component instanceof TrapezoidFinSet fins) {
+            } else if (component instanceof FinSet fins) {
                 CoordinateIF[] locations = fins.getComponentLocations(), points = fins.getFinPoints();
                 double[] angles = fins.getInstanceAngles();
                 for (int instance = 0; instance < locations.length; instance++) {

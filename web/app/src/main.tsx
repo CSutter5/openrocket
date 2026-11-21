@@ -211,7 +211,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
             <ComponentPalette components={components} selected={selected} disabled={blocked || readOnly || document.mode !== 'editable' || components.length >= 64} create={createComponent}/>
           </section>
           <section id="panel-motors" role="tabpanel" aria-labelledby="tab-motors" hidden={tab !== 'motors'}>
-            <MotorConfigurations key={document.identitySidecarHash} document={document} busy={blocked || readOnly} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
+            <MotorConfigurations key={document.identitySidecarHash} document={document} busy={blocked || readOnly} edit={perform} select={selectConfiguration} openSelector={() => setMotorSelector('assign')} create={() => setMotorSelector('create')} rename={(configurationId, name) => perform({ type: 'renameConfiguration', expectedHash: document.hash, configurationId, name })} remove={configurationId => perform({ type: 'deleteConfiguration', expectedHash: document.hash, configurationId })}/>
           </section>
           <div id="panel-simulations" role="tabpanel" aria-labelledby="tab-simulations" hidden={tab !== 'simulations'}>
             <FlightPanel document={document} busy={blocked} unit={preferences ? simulationUnit : unit} setUnit={preferences ? setSimulationUnit : setUnit} results={flightResults} onResult={(id, result) => setFlightResults(previous => ({ ...previous, [id]: result }))}/>
@@ -223,7 +223,7 @@ function App({ sharedRocket }: { sharedRocket?: PublicRocket }) {
           <div className="unit-choice"><label htmlFor="length-units">Length units</label><select id="length-units" value={unit} disabled={blocked} onChange={event => setUnit(event.target.value as LengthUnit)}>
             {lengthUnits.map(u => <option key={u.id} value={u.id}>{u.label} ({u.id})</option>)}
           </select></div>
-          <div className="stage-label"><span>Stage</span><strong>{components.find(c => c.type === 'stage')?.name ?? '—'}</strong></div>
+          <div className="stage-label"><span>Stages</span><strong>{components.filter(c => c.type === 'stage').length}</strong></div>
           <div className="configuration-choice"><label htmlFor="view-configuration">Flight configuration</label><select id="view-configuration" value={document.flightConfigurationId ?? ''} disabled={blocked || !document.flightConfigurations.length} onChange={event => selectConfiguration(event.target.value)}>
             {!document.flightConfigurations.length && <option value="">No motor configuration</option>}
             {document.flightConfigurations.map(c => <option key={c.id} value={c.id}>{c.label}{c.isDefault ? ' · archived default' : ''}</option>)}

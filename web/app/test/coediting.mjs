@@ -88,6 +88,24 @@ try {
   await a.getByRole('button', { name: 'Delete', exact: true }).click();
   await b.waitForFunction(() => document.querySelectorAll('.component-tree [aria-label$=" bodytube"]').length === 1);
   accepted = await download(a); assert.deepEqual(accepted, await download(b));
+  const staged = resolve(app, '../../core/src/main/resources/datafiles/examples/Three stage low power rocket.ork');
+  await a.getByLabel('Open local .ork', { exact: true }).setInputFiles(staged);
+  await b.locator('.filename').filter({ hasText: 'Three stage low power rocket.ork' }).waitFor();
+  await a.getByRole('tab', { name: 'Motors & Configuration', exact: true }).click();
+  await a.getByRole('button', { name: 'Stage settings', exact: true }).click();
+  const staging = a.getByRole('dialog', { name: 'Stage settings', exact: true });
+  await staging.getByLabel('Stage', { exact: true }).selectOption({ index: 2 });
+  await staging.getByLabel('Stage active', { exact: true }).uncheck();
+  await staging.getByLabel('Separates at', { exact: true }).selectOption('burnout');
+  await staging.getByRole('spinbutton', { name: 'Separation delay', exact: true }).fill('0.2');
+  const beforeStaging = await a.evaluate(() => window.rawA.state.token);
+  await staging.getByRole('button', { name: 'OK', exact: true }).click();await staging.waitFor({ state: 'detached' });
+  await b.waitForFunction(token => window.rawB.state.token !== token, beforeStaging);
+  accepted = await download(a);assert.deepEqual(accepted, await download(b));
+  const stagedArchive = await importArchive(new Uint8Array(accepted)), stage = stagedArchive.parsed.components.filter(n => n.name === 'stage')[2];
+  const config = stagedArchive.parsed.components[0].children.find(n => n.name === 'motorconfiguration' && n.attributes.default?.value === 'true');
+  assert.equal(config.children.find(n => n.name === 'stage' && n.attributes.number?.value === '2').attributes.active.value, 'false');
+  assert.equal(Number(stage.children.find(n => n.name === 'separationconfiguration' && n.attributes.configid?.value === config.attributes.configid.value).children.find(n => n.name === 'separationdelay').text), .2);
   // Incompressible opaque bytes force the durable draft across multiple storage chunks.
   const current = await importArchive(new Uint8Array(accepted));
   const opaque = new Uint8Array(160000); let seed = 123456789;
@@ -110,6 +128,6 @@ try {
   assert.deepEqual(await download(a), accepted);
   const late = await browser.newPage();await late.goto(url + path);await editorReady(late); assert.deepEqual(await download(late), accepted);
   assert.deepEqual(errors, []);
-  console.log(`Coediting passed in Chromium ${browser.version()}: two isolated browsers, presence, rename/radius convergence, equal downloads, concurrent conflict, stale dialog draft retention, invalid command/import preservation, subtree duplicate/delete, opaque assets across storage chunks, disconnect, durable restart and late join.`);
+  console.log(`Coediting passed in Chromium ${browser.version()}: two isolated browsers, presence, rename/radius convergence, equal downloads, concurrent conflict, stale dialog draft retention, invalid command/import preservation, subtree duplicate/delete, shared multistage configuration editing, opaque assets across storage chunks, disconnect, durable restart and late join.`);
 } catch (error) { console.error(host.log); throw error; }
 finally { await browser?.close(); await host.close(); }

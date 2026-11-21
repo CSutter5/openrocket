@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import type { ComponentView, DocumentView } from './model';
+import { StagingEditor } from './StagingEditor';
+import type { Action, ComponentView, DocumentView } from './model';
 import { additionTarget } from './components';
 
 const icons = import.meta.glob('../../../swing/src/main/resources/pix/componenticons/*-large.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
@@ -38,13 +39,14 @@ export function WindowPanel({ title, close, children, className = '' }: { title:
     <div className="window-content">{children}</div>
   </dialog>;
 }
-export function MotorConfigurations({ document, busy, select, openSelector, create, rename, remove }: { document: DocumentView; busy: boolean; select: (id: string) => void; openSelector: () => void; create: () => void; rename: (id: string, name: string) => Promise<boolean>; remove: (id: string) => Promise<boolean> }) {
+export function MotorConfigurations({ document, busy, select, openSelector, create, rename, remove, edit }: { document: DocumentView; busy: boolean; select: (id: string) => void; openSelector: () => void; create: () => void; rename: (id: string, name: string) => Promise<boolean>; remove: (id: string) => Promise<boolean>; edit: (action: Action) => Promise<boolean> }) {
+  const [staging, setStaging] = useState(false);
   const [dialog, setDialog] = useState<{ kind: 'rename' | 'delete'; id: string }>(), [name, setName] = useState('');
   const selected = document.flightConfigurations.find(c => c.id === document.flightConfigurationId);
   const target = document.flightConfigurations.find(c => c.id === dialog?.id);
   const editable = document.mode === 'editable';
   return <section className="motor-panel" aria-label="Motor configurations">
-    <div className="panel-toolbar"><button disabled={busy || !editable || document.flightConfigurations.length >= 16} onClick={create}>New configuration</button><button disabled={busy || !editable || !selected} onClick={() => { setName(selected!.name); setDialog({ kind: 'rename', id: selected!.id }); }}>Rename configuration</button><button disabled={busy || !editable || !selected} onClick={() => setDialog({ kind: 'delete', id: selected!.id })}>Delete configuration</button></div>
+    <div className="panel-toolbar"><button disabled={busy || !editable || document.flightConfigurations.length >= 16} onClick={create}>New configuration</button><button disabled={busy || !editable || !selected} onClick={() => { setName(selected!.name); setDialog({ kind: 'rename', id: selected!.id }); }}>Rename configuration</button><button disabled={busy || !editable || !selected} onClick={() => setDialog({ kind: 'delete', id: selected!.id })}>Delete configuration</button><button disabled={busy || !editable || !selected || !document.stages.length || document.components.some(c => ['parallelstage', 'podset'].includes(c.type))} onClick={() => setStaging(true)}>Stage settings</button></div>
     <div className="motor-layout"><aside className="configuration-info"><h2>Motors</h2><p>Select a configuration to edit its motor.</p></aside>
       <fieldset className="configuration-table"><legend>Motor configurations</legend><div className="table-scroll"><table><thead><tr><th>Configuration / motor</th><th>Archived default</th><th>Selection</th></tr></thead>
         <tbody>{document.flightConfigurations.map(c => <tr key={c.id} className={c.id === document.flightConfigurationId ? 'selected-row' : ''}>
@@ -53,6 +55,7 @@ export function MotorConfigurations({ document, busy, select, openSelector, crea
         <div className="table-actions"><button disabled={busy || !document.flightConfigurations.length} onClick={openSelector}>Select motor</button></div>
       </fieldset>
     </div>
+    {staging && <WindowPanel title="Stage settings" close={() => setStaging(false)}><StagingEditor document={document} busy={busy} edit={edit} close={() => setStaging(false)}/></WindowPanel>}
     {dialog && target && <WindowPanel title={dialog.kind === 'rename' ? 'Rename configuration' : 'Delete configuration'} close={() => setDialog(undefined)}>
       {dialog.kind === 'rename' ? <form onSubmit={async event => { event.preventDefault(); if (await rename(target.id, name)) setDialog(undefined); }}><label>Configuration name<input value={name} maxLength={256} required disabled={busy} onChange={event => setName(event.target.value)}/></label><div className="window-footer"><button type="button" onClick={() => setDialog(undefined)}>Cancel</button><button disabled={busy || !name.trim()}>Rename</button></div></form> : <><p>Delete “{target.name || target.label}” and its {document.simulations.filter(s => s.configurationId === target.id).length} linked simulation(s)?</p><div className="window-footer"><button onClick={() => setDialog(undefined)}>Cancel</button><button disabled={busy} onClick={async () => { if (await remove(target.id)) setDialog(undefined); }}>Delete</button></div></>}
     </WindowPanel>}

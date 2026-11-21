@@ -25,7 +25,7 @@ export async function resolveCatalogMotors(archive: ExpandedArchive) {
   for (const ref of archive.parsed.nodes.filter(n => n.name === 'motor' && n.parent?.name === 'motormount')) {
     const get = (key: string) => ref.children.find(n => n.name === key)?.text.trim();
     const digest = get('digest') ?? '';
-    if (Object.hasOwn(pinned.motors, digest) || loaded.has(digest) || archive.entries.some(e => e.path === `thrustcurves/${digest}.rse`)) continue;
+    if (Object.hasOwn(pinned.motors, digest) || loaded.has(digest)) continue;
     const motor = motors.find(m => m.digest === digest && m.designation === get('designation') && m.diameter === Number(get('diameter')) && m.length === Number(get('length')));
     if (motor) loaded.set(digest, { bytes: await loadMotorCurve(motor), hash: motor.sha256 });
   }

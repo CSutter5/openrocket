@@ -11,7 +11,7 @@ import info.openrocket.core.rocketcomponent.*;
 import info.openrocket.core.rocketcomponent.position.*;
 import info.openrocket.core.util.*;
 
-/** Bounded imported single-stage model. Unrepresented fields fail before flight. */
+/** Bounded imported axial-stage model. Unrepresented fields fail before flight. */
 public final class ImportedRocketFlight {
     final Map<String,String> fields=new LinkedHashMap<>();
     public final List<RocketComponent> components=new ArrayList<>();
@@ -37,7 +37,7 @@ public final class ImportedRocketFlight {
             RocketComponent c=switch(text(i+"/type")) {
                 case "stage"->new AxialStage();case "nosecone"->new NoseCone();case "transition"->new Transition();case "bodytube"->new BodyTube();
                 case "innertube"->new InnerTube();case "trapezoidfinset"->new TrapezoidFinSet();case "parachute"->new Parachute();
-                case "ellipticalfinset"->new EllipticalFinSet();case "tubefinset"->new TubeFinSet();
+                case "freeformfinset"->new FreeformFinSet();case "ellipticalfinset"->new EllipticalFinSet();case "tubefinset"->new TubeFinSet();
                 case "launchlug"->new LaunchLug();case "railbutton"->new RailButton();case "streamer"->new Streamer();
                 case "centeringring"->new CenteringRing();case "tubecoupler"->new TubeCoupler();case "engineblock"->new EngineBlock();
                 case "masscomponent"->new MassComponent();case "bulkhead"->new Bulkhead();case "shockcord"->new ShockCord();
@@ -52,12 +52,30 @@ public final class ImportedRocketFlight {
                 String field=key.substring(prefix.length());if(field.contains("/")||field.equals("type")||field.equals("parent"))continue;
                 apply(c,field,key);
             }
+            if(c instanceof FreeformFinSet fins) {
+                int size=(int)num(prefix+"finpoints/count");CoordinateIF[] points=new CoordinateIF[size];
+                for(int j=0;j<size;j++)points[j]=new Coordinate(num(prefix+"finpoints/"+j+"/x"),num(prefix+"finpoints/"+j+"/y"));
+                fins.setPoints(points);
+            }
+            if(c instanceof FinSet fins && fields.containsKey(prefix+"tabposition")) {
+                String method=text(prefix+"tabposition/@relativeto");
+                method=switch(method){case "front"->"top";case "center"->"middle";case "end"->"bottom";default->method;};
+                fins.setTabOffsetMethod(AxialMethod.valueOf(method.toUpperCase()));fins.setTabOffset(num(prefix+"tabposition"));
+            }
             c.setIgnorePresetClearing(false);
+            if(c instanceof AxialStage stage)for(FlightConfigurationId id:configurations) {
+                String p=prefix+"separationconfiguration/"+id+"/";
+                if(fields.containsKey(p+"separationevent")){StageSeparationConfiguration sc=new StageSeparationConfiguration();sc.setSeparationEvent(separation(text(p+"separationevent")));sc.setSeparationAltitude(num(p+"separationaltitude"));sc.setSeparationDelay(num(p+"separationdelay"));stage.getSeparationConfigurations().set(id,sc);}
+            }
             if(c instanceof RecoveryDevice d)for(FlightConfigurationId id:configurations) {
                 String p=prefix+"deploymentconfiguration/"+id+"/";
                 if(fields.containsKey(p+"deployevent")){DeploymentConfiguration dc=new DeploymentConfiguration();dc.setDeployEvent(deploy(text(p+"deployevent")));dc.setDeployAltitude(num(p+"deployaltitude"));dc.setDeployDelay(num(p+"deploydelay"));d.getDeploymentConfigurations().set(id,dc);}
             }
             if(c instanceof MotorMount mount&&fields.containsKey(prefix+"motormount/overhang"))motors(mount,prefix+"motormount/");
+        }
+        for(FlightConfigurationId id:configurations) {
+            var config=rocket.getFlightConfiguration(id);
+            for(int stage=0;stage<rocket.getStageCount();stage++)config._setStageActive(stage,bool("stageActive/"+id+"/"+stage),false);
         }
         rocket.setSelectedConfiguration(selected);
         if(!analysis && selectedMotor==null)throw new IllegalArgumentException("Selected configuration has no resolved motor");
@@ -71,27 +89,32 @@ public final class ImportedRocketFlight {
     boolean auto(String key){return text(key).equals("auto")||text(key).startsWith("auto ");}
     double dimension(String key){return Double.parseDouble(text(key).replace("auto ",""));}
     Material material(String key) {
-        if (analysis && !fields.containsKey(key+"/@group")) {
-            // Group and shear metadata do not affect launch mass or static CP.
-            return Material.newMaterial(Material.Type.valueOf(text(key+"/@type").toUpperCase()),text(key),num(key+"/@density"),
-                fields.containsKey(key+"/@shearModulus") ? num(key+"/@shearModulus") : 0, null, true, true);
+        MaterialGroup group=null;
+        if(fields.containsKey(key+"/@group")) {
+            for(MaterialGroup candidate:MaterialGroup.ALL_GROUPS)if(candidate.getDatabaseString().equals(text(key+"/@group")))group=candidate;
+            if(group==null)throw new IllegalArgumentException("Unsupported material group");
         }
-        MaterialGroup group=null;for(MaterialGroup g:MaterialGroup.ALL_GROUPS)if(g.getDatabaseString().equals(text(key+"/@group")))group=g;
-        if(group==null)throw new IllegalArgumentException("Unsupported material group");
-        double shear=fields.containsKey(key+"/@shearModulus")?num(key+"/@shearModulus"):0;
-        String name=text(key);double density=num(key+"/@density");
-        boolean stock=(name.equals("Aluminum")&&density==2700&&shear==2.6e10&&group==MaterialGroup.METALS)
-            ||(name.equals("Fiberglass")&&density==1850&&shear==4.14e9&&group==MaterialGroup.COMPOSITES)
-            ||(name.equals("Cardboard")&&density==680&&shear==4e8&&group==MaterialGroup.PAPER)
-            ||(name.equals("Elastic cord (round 2 mm, 1/16 in)")&&density==.0018&&shear==0&&group==MaterialGroup.ELASTICS);
-        return Material.newMaterial(Material.Type.valueOf(text(key+"/@type").toUpperCase()),name,num(key+"/@density"),shear,group,!stock);
+        Material.Type type=Material.Type.valueOf(text(key+"/@type").toUpperCase());
+        return fields.containsKey(key+"/@shearModulus")
+            ? info.openrocket.core.database.Databases.findMaterial(type,text(key),num(key+"/@density"),num(key+"/@shearModulus"),group)
+            : info.openrocket.core.database.Databases.findMaterial(type,text(key),num(key+"/@density"),group);
     }
     static DeploymentConfiguration.DeployEvent deploy(String value){for(var e:DeploymentConfiguration.DeployEvent.values())if(e.name().replace("_","").equalsIgnoreCase(value))return e;throw new IllegalArgumentException("Unsupported deployment event "+value);}
+    static StageSeparationConfiguration.SeparationEvent separation(String value){for(var e:StageSeparationConfiguration.SeparationEvent.values())if(e.name().replace("_","").equalsIgnoreCase(value))return e;throw new IllegalArgumentException("Unsupported separation event "+value);}
+    static IgnitionEvent ignition(String value){for(var e:IgnitionEvent.values())if(e.name().replace("_","").equalsIgnoreCase(value))return e;throw new IllegalArgumentException("Unsupported ignition event "+value);}
     void apply(RocketComponent c,String field,String key) {
         String value=text(key);
         switch(field) {
+            case "separationevent":((AxialStage)c).getSeparationConfigurations().getDefault().setSeparationEvent(separation(value));break;
+            case "separationaltitude":((AxialStage)c).getSeparationConfigurations().getDefault().setSeparationAltitude(num(key));break;
+            case "separationdelay":((AxialStage)c).getSeparationConfigurations().getDefault().setSeparationDelay(num(key));break;
+            case "tabheight":((FinSet)c).setTabHeight(num(key),false);break;
+            case "tablength":((FinSet)c).setTabLength(num(key),false);break;
+            case "tabposition":break; // Applied after fin geometry and tab dimensions.
             case "name":c.setName(value);break;case "id":c.setID(value);break;case "comment":c.setComment(value);break;
             case "color":case "linestyle":break; // Presentation metadata, preserved by the archive codec.
+            case "designer":((Rocket)c).setDesigner(value);break;case "revision":((Rocket)c).setRevision(value);break;case "kitname":((Rocket)c).setKitName(value);break;
+            case "customreference":((Rocket)c).setCustomReferenceLength(num(key));break;
             case "designtype":((Rocket)c).setDesignType(DesignType.valueOf(value.toUpperCase()));break;
             case "referencetype":((Rocket)c).setReferenceType(ReferenceType.valueOf(value.toUpperCase()));break;
             case "axialoffset":case "position":c.setAxialMethod(AxialMethod.valueOf(text(key+(field.equals("position")?"/@type":"/@method")).toUpperCase()));c.setAxialOffset(num(key));break;
@@ -168,14 +191,18 @@ public final class ImportedRocketFlight {
     }
     void motors(MotorMount mount,String prefix) {
         mount.setMotorMount(true);mount.setMotorOverhang(num(prefix+"overhang"));
-        mount.getDefaultMotorConfig().setIgnitionEvent(IgnitionEvent.valueOf(text(prefix+"ignitionevent").toUpperCase()));mount.getDefaultMotorConfig().setIgnitionDelay(num(prefix+"ignitiondelay"));
+        mount.getDefaultMotorConfig().setIgnitionEvent(ignition(text(prefix+"ignitionevent")));mount.getDefaultMotorConfig().setIgnitionDelay(num(prefix+"ignitiondelay"));
         for(FlightConfigurationId id:configurations) {
-            String p=prefix+"motor/"+id+"/";if(!fields.containsKey(p+"digest"))continue;
-            ThrustCurveMotor motor=motor(text(p+"digest"));
-            if(!motor.getDesignation().equals(text(p+"designation"))||!motor.getManufacturer().matches(text(p+"manufacturer"))||Math.abs(motor.getDiameter()-num(p+"diameter"))>1e-12||Math.abs(motor.getLength()-num(p+"length"))>1e-12||!motor.getMotorType().name().equalsIgnoreCase(text(p+"type")))throw new IllegalArgumentException("Motor reference differs from embedded curve");
-            MotorConfiguration mc=new MotorConfiguration(mount,id);mc.setMotor(motor);mc.setEjectionDelay(text(p+"delay").equals("none")?Double.POSITIVE_INFINITY:num(p+"delay"));
-            String ignition=prefix+"ignitionconfiguration/"+id+"/";if(fields.containsKey(ignition+"ignitionevent")){mc.setIgnitionEvent(IgnitionEvent.valueOf(text(ignition+"ignitionevent").toUpperCase()));mc.setIgnitionDelay(num(ignition+"ignitiondelay"));}
-            mount.setMotorConfig(mc,id);if(id.equals(selected))selectedMotor=motor;
+            String p=prefix+"motor/"+id+"/";
+            MotorConfiguration mc=new MotorConfiguration(mount,id);ThrustCurveMotor motor=null;
+            if(fields.containsKey(p+"digest")) {
+                motor=motor(text(p+"digest"));
+                if(!motor.getDesignation().equals(text(p+"designation"))||!motor.getManufacturer().matches(text(p+"manufacturer"))||Math.abs(motor.getDiameter()-num(p+"diameter"))>1e-12||Math.abs(motor.getLength()-num(p+"length"))>1e-12||!motor.getMotorType().name().equalsIgnoreCase(text(p+"type")))throw new IllegalArgumentException("Motor reference differs from embedded curve");
+                mc.setMotor(motor);mc.setEjectionDelay(text(p+"delay").equals("none")?Double.POSITIVE_INFINITY:num(p+"delay"));
+            }
+            String ignition=prefix+"ignitionconfiguration/"+id+"/";
+            if(fields.containsKey(ignition+"ignitionevent")){mc.setIgnitionEvent(ignition(text(ignition+"ignitionevent")));mc.setIgnitionDelay(num(ignition+"ignitiondelay"));}
+            mount.setMotorConfig(mc,id);if(id.equals(selected)&&motor!=null)selectedMotor=motor;
         }
     }
     ThrustCurveMotor motor(String expected) {

@@ -128,3 +128,7 @@ The complete desktop-generated sample/profile, supported-input refusal boundary,
 
 
 `ImportedRocketFlight` extends the local browser entry point for bounded imported single-stage graphs, mass/CG overrides and dual recovery. `BrowserCurve` calls the pinned loader's curve normalization; the adapter verifies native/current-or-legacy digests before accepting motor data. A two-record motor supplement is exported from the already-pinned SQLite catalog at build/development time, not queried by a production JVM or server. `FlightPresetCatalog` represents only the factory-checked public PAR-36 record. [The imported-flight record](../../docs/web-app/imported-browser-simulation.md) explains the stricter field/identity boundary and the separate user-file numerical observations. The original fixed proof and reducer-only/runtime authorization checks remain intact.
+
+## Axial multistage flights
+
+The browser app now reconstructs bounded direct axial stages, stage activeness, native default/per-flight separation and ignition, freeform fins and fin tabs, with all flight branches retained. See [the multistage record](../../docs/web-app/multistage.md) for behavior and validation. The TeaVM remapper additionally bridges the native freeform validator’s `Line2D.Double` segment API and replaces `%g` with `%s` in the exact branch log format; the original JVM classpath and desktop sources remain intact. Material reconstruction uses native immutable stock lookup. These adaptations require an engine rebuild and do not claim general AWT or desktop compatibility.

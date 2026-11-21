@@ -75,8 +75,8 @@ export async function createConfiguration(archive: ExpandedArchive, name: string
   const root = archive.parsed.components[0], configurations = root.children.filter(n => n.name === 'motorconfiguration');
   if (configurations.length >= 16) throw new Error('This editor supports up to 16 configurations');
   const stages = archive.parsed.components.filter(n => ['stage', 'parallelstage', 'podset'].includes(n.name));
-  if (stages.length !== 1 || stages[0].name !== 'stage') throw new Error('Creating configurations currently requires one axial stage');
-  const id = crypto.randomUUID(), config = `<motorconfiguration configid="${id}"${configurations.length ? '' : ' default="true"'}><name>${escape(name)}</name><stage number="0" active="true"/></motorconfiguration>`;
+  if (!stages.length || stages.some(n => n.name !== 'stage' || n.parent?.parent !== root)) throw new Error('Creating configurations requires direct axial stages');
+  const id = crypto.randomUUID(), config = `<motorconfiguration configid="${id}"${configurations.length ? '' : ' default="true"'}><name>${escape(name)}</name>${stages.map((_, number) => `<stage number="${number}" active="true"/>`).join('')}</motorconfiguration>`;
   const before = root.children.find(n => n.name === 'subcomponents')?.start ?? root.contentEnd;
   const spans = [{ start: before, end: before, text: config }, ...simulationStatusChanges(archive, () => true).map(c => ({ start: c.start, end: c.end, text: c.after }))];
   const container = archive.parsed.nodes.find(n => n.name === 'openrocket')!, lists = container.children.filter(n => n.name === 'simulations');

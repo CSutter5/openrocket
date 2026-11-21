@@ -22,7 +22,13 @@ public final class EditorStability {
         double diameter = Double.NaN;
         for (var component : configuration.getCoreComponents()) if (component instanceof SymmetricComponent shell)
             diameter = MathUtil.max(diameter, shell.getForeRadius() * 2, shell.getAftRadius() * 2);
-        return "{\"cg\":" + coordinate(cg, MassCalculator.MIN_MASS) + ",\"cp\":" + coordinate(cp, MathUtil.EPSILON)
+        var exterior=new java.util.ArrayList<info.openrocket.core.rocketcomponent.RocketComponent>();
+        for(var component:configuration.getActiveComponents())if(component instanceof SymmetricComponent || component instanceof info.openrocket.core.rocketcomponent.FinSet fins && fins.getCantAngle()==0)exterior.add(component);
+        String drawing="null";
+        if(exterior.stream().anyMatch(c->c.getLength()>0))drawing=EditorDrawing.snapshot(exterior);
+        StringBuilder ids=new StringBuilder("[");
+        for(var component:exterior){if(ids.length()>1)ids.append(',');ids.append(ImportedFlight.quote(component.getID().toString()));}ids.append(']');
+        return "{\"exterior\":"+drawing+",\"exteriorIds\":"+ids+",\"cg\":" + coordinate(cg, MassCalculator.MIN_MASS) + ",\"cp\":" + coordinate(cp, MathUtil.EPSILON)
             + ",\"length\":" + scalar(configuration.getLength()) + ",\"diameter\":" + scalar(diameter)
             + ",\"massWithoutMotors\":" + scalar(MassCalculator.calculateStructure(configuration).getMass())
             + ",\"massWithMotors\":" + scalar(cg.getWeight())

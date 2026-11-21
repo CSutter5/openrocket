@@ -255,6 +255,8 @@ form .muted { font-size: .9rem; margin-top: .4rem; }
 .native-row-option { margin: .15rem 0 0 36%; }
 .native-check { display: flex; align-items: center; gap: .35rem; color: #adb6c4; margin: .3rem 0; }
 .native-check input { margin: 0; accent-color: #568fec; }
+.staging-editor .native-check { flex-direction: row; }
+.staging-editor input[type=checkbox] { width: auto; }
 .native-choice { display: flex; align-items: center; gap: .5rem; margin: .3rem 0 .75rem; min-width: 0; }
 .native-choice > span { flex: none; }
 .native-choice > select { min-width: 0; flex: 1; padding: .15rem .4rem; }

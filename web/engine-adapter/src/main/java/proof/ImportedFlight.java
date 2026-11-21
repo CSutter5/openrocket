@@ -135,11 +135,33 @@ public final class ImportedFlight {
         List<Double> acceleration = branch.get(FlightDataType.TYPE_ACCELERATION_TOTAL);
         for (int i=0;i<time.size();i++) {
             if (i>0) out.append(',');
-            out.append('[').append(time.get(i)).append(',').append(altitude.get(i)).append(',').append(velocity.get(i)).append(',').append(acceleration.get(i)).append(']');
+            out.append('[').append(EditorStability.scalar(time.get(i))).append(',').append(EditorStability.scalar(altitude.get(i))).append(',').append(EditorStability.scalar(velocity.get(i))).append(',').append(EditorStability.scalar(acceleration.get(i))).append(']');
         }
         out.append("],\"warningCount\":").append(data.getWarningSet().size()).append('}');
         String base = out.toString();
-        return base.substring(0, base.length()-1) + ",\"warnings\":" + warnings(data) + ",\"inputs\":" + inputs(rocket, motor) + "}";
+        return base.substring(0, base.length()-1) + ",\"branches\":" + branches(data) + ",\"warnings\":" + warnings(data) + ",\"inputs\":" + inputs(rocket, motor) + "}";
+    }
+    private static String branches(FlightData data) {
+        StringBuilder out=new StringBuilder("[");
+        for(int index=0;index<data.getBranchCount();index++) {
+            if(index>0)out.append(',');FlightDataBranch branch=data.getBranch(index);
+            out.append("{\"name\":").append(quote(branch.getName())).append(",\"events\":[");boolean first=true;
+            for(var event:branch.getEvents()) {
+                if(!first)out.append(',');first=false;
+                out.append('[').append(quote(event.getType().name())).append(',').append(event.getTime()).append(',')
+                    .append(event.getSource()==null?"null":quote(event.getSource().getID().toString())).append(']');
+            }
+            out.append("],\"series\":[");
+            var time=branch.get(FlightDataType.TYPE_TIME);var altitude=branch.get(FlightDataType.TYPE_ALTITUDE);
+            var velocity=branch.get(FlightDataType.TYPE_VELOCITY_TOTAL);var acceleration=branch.get(FlightDataType.TYPE_ACCELERATION_TOTAL);
+            for(int i=0;i<time.size();i++) {
+                if(i>0)out.append(',');out.append('[').append(EditorStability.scalar(time.get(i))).append(',')
+                    .append(EditorStability.scalar(altitude.get(i))).append(',').append(EditorStability.scalar(velocity.get(i))).append(',')
+                    .append(EditorStability.scalar(acceleration.get(i))).append(']');
+            }
+            out.append("]}");
+        }
+        return out.append(']').toString();
     }
     public static String quote(String value) {
         return "\""+value.replace("\\","\\\\").replace("\"","\\\"").replace("\n","\\n").replace("\r","\\r").replace("\t","\\t")+"\"";

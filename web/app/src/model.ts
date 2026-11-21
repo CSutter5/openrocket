@@ -13,6 +13,7 @@ export interface DocumentView {
   flightSupport: import('./simulation/input').Support;
   flightConfigurations: import('./simulation/input').FlightConfigurationChoice[];
   flightConfigurationId?: string;
+  stages: import('./staging').StageSettings[];
   motorMounts: { id: string; name: string; diameter?: number; length?: number; usedGroups: number[]; assignments: { configurationId: string; motorKey?: string; delay: string }[] }[];
   stability: { cg: number | null; cp: number | null; length?: number | null; diameter?: number | null;
     massWithoutMotors?: number | null; massWithMotors?: number | null; caliber?: number | null; aerodynamicLength?: number | null; reason?: string };
@@ -33,6 +34,7 @@ export type Action =
   | { type: 'radius'; id: string; expected: number; value: number }
   | { type: 'tubeProperty'; id: string; property: import('../../packages/ork-format/src/tube-properties.js').TubeProperty; expected: number; value: number }
   | { type: 'flightConfiguration'; expectedHash: string; configurationId: string }
+  | { type: 'staging'; expectedHash: string; configurationId: string; settings: import('./staging').StageSettings }
   | { type: 'assignMotor'; expectedHash: string; configurationId: string; mountId: string; motorKey: string; delay: string }
   | { type: 'createConfiguration'; expectedHash: string; name: string; mountId: string; motorKey: string; delay: string }
   | { type: 'renameConfiguration'; expectedHash: string; configurationId: string; name: string }
